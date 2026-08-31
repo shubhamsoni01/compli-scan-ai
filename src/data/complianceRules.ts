@@ -1,0 +1,473 @@
+import { type ProductCategory } from './products';
+
+export type RuleStatus = 'active' | 'draft' | 'deprecated';
+export type CheckStatus = 'passed' | 'failed' | 'review' | 'not-applicable';
+
+export interface ComplianceRule {
+  id: string;
+  ruleId: string;
+  requirement: string;
+  description: string;
+  applicableTo: ProductCategory[];
+  legalReference: string;
+  authority: string;
+  status: RuleStatus;
+  isConditional: boolean;
+  conditionalNote?: string;
+}
+
+export interface ComplianceCheckItem {
+  ruleId: string;
+  field: string;
+  requirement: string;
+  detectedValue: string | null;
+  status: CheckStatus;
+  explanation: string;
+  legalReference: string;
+}
+
+export interface ComplianceResult {
+  scanId: string;
+  productName: string;
+  productBrand: string;
+  category: ProductCategory;
+  scanDate: string;
+  score: number;
+  overallStatus: string;
+  statusDescription: string;
+  summary: {
+    passed: number;
+    issues: number;
+    review: number;
+    notApplicable: number;
+  };
+  checks: ComplianceCheckItem[];
+  extractedInfo: Record<string, string | null>;
+}
+
+export const complianceRules: ComplianceRule[] = [
+  {
+    id: 'rule_001',
+    ruleId: 'LM-001',
+    requirement: 'Name and Address of Manufacturer/Packer/Importer',
+    description: 'Every package must declare the name and address of the manufacturer, packer, or importer.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(a)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_002',
+    ruleId: 'LM-002',
+    requirement: 'Common or Generic Name of Commodity',
+    description: 'The common or generic name of the commodity contained in the package must be mentioned.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(b)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_003',
+    ruleId: 'LM-003',
+    requirement: 'Net Quantity',
+    description: 'Net quantity of the commodity in standard units of weight, measure, or number.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(c)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_004',
+    ruleId: 'LM-004',
+    requirement: 'Month and Year of Manufacture/Packing/Import',
+    description: 'The month and year in which the commodity was manufactured, packed, or imported.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(d)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_005',
+    ruleId: 'LM-005',
+    requirement: 'Best Before / Use By Date',
+    description: 'For applicable commodities, the best before or use by date must be clearly mentioned.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(e)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: true,
+    conditionalNote: 'Required for food, edible oils, and cosmetics with expiry',
+  },
+  {
+    id: 'rule_006',
+    ruleId: 'LM-006',
+    requirement: 'Maximum Retail Price (MRP)',
+    description: 'MRP inclusive of all taxes must be printed on every pre-packaged commodity.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(f)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_007',
+    ruleId: 'LM-007',
+    requirement: 'Consumer Care Details',
+    description: 'Customer care details including address, email, or phone number for consumer complaints.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(2)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_008',
+    ruleId: 'FSSAI-001',
+    requirement: 'FSSAI License Number',
+    description: 'FSSAI license number must be displayed on food product labels.',
+    applicableTo: ['food', 'edible-oil'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(4)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_009',
+    ruleId: 'FSSAI-002',
+    requirement: 'FSSAI Logo',
+    description: 'The FSSAI logo must be displayed on the label of food products.',
+    applicableTo: ['food', 'edible-oil'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(4)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_010',
+    ruleId: 'FSSAI-003',
+    requirement: 'List of Ingredients',
+    description: 'Complete list of ingredients in descending order of composition by weight/volume.',
+    applicableTo: ['food', 'edible-oil'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(2)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_011',
+    ruleId: 'FSSAI-004',
+    requirement: 'Nutritional Information',
+    description: 'Nutritional information per 100g/100ml or per serving must be declared.',
+    applicableTo: ['food', 'edible-oil'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(6)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: true,
+    conditionalNote: 'Mandatory for most packaged food; exemptions exist for small packages',
+  },
+  {
+    id: 'rule_012',
+    ruleId: 'FSSAI-005',
+    requirement: 'Allergen Declaration',
+    description: 'Declaration of allergens present in the product.',
+    applicableTo: ['food'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(3)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: true,
+    conditionalNote: 'Required if allergens (as defined by FSSAI) are present',
+  },
+  {
+    id: 'rule_013',
+    ruleId: 'FSSAI-006',
+    requirement: 'Veg/Non-Veg Symbol',
+    description: 'Green dot (veg) or brown/red dot (non-veg) symbol must be displayed.',
+    applicableTo: ['food'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(5)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_014',
+    ruleId: 'BIS-001',
+    requirement: 'ISI Mark / BIS Certification',
+    description: 'Certain products under mandatory BIS certification must carry the ISI mark.',
+    applicableTo: ['household', 'food', 'other'],
+    legalReference: 'Bureau of Indian Standards Act, 2016',
+    authority: 'BIS',
+    status: 'active',
+    isConditional: true,
+    conditionalNote: 'Required only for products under mandatory BIS certification',
+  },
+  {
+    id: 'rule_015',
+    ruleId: 'LM-008',
+    requirement: 'Batch/Lot/Code Number',
+    description: 'Batch, lot, or code number for traceability purposes.',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(g)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_016',
+    ruleId: 'COS-001',
+    requirement: 'Ingredient List (INCI Nomenclature)',
+    description: 'Full list of ingredients using International Nomenclature of Cosmetic Ingredients.',
+    applicableTo: ['cosmetics'],
+    legalReference: 'Drugs and Cosmetics Rules, 1945 — Rule 148A',
+    authority: 'CDSCO',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_017',
+    ruleId: 'COS-002',
+    requirement: 'Manufacturing License Number',
+    description: 'Cosmetic manufacturing license number issued by the state licensing authority.',
+    applicableTo: ['cosmetics'],
+    legalReference: 'Drugs and Cosmetics Rules, 1945 — Rule 129A',
+    authority: 'CDSCO',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_018',
+    ruleId: 'FSSAI-007',
+    requirement: 'Country of Origin (Imported Products)',
+    description: 'For imported products, the country of origin must be declared.',
+    applicableTo: ['food', 'edible-oil'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011 — Reg. 2.2.2(8)',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: true,
+    conditionalNote: 'Required only for imported food products',
+  },
+  {
+    id: 'rule_019',
+    ruleId: 'LM-009',
+    requirement: 'Declaration in Hindi & English',
+    description: 'Mandatory declarations must be in Hindi and English (or local language).',
+    applicableTo: ['food', 'edible-oil', 'cosmetics', 'household', 'other'],
+    legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(5)',
+    authority: 'Legal Metrology Division',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_020',
+    ruleId: 'OIL-001',
+    requirement: 'Type of Oil Declaration',
+    description: 'The type/source of edible oil must be clearly stated (e.g., sunflower, mustard, groundnut).',
+    applicableTo: ['edible-oil'],
+    legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    authority: 'FSSAI',
+    status: 'active',
+    isConditional: false,
+  },
+  {
+    id: 'rule_021',
+    ruleId: 'HH-001',
+    requirement: 'Safety Warnings & Precautions',
+    description: 'Household chemicals must display safety warnings, precautions, and first-aid measures.',
+    applicableTo: ['household'],
+    legalReference: 'Environment Protection Act, 1986 & BIS Standards',
+    authority: 'MOEF / BIS',
+    status: 'active',
+    isConditional: true,
+    conditionalNote: 'Required for products containing hazardous chemicals',
+  },
+  {
+    id: 'rule_022',
+    ruleId: 'HH-002',
+    requirement: 'Usage Instructions',
+    description: 'Clear usage/dosage instructions must be provided on household product labels.',
+    applicableTo: ['household'],
+    legalReference: 'Consumer Protection Act, 2019',
+    authority: 'Consumer Affairs',
+    status: 'active',
+    isConditional: false,
+  },
+];
+
+export const mockComplianceResult: ComplianceResult = {
+  scanId: 'scan_001',
+  productName: 'Uncle Chips Spicy Treat',
+  productBrand: 'Uncle Chips',
+  category: 'food',
+  scanDate: '2026-08-28T14:32:00',
+  score: 82,
+  overallStatus: 'Potential Non-Compliance',
+  statusDescription:
+    'Some required information appears to be missing or unclear. Please review the details below for specific compliance gaps.',
+  summary: {
+    passed: 12,
+    issues: 2,
+    review: 1,
+    notApplicable: 0,
+  },
+  checks: [
+    {
+      ruleId: 'LM-006',
+      field: 'MRP',
+      requirement: 'Maximum Retail Price',
+      detectedValue: '₹20',
+      status: 'passed',
+      explanation: 'MRP clearly printed on the package. Value detected: ₹20 inclusive of all taxes.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(f)',
+    },
+    {
+      ruleId: 'LM-003',
+      field: 'Net Quantity',
+      requirement: 'Net Quantity Declaration',
+      detectedValue: '52g',
+      status: 'passed',
+      explanation: 'Net quantity clearly declared in standard metric units.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(c)',
+    },
+    {
+      ruleId: 'LM-001',
+      field: 'Manufacturer Details',
+      requirement: 'Name and Address of Manufacturer',
+      detectedValue: 'ABC Foods Pvt Ltd, Mumbai, Maharashtra',
+      status: 'passed',
+      explanation: 'Manufacturer name and complete address found on the label.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(a)',
+    },
+    {
+      ruleId: 'LM-005',
+      field: 'Best Before / Use By',
+      requirement: 'Expiry Date',
+      detectedValue: '20/09/2026',
+      status: 'passed',
+      explanation: 'Best before date clearly printed in DD/MM/YYYY format.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(e)',
+    },
+    {
+      ruleId: 'LM-008',
+      field: 'Batch Number',
+      requirement: 'Batch/Lot Number',
+      detectedValue: 'AB24024',
+      status: 'passed',
+      explanation: 'Batch number identified on the package.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(g)',
+    },
+    {
+      ruleId: 'FSSAI-001',
+      field: 'FSSAI License',
+      requirement: 'FSSAI License Number',
+      detectedValue: '10012345000123',
+      status: 'passed',
+      explanation: 'Valid 14-digit FSSAI license number detected.',
+      legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    },
+    {
+      ruleId: 'FSSAI-002',
+      field: 'FSSAI Logo',
+      requirement: 'FSSAI Logo Display',
+      detectedValue: 'Detected',
+      status: 'passed',
+      explanation: 'FSSAI logo identified on the label.',
+      legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    },
+    {
+      ruleId: 'FSSAI-006',
+      field: 'Veg/Non-Veg Symbol',
+      requirement: 'Vegetarian/Non-Vegetarian Mark',
+      detectedValue: 'Green dot (Vegetarian)',
+      status: 'passed',
+      explanation: 'Green dot symbol for vegetarian product clearly visible.',
+      legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    },
+    {
+      ruleId: 'LM-002',
+      field: 'Product Name',
+      requirement: 'Common/Generic Name',
+      detectedValue: 'Potato Chips',
+      status: 'passed',
+      explanation: 'Generic name of the commodity is clearly stated.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(b)',
+    },
+    {
+      ruleId: 'LM-004',
+      field: 'Manufacture Date',
+      requirement: 'Month and Year of Manufacture',
+      detectedValue: 'Jul 2026',
+      status: 'passed',
+      explanation: 'Month and year of manufacture declared.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(1)(d)',
+    },
+    {
+      ruleId: 'LM-009',
+      field: 'Language',
+      requirement: 'Hindi & English Declaration',
+      detectedValue: 'English and Hindi detected',
+      status: 'passed',
+      explanation: 'Mandatory declarations found in both English and Hindi.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(5)',
+    },
+    {
+      ruleId: 'FSSAI-004',
+      field: 'Nutritional Info',
+      requirement: 'Nutritional Information',
+      detectedValue: 'Detected',
+      status: 'passed',
+      explanation: 'Nutritional information table found per 100g serving.',
+      legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    },
+    {
+      ruleId: 'LM-007',
+      field: 'Consumer Care',
+      requirement: 'Consumer Care Details',
+      detectedValue: null,
+      status: 'failed',
+      explanation:
+        'Required consumer care information (address, email, or phone) could not be confidently identified from the uploaded label. This may be missing or obscured.',
+      legalReference: 'Legal Metrology (Packaged Commodities) Rules, 2011 — Rule 6(2)',
+    },
+    {
+      ruleId: 'FSSAI-005',
+      field: 'Allergen Declaration',
+      requirement: 'Allergen Information',
+      detectedValue: null,
+      status: 'failed',
+      explanation:
+        'Allergen declaration not detected. If the product contains any of the 8 major allergens defined by FSSAI, this information must be displayed.',
+      legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    },
+    {
+      ruleId: 'FSSAI-003',
+      field: 'Ingredients',
+      requirement: 'List of Ingredients',
+      detectedValue: 'Partially detected',
+      status: 'review',
+      explanation:
+        'An ingredient list was detected but could not be fully extracted. The list appears partially obscured or in a non-standard format. Manual verification recommended.',
+      legalReference: 'Food Safety and Standards (Packaging and Labelling) Regulations, 2011',
+    },
+  ],
+  extractedInfo: {
+    'Product Name': 'Uncle Chips Spicy Treat',
+    'Brand': 'Uncle Chips',
+    'Generic Name': 'Potato Chips',
+    'Net Quantity': '52g',
+    'MRP': '₹20',
+    'Manufacturer': 'ABC Foods Pvt Ltd',
+    'Address': 'Plot No. 42, MIDC Industrial Area, Andheri East, Mumbai - 400093, Maharashtra',
+    'Best Before': '20/09/2026',
+    'Manufacture Date': 'Jul 2026',
+    'Batch Number': 'AB24024',
+    'FSSAI License': '10012345000123',
+    'Veg/Non-Veg': 'Vegetarian',
+    'Ingredients': 'Potato, Edible Vegetable Oil (Palmolein), Spices & Condiments, Salt, Sugar...',
+    'Allergen Info': null,
+    'Consumer Care': null,
+    'Nutritional Info': 'Energy: 520 kcal, Protein: 6g, Carbohydrate: 55g, Fat: 30g, Sodium: 680mg (per 100g)',
+  },
+};

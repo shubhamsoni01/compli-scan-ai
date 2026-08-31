@@ -1,0 +1,73 @@
+/**
+ * Official Edible Oil Labelling Rules
+ * Source: FSSAI Labelling & Display Regulations, 2020; FSS (Prohibition and Restrictions on Sales) Regulations, 2011; Department of Consumer Affairs (Legal Metrology)
+ * Authority: FSSAI & Department of Consumer Affairs, Government of India
+ */
+
+export const edibleOilRules = [
+  {
+    ruleId: 'OIL-001',
+    category: ['Edible Oil'],
+    regulation: 'FSSAI Food Labelling & Display, 2020',
+    title: 'Edible Oil Baseline Food Labelling Compliance',
+    requirement: 'Edible oil packaging must comply with all baseline food labelling requirements (Name, Ingredients, FSSAI Lic, Net Qty, Date marking, MRP, Consumer Care).',
+    checkType: 'OIL_BASELINE_COMPLIANCE',
+    severity: 'CRITICAL',
+    officialSource: 'Food Safety and Standards (Labelling and Display) Regulations, 2020',
+    sourceAuthority: 'Food Safety and Standards Authority of India (FSSAI)',
+    officialUrl: 'https://www.fssai.gov.in/upload/uploadfiles/files/Compendium_Labelling_Display_23_09_2021.pdf',
+    active: true,
+  },
+  {
+    ruleId: 'OIL-002',
+    category: ['Edible Oil'],
+    regulation: 'Regulation 2.3.15 (Prohibition and Restrictions on Sales)',
+    title: 'Multi-Sourced Edible Vegetable Oil Admixture Declaration',
+    requirement: 'If the product is an admixture of two edible vegetable oils, the package must carry the exact declaration "Multi-Sourced Edible Vegetable Oil" with name and percentage by weight of each oil.',
+    checkType: 'MULTI_SOURCED_DECLARATION',
+    severity: 'HIGH',
+    officialSource: 'Food Safety and Standards (Prohibition and Restrictions on Sales) Regulations, 2011',
+    sourceAuthority: 'Food Safety and Standards Authority of India (FSSAI)',
+    officialUrl: 'https://www.fssai.gov.in/upload/uploadfiles/files/Compendium_Prohibition_Sales_23_09_2021.pdf',
+    active: true,
+  },
+  {
+    ruleId: 'OIL-003',
+    category: ['Edible Oil'],
+    regulation: 'FSS (Prohibition & Restrictions on Sales) Regulation 2.3.15',
+    title: 'Mandatory "NOT TO BE SOLD LOOSE" Declaration for Multi-Sourced Oils',
+    requirement: 'Every package containing Multi-Sourced Edible Vegetable Oils must prominently state "NOT TO BE SOLD LOOSE" in capital letters.',
+    checkType: 'NOT_TO_BE_SOLD_LOOSE',
+    severity: 'CRITICAL',
+    officialSource: 'Food Safety and Standards (Prohibition and Restrictions on Sales) Regulations, 2011',
+    sourceAuthority: 'Food Safety and Standards Authority of India (FSSAI)',
+    officialUrl: 'https://www.fssai.gov.in/upload/uploadfiles/files/Compendium_Prohibition_Sales_23_09_2021.pdf',
+    active: true,
+  },
+  {
+    ruleId: 'OIL-004',
+    category: ['Edible Oil'],
+    regulation: 'FSS (Food Products Standards & Food Additives) Regulations, 2011',
+    title: 'Physically Refined Rice Bran Oil Declaration in Vanaspati',
+    requirement: 'Where physically refined rice bran oil is used in Vanaspati, a specific declaration indicating "Contains Physically Refined Rice Bran Oil" must appear on the package.',
+    checkType: 'RICE_BRAN_VANASPATI_DECLARATION',
+    severity: 'MEDIUM',
+    officialSource: 'Food Safety and Standards (Food Products Standards and Food Additives) Regulations, 2011',
+    sourceAuthority: 'Food Safety and Standards Authority of India (FSSAI)',
+    officialUrl: 'https://www.fssai.gov.in/upload/uploadfiles/files/Compendium_Food_Additives_Regulations_08_09_2020.pdf',
+    active: true,
+  },
+  {
+    ruleId: 'OIL-005',
+    category: ['Edible Oil'],
+    regulation: 'Department of Consumer Affairs Directive / LM Rules',
+    title: 'Edible Oil Net Quantity & Density/Volume Declaration Format',
+    requirement: 'Edible oils and vanaspati must declare net quantity in units of volume (Litre / ml) along with corresponding equivalent mass in kilograms or grams at the time of packing.',
+    checkType: 'OIL_NET_QUANTITY_FORMAT',
+    severity: 'HIGH',
+    officialSource: 'Department of Consumer Affairs (Legal Metrology Division)',
+    sourceAuthority: 'Department of Consumer Affairs, Government of India',
+    officialUrl: 'https://consumeraffairs.nic.in/acts-and-rules/legal-metrology/the-legal-metrology-packaged-commodities-rules-2011',
+    active: true,
+  },
+];
