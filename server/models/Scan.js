@@ -41,6 +41,7 @@ const ScanSchema = new mongoose.Schema({
   userName: { type: String, default: 'CompliScan User' },
   userEmail: { type: String, default: '' },
   originalImageUrl: { type: String, default: null },
+  originalFilename: { type: String, default: null },
   reportId: { type: String, default: null },
   // Extracted Product Metadata
   productName: { type: String, default: 'Not detected' },

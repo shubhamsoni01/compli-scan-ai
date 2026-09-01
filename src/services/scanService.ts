@@ -16,9 +16,11 @@ export interface ScanResultData extends ComplianceResult {
   ocrText?: string;
   ocrEngine?: string;
   uploadedImage?: string;
+  originalFilename?: string;
   evaluatedRules?: ComplianceRuleResult[];
   readabilityResult?: ReadabilityResult;
   reviewerEdits?: any;
+  complaintData?: any;
   reportId?: string;
   userName?: string;
   userEmail?: string;
@@ -93,7 +95,9 @@ export async function getScanResultAsync(scanId: string): Promise<ScanResultData
         evaluatedRules: dbDoc.ruleResults,
         readabilityResult: dbDoc.readabilityResult || undefined,
         uploadedImage: dbDoc.originalImageUrl || undefined,
+        originalFilename: dbDoc.originalFilename || undefined,
         reviewerEdits: dbDoc.reviewerEdits || undefined,
+        complaintData: dbDoc.complaintData || undefined,
         reportId: dbDoc.reportId || undefined,
         userName: dbDoc.userName || undefined,
         userEmail: dbDoc.userEmail || undefined,
@@ -265,6 +269,7 @@ export async function startRealScan(
     ocrText: ocrResponse.text,
     ocrEngine: ocrResponse.ocrEngine,
     uploadedImage: ocrResponse.originalImageUrl || uploadedImage,
+    originalFilename: imageFile.name || ocrResponse.originalFilename || 'Original filename unavailable',
     evaluatedRules: comp?.rules || [],
     readabilityResult,
   };
@@ -289,6 +294,7 @@ export async function startRealScan(
     userName: currentAuthUser?.name || 'CompliScan User',
     userEmail: currentAuthUser?.email || '',
     originalImageUrl: ocrResponse.originalImageUrl || null,
+    originalFilename: imageFile.name || ocrResponse.originalFilename || 'Original filename unavailable',
     reportId,
     productName: p.productName || 'Not detected',
     brand: p.brand || 'Not detected',

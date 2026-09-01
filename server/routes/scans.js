@@ -37,6 +37,7 @@ router.post('/', requireAuth, async (req, res) => {
       reportData = null,
       readabilityResult = null,
       originalImageUrl = null,
+      originalFilename = null,
       userName = null,
       userEmail = null,
       reportId = null,
@@ -71,6 +72,7 @@ router.post('/', requireAuth, async (req, res) => {
       // Update any updated reportData or image if provided
       if (reportData && !existing.reportData) existing.reportData = reportData;
       if (originalImageUrl && !existing.originalImageUrl) existing.originalImageUrl = originalImageUrl;
+      if (originalFilename && !existing.originalFilename) existing.originalFilename = originalFilename;
       await existing.save();
       return res.status(200).json({
         success: true,
@@ -91,6 +93,7 @@ router.post('/', requireAuth, async (req, res) => {
       userName: userName || (req.user ? req.user.name : 'CompliScan User'),
       userEmail: userEmail || (req.user ? req.user.email : ''),
       originalImageUrl: originalImageUrl || null,
+      originalFilename: originalFilename || 'Original filename unavailable',
       reportId: reportId || null,
       productName: productName || 'Not detected',
       brand: brand || 'Not detected',
@@ -197,7 +200,7 @@ router.get('/', requireAuth, async (req, res) => {
     const scans = await Scan.find(query)
       .sort({ createdAt: -1 })
       .limit(Number(limit))
-      .select('scanId productName brand category complianceScore overallStatus createdAt originalImageUrl reportId readabilityResult complaintData')
+      .select('scanId productName brand category complianceScore overallStatus createdAt originalImageUrl originalFilename reportId readabilityResult complaintData')
       .lean();
 
     return res.status(200).json({

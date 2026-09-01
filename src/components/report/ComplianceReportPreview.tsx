@@ -132,10 +132,56 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
                 </div>
               </div>
 
+              {/* User & Scan Information Strip */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-semibold">User Name</span>
+                  <span className="font-bold text-slate-800">{reportData.userName || reportData.user?.name || 'CompliScan User'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-semibold">User Email</span>
+                  <span className="font-medium text-slate-700">{reportData.userEmail || reportData.user?.email || 'Unspecified'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-semibold">Scan ID</span>
+                  <span className="font-mono text-slate-700">{reportData.scanId}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-semibold">Scan Date & Time</span>
+                  <span className="text-slate-700">{new Date(reportData.scanDate || Date.now()).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
+                </div>
+              </div>
+
+              {/* Original Uploaded Product Image */}
+              <div className="space-y-3">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-900 border-b border-slate-100 pb-1">
+                  Original Scanned Product Image
+                </h2>
+                <div className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                  {reportData.originalImageUrl || reportData.uploadedImage ? (
+                    <img
+                      src={reportData.originalImageUrl || reportData.uploadedImage}
+                      alt="Original Product Label"
+                      className="max-h-60 max-w-full rounded-lg object-contain border border-slate-200 shadow-sm"
+                    />
+                  ) : (
+                    <div className="text-xs text-slate-400 py-8 italic">
+                      Original scan image unavailable.
+                    </div>
+                  )}
+                  <p className="text-xs font-semibold text-slate-700 mt-2">
+                    Original Product Image Used for Compliance Screening
+                  </p>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    Image/File Name: {reportData.originalFilename || 'Original filename unavailable'}
+                  </p>
+                </div>
+              </div>
+
               {/* 1. Product Summary */}
               <div className="space-y-3">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-900 border-b border-slate-100 pb-1">
-                  1. Product Summary
+                  1. Product Information
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2.5 gap-x-6 text-xs">
                   <div>

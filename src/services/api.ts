@@ -43,6 +43,7 @@ export interface OCRResponse {
   ocrEngine?: string;
   error?: string;
   originalImageUrl?: string | null;
+  originalFilename?: string | null;
   ocrData?: {
     lines?: Array<{ text: string; height?: number | null; minTop?: number | null }>;
     words?: Array<{ wordText: string; left?: number; top?: number; height?: number; width?: number }>;

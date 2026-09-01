@@ -77,6 +77,7 @@ router.post('/', requireAuth, upload.single('image'), async (req, res) => {
       text: result.text,
       ocrEngine: result.ocrEngine,
       originalImageUrl,
+      originalFilename: originalname || 'Original filename unavailable',
       ocrData: {
         lines: result.lines || [],
         words: result.words || [],

@@ -108,15 +108,28 @@ export default function HistoryPage() {
     try {
       // Fetch complete record if needed
       const fullDoc = await fetchScanByIdFromDB(scan.id);
-      const payload = fullDoc || scan.rawDoc || {
+      const currentUserRaw = localStorage.getItem('compliscan_user_data');
+      let currentAuthUser: any = null;
+      try {
+        if (currentUserRaw) currentAuthUser = JSON.parse(currentUserRaw);
+      } catch {}
+
+      const payload = {
+        ...(fullDoc || scan.rawDoc || {}),
         scanId: scan.id,
-        productName: scan.productName,
-        productBrand: scan.brand,
-        category: scan.category,
-        score: scan.score,
-        scanDate: scan.date,
-        overallStatus: scan.status === 'compliant' ? 'COMPLIANT' : 'NEEDS_REVIEW',
-        originalImageUrl: scan.originalImageUrl,
+        productName: fullDoc?.productName || scan.productName,
+        productBrand: fullDoc?.brand || scan.brand,
+        category: fullDoc?.category || scan.category,
+        score: fullDoc?.complianceScore ?? scan.score,
+        scanDate: fullDoc?.createdAt || scan.date,
+        overallStatus: fullDoc?.overallStatus || (scan.status === 'compliant' ? 'COMPLIANT' : 'NEEDS_REVIEW'),
+        originalImageUrl: fullDoc?.originalImageUrl || scan.originalImageUrl,
+        originalFilename: fullDoc?.originalFilename || scan.originalFilename || 'Original filename unavailable',
+        userName: fullDoc?.userName || currentAuthUser?.name || 'CompliScan User',
+        userEmail: fullDoc?.userEmail || currentAuthUser?.email || '',
+        readabilityResult: fullDoc?.readabilityResult || scan.rawDoc?.readabilityResult,
+        complaintData: fullDoc?.complaintData || scan.complaintData,
+        reviewerEdits: fullDoc?.reviewerEdits || scan.rawDoc?.reviewerEdits,
       };
 
       const { blob, filename } = await generateReportPDF(payload);

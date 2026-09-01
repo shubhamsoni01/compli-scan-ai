@@ -42,6 +42,7 @@ export async function generateComplianceDocx(reportData) {
     readabilityResult = null,
     reviewerEdits = null,
     originalImageUrl = null,
+    originalFilename = 'Original filename unavailable',
     userName = 'CompliScan User',
     userEmail = 'user@compliscan.ai',
   } = reportData;
@@ -129,7 +130,25 @@ export async function generateComplianceDocx(reportData) {
             }),
             new Paragraph({
               alignment: AlignmentType.CENTER,
-              children: [new TextRun({ text: 'Original Scanned Product Label', italics: true, size: 16 })],
+              children: [
+                new TextRun({
+                  text: 'Original Product Image Used for Compliance Screening',
+                  bold: true,
+                  size: 17,
+                  color: '334155',
+                }),
+              ],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({
+                  text: `Image/File Name: ${originalFilename || 'Original filename unavailable'}`,
+                  italics: true,
+                  size: 15,
+                  color: '64748B',
+                }),
+              ],
             }),
           ],
         });

@@ -84,8 +84,18 @@ export const EditReportModal: React.FC<EditReportModalProps> = ({
   const handleDownloadDocx = async () => {
     setIsDownloadingDocx(true);
     try {
+      const currentUserRaw = localStorage.getItem('compliscan_user_data');
+      let currentAuthUser: any = null;
+      try {
+        if (currentUserRaw) currentAuthUser = JSON.parse(currentUserRaw);
+      } catch {}
+
       const mergedPayload = {
         ...reportData,
+        userName: currentAuthUser?.name || reportData.userName || 'CompliScan User',
+        userEmail: currentAuthUser?.email || reportData.userEmail || '',
+        originalImageUrl: reportData.originalImageUrl || reportData.uploadedImage,
+        originalFilename: reportData.originalFilename || 'Original filename unavailable',
         productName,
         category,
         extractedInfo: {
@@ -124,8 +134,18 @@ export const EditReportModal: React.FC<EditReportModalProps> = ({
   const handleDownloadPdf = async () => {
     setIsDownloadingPdf(true);
     try {
+      const currentUserRaw = localStorage.getItem('compliscan_user_data');
+      let currentAuthUser: any = null;
+      try {
+        if (currentUserRaw) currentAuthUser = JSON.parse(currentUserRaw);
+      } catch {}
+
       const mergedPayload = {
         ...reportData,
+        userName: currentAuthUser?.name || reportData.userName || 'CompliScan User',
+        userEmail: currentAuthUser?.email || reportData.userEmail || '',
+        originalImageUrl: reportData.originalImageUrl || reportData.uploadedImage,
+        originalFilename: reportData.originalFilename || 'Original filename unavailable',
         productName,
         category,
         extractedInfo: {

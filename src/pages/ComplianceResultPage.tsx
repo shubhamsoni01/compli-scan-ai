@@ -55,7 +55,21 @@ export default function ComplianceResultPage() {
     setIsPreviewOpen(true);
 
     try {
-      const { blob, filename } = await generateReportPDF(resolvedResult);
+      const currentUserRaw = localStorage.getItem('compliscan_user_data');
+      let currentAuthUser: any = null;
+      try {
+        if (currentUserRaw) currentAuthUser = JSON.parse(currentUserRaw);
+      } catch {}
+
+      const mergedPayload = {
+        ...resolvedResult,
+        userName: currentAuthUser?.name || (resolvedResult as any).userName || 'CompliScan User',
+        userEmail: currentAuthUser?.email || (resolvedResult as any).userEmail || '',
+        originalImageUrl: (resolvedResult as any).uploadedImage || (resolvedResult as any).originalImageUrl,
+        originalFilename: (resolvedResult as any).originalFilename || 'Original filename unavailable',
+      };
+
+      const { blob, filename } = await generateReportPDF(mergedPayload);
       setReportPdfBlob(blob);
       setReportFilename(filename);
     } catch (err: any) {
