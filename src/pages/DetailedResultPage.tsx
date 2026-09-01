@@ -11,6 +11,7 @@ import { mockComplianceResult, complianceRules } from '@/data/complianceRules';
 import { getCachedScanResult, getScanResultAsync } from '@/services/scanService';
 import { formatDate } from '@/utils/formatters';
 import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
+import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 
 export default function DetailedResultPage() {
   const { scanId, id } = useParams<{ scanId?: string; id?: string }>();
@@ -105,6 +106,19 @@ export default function DetailedResultPage() {
               </div>
             ))}
           </div>
+        </Card>
+      )
+    },
+    {
+      id: 'readability',
+      label: 'Font Size & Readability',
+      content: currentResult.readabilityResult ? (
+        <div className="space-y-4">
+          <ReadabilityCard data={currentResult.readabilityResult} />
+        </div>
+      ) : (
+        <Card className="p-6 text-center text-gray-500">
+          <p>Readability analysis data is not available for this scan.</p>
         </Card>
       )
     },

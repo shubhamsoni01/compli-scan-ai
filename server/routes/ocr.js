@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { extractTextWithOCR } from '../services/ocrService.js';
+import { getImageDimensionsFromBuffer } from '../services/readabilityAnalyzer.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -45,11 +46,23 @@ router.post('/', requireAuth, upload.single('image'), async (req, res) => {
     console.log(`[OCR Success] scanId: ${scanId} | extracted text length: ${result.text?.length || 0}`);
     console.log(`[OCR Snippet] scanId: ${scanId} | "${result.text?.slice(0, 100).replace(/\n/g, ' ')}..."`);
 
+    const dimensions = getImageDimensionsFromBuffer(buffer);
+
     return res.status(200).json({
       success: true,
       scanId,
       text: result.text,
       ocrEngine: result.ocrEngine,
+      ocrData: {
+        lines: result.lines || [],
+        words: result.words || [],
+      },
+      imageMetadata: {
+        width: dimensions?.width || null,
+        height: dimensions?.height || null,
+        fileSize: buffer.length,
+        mimeType: mimetype,
+      },
     });
   } catch (error) {
     console.error('[OCR Error]:', error.message);

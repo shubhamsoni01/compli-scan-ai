@@ -73,6 +73,9 @@ const ScanSchema = new mongoose.Schema({
   // Generated Report Data & Metadata
   reportData: { type: mongoose.Schema.Types.Mixed, default: null },
 
+  // Font Size & Readability Analysis Results
+  readabilityResult: { type: mongoose.Schema.Types.Mixed, default: null },
+
   // Optional complaint structure for future readiness
   complaintData: { type: mongoose.Schema.Types.Mixed, default: null },
 }, {

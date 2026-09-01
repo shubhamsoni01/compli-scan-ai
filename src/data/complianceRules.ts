@@ -43,6 +43,7 @@ export interface ComplianceResult {
   };
   checks: ComplianceCheckItem[];
   extractedInfo: Record<string, string | null>;
+  readabilityResult?: any;
 }
 
 export const complianceRules: ComplianceRule[] = [
@@ -469,5 +470,61 @@ export const mockComplianceResult: ComplianceResult = {
     'Allergen Info': null,
     'Consumer Care': null,
     'Nutritional Info': 'Energy: 520 kcal, Protein: 6g, Carbohydrate: 55g, Fat: 30g, Sodium: 680mg (per 100g)',
+  },
+  readabilityResult: {
+    overallStatus: 'PASS',
+    overallScore: 88,
+    estimatedFontSize: 'ADEQUATE',
+    imageQuality: 'GOOD',
+    textVisibility: 'GOOD',
+    ocrConfidence: 92,
+    avgLineHeightPx: 28,
+    relativeLineHeight: 2.8,
+    issues: [],
+    checks: [
+      {
+        name: 'Text Visibility & Completeness',
+        status: 'PASS',
+        observedValue: '48 words detected',
+        reason: 'Mandatory label declarations are clearly visible and extracted.',
+      },
+      {
+        name: 'OCR Recognition Confidence',
+        status: 'PASS',
+        observedValue: '92%',
+        reason: 'High OCR character detection confidence across primary label declarations.',
+      },
+      {
+        name: 'Estimated Text Size',
+        status: 'PASS',
+        observedValue: 'ADEQUATE',
+        reason: 'Detected text height averages ~28px (~2.8% of frame), occupying adequate visual proportion.',
+      },
+      {
+        name: 'Image Sharpness & Resolution',
+        status: 'PASS',
+        observedValue: '1200 × 1000 px (GOOD)',
+        reason: 'Resolution meets standard optical character verification clarity.',
+      },
+      {
+        name: 'Physical Printed Font Size (Calibrated)',
+        status: 'NEEDS_REVIEW',
+        observedValue: 'Uncalibrated Reference',
+        reason: 'Exact printed font size in millimetres cannot be certified from an ordinary photograph without a physical calibration reference marker.',
+        limitation: true,
+      },
+    ],
+    declarationReadability: [
+      { field: 'Product Name', observedValue: 'Uncle Chips Spicy Treat', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Net Quantity', observedValue: '52g', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Maximum Retail Price (MRP)', observedValue: '₹20', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Date of Manufacture', observedValue: 'Jul 2026', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Expiry / Best Before', observedValue: '20/09/2026', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Manufacturer / Packer', observedValue: 'ABC Foods Pvt Ltd', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Batch / Lot Number', observedValue: 'AB24024', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'FSSAI / Licence Number', observedValue: '10012345000123', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+      { field: 'Consumer Care Contact', observedValue: null, status: 'NEEDS_REVIEW', textHeightCategory: 'NOT_FOUND', reason: 'Declaration was not detected in visible label text.' },
+      { field: 'Country of Origin', observedValue: 'India', status: 'PASS', textHeightCategory: 'ADEQUATE', reason: 'Declaration text is clearly identified and legible.' },
+    ],
   },
 };

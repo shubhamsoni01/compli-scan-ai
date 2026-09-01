@@ -15,6 +15,7 @@ import { formatDate } from '@/utils/formatters';
 import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
 import { generateReportPDF } from '@/services/api';
 import { ComplianceReportPreview } from '@/components/report/ComplianceReportPreview';
+import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { FileText, Loader2 } from 'lucide-react';
 
 export default function ComplianceResultPage() {
@@ -195,6 +196,11 @@ export default function ComplianceResultPage() {
             Try Again
           </Button>
         </div>
+      )}
+
+      {/* Estimated Font Size & Readability Analysis Layer (Non-calibrated heuristic assessment) */}
+      {resolvedResult.readabilityResult && (
+        <ReadabilityCard data={resolvedResult.readabilityResult} />
       )}
 
       {/* Rule Checklist */}

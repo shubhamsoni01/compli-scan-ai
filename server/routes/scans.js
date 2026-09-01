@@ -35,6 +35,7 @@ router.post('/', requireAuth, async (req, res) => {
       complianceScore,
       overallStatus,
       reportData = null,
+      readabilityResult = null,
     } = req.body;
 
     if (!scanId) {
@@ -103,6 +104,7 @@ router.post('/', requireAuth, async (req, res) => {
       complianceScore: Number(complianceScore),
       overallStatus: statusFormatted,
       reportData,
+      readabilityResult,
     });
 
     await newScan.save();

@@ -6,8 +6,10 @@ import {
   saveScanToDB, 
   fetchScanByIdFromDB,
   type StructuredProduct, 
-  type ComplianceRuleResult 
+  type ComplianceRuleResult,
+  type ReadabilityResult
 } from './api';
+import { computeReadabilityAnalysis } from './readabilityService';
 
 export interface ScanResultData extends ComplianceResult {
   structuredProduct?: StructuredProduct;
@@ -15,6 +17,7 @@ export interface ScanResultData extends ComplianceResult {
   ocrEngine?: string;
   uploadedImage?: string;
   evaluatedRules?: ComplianceRuleResult[];
+  readabilityResult?: ReadabilityResult;
 }
 
 // In-memory session store for current active scans to be viewed on /result/:scanId
@@ -84,6 +87,7 @@ export async function getScanResultAsync(scanId: string): Promise<ScanResultData
         ocrText: dbDoc.rawOCRText,
         ocrEngine: 'OCR.Space',
         evaluatedRules: dbDoc.ruleResults,
+        readabilityResult: dbDoc.readabilityResult || undefined,
       };
 
       scanResultsCache.set(scanId, restoredResult);
@@ -221,6 +225,20 @@ export async function startRealScan(
         notApplicable: checksList.filter((c) => c.status === 'not-applicable').length,
       };
 
+  // Run Font Size & Readability Analysis Layer (Non-calibrated heuristic assessment)
+  let readabilityResult: ReadabilityResult | undefined;
+  try {
+    readabilityResult = computeReadabilityAnalysis({
+      ocrText: ocrResponse.text,
+      ocrData: ocrResponse.ocrData,
+      imageMetadata: ocrResponse.imageMetadata,
+      productData: p,
+    });
+    console.log(`[CompliScan Client] Readability Analysis completed for ${scanId}:`, readabilityResult.overallStatus, `(${readabilityResult.overallScore}%)`);
+  } catch (readErr: any) {
+    console.warn(`[CompliScan Client] Readability analysis warning (non-fatal):`, readErr.message);
+  }
+
   // Construct Result data conforming to existing result pages
   const result: ScanResultData = {
     scanId,
@@ -239,6 +257,7 @@ export async function startRealScan(
     ocrEngine: ocrResponse.ocrEngine,
     uploadedImage,
     evaluatedRules: comp?.rules || [],
+    readabilityResult,
   };
 
   scanResultsCache.set(scanId, result);
@@ -266,6 +285,7 @@ export async function startRealScan(
     ruleResults: comp?.rules || [],
     complianceScore: computedScore,
     overallStatus: overallStatus,
+    readabilityResult: readabilityResult || null,
   };
 
   saveScanToDB(dbPayload).then((res) => {

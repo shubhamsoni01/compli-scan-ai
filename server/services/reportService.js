@@ -129,11 +129,56 @@ export async function generateCompliancePDF(reportData) {
       drawDivider();
 
       // -------------------------------------------------------------
-      // 3. STATUTORY RULE SUMMARY TABLE
+      // 2B. ESTIMATED FONT SIZE & READABILITY ANALYSIS (SEPARATE LAYER)
+      // -------------------------------------------------------------
+      if (reportData.readabilityResult) {
+        const r = reportData.readabilityResult;
+        doc.fillColor(primaryColor).fontSize(12).font('Helvetica-Bold').text('3. Estimated Font Size & Readability Analysis', 40, doc.y);
+        doc.moveDown(0.2);
+        doc.fillColor(mutedColor).fontSize(8).font('Helvetica').text(
+          'Image-based heuristic evaluation of visual font height, optical confidence, and label legibility. (Non-calibrated estimation).',
+          40,
+          doc.y
+        );
+        doc.moveDown(0.5);
+
+        const readBoxY = doc.y;
+        doc.rect(40, readBoxY, 515, 42).fillAndStroke(lightBg, borderColor);
+
+        const readStatusColor = r.overallStatus === 'PASS' ? '#059669' : r.overallStatus === 'FAIL' ? '#DC2626' : '#D97706';
+        doc.fillColor(readStatusColor).fontSize(11).font('Helvetica-Bold').text(`Overall: ${r.overallStatus}`, 55, readBoxY + 8);
+        doc.fillColor(mutedColor).fontSize(8).font('Helvetica').text(`Readability Index: ${r.overallScore ?? 85}/100`, 55, readBoxY + 24);
+
+        doc.fillColor(textColor).fontSize(8).font('Helvetica-Bold').text('Estimated Text Size:', 185, readBoxY + 8);
+        doc.font('Helvetica').fillColor(primaryColor).text(r.estimatedFontSize || 'ADEQUATE', 280, readBoxY + 8);
+
+        doc.fillColor(textColor).font('Helvetica-Bold').text('Image Quality:', 185, readBoxY + 24);
+        doc.font('Helvetica').fillColor(textColor).text(r.imageQuality || 'GOOD', 280, readBoxY + 24);
+
+        doc.fillColor(textColor).font('Helvetica-Bold').text('Text Visibility:', 365, readBoxY + 8);
+        doc.font('Helvetica').fillColor(textColor).text(r.textVisibility || 'GOOD', 450, readBoxY + 8);
+
+        doc.fillColor(textColor).font('Helvetica-Bold').text('OCR Confidence:', 365, readBoxY + 24);
+        doc.font('Helvetica').fillColor(textColor).text(r.ocrConfidence ? `${r.ocrConfidence}%` : 'N/A', 450, readBoxY + 24);
+
+        doc.y = readBoxY + 50;
+
+        // Note on calibrated reference
+        doc.fillColor(mutedColor).fontSize(7.5).font('Helvetica-Oblique').text(
+          'Note: Exact legal printed font size in millimetres cannot be certified from uncalibrated photographs without a physical scale marker.',
+          45,
+          doc.y
+        );
+        doc.moveDown(0.4);
+        drawDivider();
+      }
+
+      // -------------------------------------------------------------
+      // 4. STATUTORY RULE SUMMARY TABLE
       // -------------------------------------------------------------
       if (doc.y > 660) doc.addPage();
 
-      doc.fillColor(primaryColor).fontSize(12).font('Helvetica-Bold').text('3. Official Statutory Rule Findings', 40, doc.y);
+      doc.fillColor(primaryColor).fontSize(12).font('Helvetica-Bold').text(reportData.readabilityResult ? '4. Official Statutory Rule Findings' : '3. Official Statutory Rule Findings', 40, doc.y);
       doc.moveDown(0.3);
       doc.fillColor(mutedColor).fontSize(8).font('Helvetica').text('Every applicable declaration is evaluated deterministically against Legal Metrology Act, FSSAI, or CDSCO provisions.', 40, doc.y);
       doc.moveDown(0.6);

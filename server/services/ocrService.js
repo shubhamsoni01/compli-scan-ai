@@ -23,7 +23,7 @@ export async function extractTextWithOCR(fileBuffer, mimeType, filename = 'label
   formData.append('file', blob, filename || `label.${ext.toLowerCase()}`);
   formData.append('filetype', ext);
   formData.append('language', 'eng');
-  formData.append('isOverlayRequired', 'false');
+  formData.append('isOverlayRequired', 'true');
   formData.append('OCREngine', '1'); // OCREngine 1 is standard & universally supported on free keys
   formData.append('detectOrientation', 'true');
   formData.append('scale', 'true');
@@ -71,9 +71,38 @@ export async function extractTextWithOCR(fileBuffer, mimeType, filename = 'label
       throw new Error('No readable text detected on this label. Please provide a clearer photo.');
     }
 
+    // Extract overlay lines and word bounding boxes if provided by OCR.Space
+    const lines = [];
+    const words = [];
+    for (const r of parsedResults) {
+      const overlay = r.TextOverlay;
+      if (overlay && Array.isArray(overlay.Lines)) {
+        for (const line of overlay.Lines) {
+          lines.push({
+            text: line.LineText,
+            height: line.MaxHeight || null,
+            minTop: line.MinTop || null,
+          });
+          if (Array.isArray(line.Words)) {
+            for (const w of line.Words) {
+              words.push({
+                wordText: w.WordText,
+                left: w.Left,
+                top: w.Top,
+                height: w.Height,
+                width: w.Width,
+              });
+            }
+          }
+        }
+      }
+    }
+
     return {
       text: extractedText,
-      ocrEngine: 'OCR.Space (Engine 2)',
+      ocrEngine: 'OCR.Space (Engine 1)',
+      lines,
+      words,
     };
   } catch (err) {
     clearTimeout(timeoutId);

@@ -6,11 +6,52 @@
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
+export interface ReadabilityCheck {
+  name: string;
+  status: 'PASS' | 'NEEDS_REVIEW' | 'FAIL';
+  observedValue?: string | number | null;
+  reason: string;
+  limitation?: boolean;
+}
+
+export interface DeclarationReadability {
+  field: string;
+  observedValue: string | null;
+  status: 'PASS' | 'NEEDS_REVIEW' | 'FAIL';
+  textHeightCategory: string;
+  reason: string;
+}
+
+export interface ReadabilityResult {
+  overallStatus: 'PASS' | 'NEEDS_REVIEW' | 'FAIL';
+  overallScore: number;
+  estimatedFontSize: 'VERY_SMALL' | 'SMALL' | 'ADEQUATE' | 'LARGE';
+  imageQuality: 'EXCELLENT' | 'GOOD' | 'ADEQUATE' | 'LOW';
+  textVisibility: 'GOOD' | 'MODERATE' | 'POOR';
+  ocrConfidence: number | null;
+  avgLineHeightPx?: number | null;
+  relativeLineHeight?: number | null;
+  issues: string[];
+  checks: ReadabilityCheck[];
+  declarationReadability?: DeclarationReadability[];
+  analyzedAt?: string;
+}
+
 export interface OCRResponse {
   success: boolean;
   text?: string;
   ocrEngine?: string;
   error?: string;
+  ocrData?: {
+    lines?: Array<{ text: string; height?: number | null; minTop?: number | null }>;
+    words?: Array<{ wordText: string; left?: number; top?: number; height?: number; width?: number }>;
+  };
+  imageMetadata?: {
+    width?: number | null;
+    height?: number | null;
+    fileSize?: number;
+    mimeType?: string;
+  };
 }
 
 export interface StructuredProduct {
