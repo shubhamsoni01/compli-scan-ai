@@ -1,5 +1,6 @@
 import express from 'express';
 import { structureProductWithGroq } from '../services/groqService.js';
+import { validateAndCompleteExtractionAgainstOCR } from '../services/deterministicExtractor.js';
 import { evaluateCompliance } from '../services/ruleEngineService.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
@@ -24,11 +25,19 @@ router.post('/', requireAuth, async (req, res) => {
     console.log(`[Groq Start] scanId: ${scanId} | input text length: ${ocrText.length}`);
     console.log(`[Groq Input Snippet] scanId: ${scanId} | "${ocrText.slice(0, 100).replace(/\n/g, ' ')}..."`);
 
-    const structuredData = await structureProductWithGroq(ocrText);
+    let rawStructured = {};
+    try {
+      rawStructured = await structureProductWithGroq(ocrText);
+    } catch (groqErr) {
+      console.warn(`[Groq Parse Notice] Groq extraction incomplete or timed out (${groqErr.message}). Using deterministic OCR parsing.`);
+    }
 
-    console.log(`[Groq Success] scanId: ${scanId} | parsed product: "${structuredData.productName}" | category: "${structuredData.category}"`);
+    // Deterministic Extraction & Consistency Check against RAW OCR TEXT (Source of Truth)
+    const structuredData = validateAndCompleteExtractionAgainstOCR(rawStructured, ocrText);
 
-    // Deterministic Rule Engine Evaluation
+    console.log(`[Extraction Success] scanId: ${scanId} | product: "${structuredData.productName}" | category: "${structuredData.category}" | MRP: "${structuredData.mrp}" | NetQty: "${structuredData.netQuantity}"`);
+
+    // Deterministic Legal Rule Engine Evaluation
     console.log(`[Rule Engine Start] scanId: ${scanId} | evaluating rules for category: ${structuredData.category}`);
     const complianceEvaluation = evaluateCompliance(structuredData, structuredData.category);
     console.log(`[Rule Engine Success] scanId: ${scanId} | score: ${complianceEvaluation.score}% | status: ${complianceEvaluation.overallStatus} | passed: ${complianceEvaluation.summary.passed} | issues: ${complianceEvaluation.summary.issues} | review: ${complianceEvaluation.summary.review} | NA: ${complianceEvaluation.summary.notApplicable}`);

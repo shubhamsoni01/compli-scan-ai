@@ -74,12 +74,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
     switch (rule.ruleId) {
       case 'LM-001': {
         const hasMfg = Boolean(p.manufacturer && p.manufacturer.trim().length > 3);
+        const evidence = p.mfgDetailsEvidence || p.manufacturer || (rawText.match(/(?:manufactured|mfg|packed|marketed)\s*by[^,\n]+/i)?.[0]) || null;
         results.push({
           ruleId: rule.ruleId,
           regulation: rule.regulation,
           title: rule.title,
           status: hasMfg ? 'PASS' : 'FAIL',
           observedValue: p.manufacturer || null,
+          evidence,
           requirement: rule.requirement,
           reason: hasMfg
             ? `Manufacturer details identified: "${p.manufacturer}"`
@@ -98,6 +100,7 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
           title: rule.title,
           status: hasName ? 'PASS' : 'FAIL',
           observedValue: p.productName || null,
+          evidence: p.productName,
           requirement: rule.requirement,
           reason: hasName
             ? `Common/generic commodity name identified: "${p.productName}"`
@@ -112,12 +115,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
         const hasNetQty = Boolean(p.netQuantity && p.netQuantity.trim().length > 0);
         // Verify metric unit
         const hasMetric = hasNetQty && /(g|kg|ml|l|litre|litres|gm|grams|number|pcs|piece|pieces|count|n)/i.test(p.netQuantity);
+        const evidence = p.netQtyEvidence || p.netQuantity || (rawText.match(/(?:net\s*(?:quantity|qty|weight|wt|vol|volume)|weight)[^,\n]+/i)?.[0]) || null;
         results.push({
           ruleId: rule.ruleId,
           regulation: rule.regulation,
           title: rule.title,
           status: hasMetric ? 'PASS' : hasNetQty ? 'NEEDS_REVIEW' : 'FAIL',
           observedValue: p.netQuantity || null,
+          evidence,
           requirement: rule.requirement,
           reason: hasMetric
             ? `Net quantity declared in standard metric units: "${p.netQuantity}"`
@@ -132,12 +137,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
       }
       case 'LM-004': {
         const hasDate = Boolean(p.manufacturingDate && p.manufacturingDate.trim().length > 0);
+        const evidence = p.mfgEvidence || p.manufacturingDate || (rawText.match(/(?:mfd|mfg|manufactur(?:ed|ing)|packed)[^,\n]+/i)?.[0]) || null;
         results.push({
           ruleId: rule.ruleId,
           regulation: rule.regulation,
           title: rule.title,
           status: hasDate ? 'PASS' : 'FAIL',
           observedValue: p.manufacturingDate || null,
+          evidence,
           requirement: rule.requirement,
           reason: hasDate
             ? `Month and year of manufacture/packing declared: "${p.manufacturingDate}"`
@@ -151,12 +158,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
       case 'LM-005': {
         const hasMrp = Boolean(p.mrp && p.mrp.trim().length > 0);
         const hasCurrency = hasMrp && /(rs|\u20b9|inr|\/|taxes)/i.test(p.mrp);
+        const evidence = p.mrpEvidence || p.mrp || (rawText.match(/(?:m\.?r\.?p\.?|maximum\s*retail\s*price)[^,\n]+/i)?.[0]) || null;
         results.push({
           ruleId: rule.ruleId,
           regulation: rule.regulation,
           title: rule.title,
           status: hasMrp && hasCurrency ? 'PASS' : hasMrp ? 'NEEDS_REVIEW' : 'FAIL',
           observedValue: p.mrp || null,
+          evidence,
           requirement: rule.requirement,
           reason: hasMrp && hasCurrency
             ? `Maximum Retail Price (MRP) declared in Indian currency: "${p.mrp}"`
@@ -171,12 +180,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
       }
       case 'LM-006': {
         const hasCare = Boolean(p.consumerCare && p.consumerCare.trim().length > 3);
+        const evidence = p.careEvidence || p.consumerCare || (rawText.match(/(?:consumer\s*care|customer\s*care|helpline|toll\s*free)[^,\n]+/i)?.[0]) || null;
         results.push({
           ruleId: rule.ruleId,
           regulation: rule.regulation,
           title: rule.title,
           status: hasCare ? 'PASS' : 'FAIL',
           observedValue: p.consumerCare || null,
+          evidence,
           requirement: rule.requirement,
           reason: hasCare
             ? `Consumer care contact information detected: "${p.consumerCare}"`
@@ -373,12 +384,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
         }
         case 'FOOD-003': {
           const hasIngredients = Boolean(p.ingredients && p.ingredients.trim().length > 5);
+          const evidence = p.ingredientsEvidence || p.ingredients || (rawText.match(/(?:ingredients?|composition|contains)[^.\n]+/i)?.[0]) || null;
           results.push({
             ruleId: rule.ruleId,
             regulation: rule.regulation,
             title: rule.title,
             status: hasIngredients ? 'PASS' : 'FAIL',
             observedValue: p.ingredients || null,
+            evidence,
             requirement: rule.requirement,
             reason: hasIngredients
               ? `List of ingredients declared in descending order: "${p.ingredients.slice(0, 80)}..."`
@@ -465,12 +478,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
         }
         case 'FOOD-008': {
           const hasFssai = Boolean(p.licenseNumber && /1\d{13}/.test(p.licenseNumber));
+          const evidence = p.licenseEvidence || p.licenseNumber || (rawText.match(/(?:fssai|lic\.?\s*no\.?)[^,\n]+/i)?.[0]) || null;
           results.push({
             ruleId: rule.ruleId,
             regulation: rule.regulation,
             title: rule.title,
             status: hasFssai ? 'PASS' : p.licenseNumber ? 'NEEDS_REVIEW' : 'FAIL',
             observedValue: p.licenseNumber || null,
+            evidence,
             requirement: rule.requirement,
             reason: hasFssai
               ? `Valid 14-digit FSSAI licence number identified: "${p.licenseNumber}"`
@@ -502,12 +517,14 @@ export function evaluateCompliance(productData, rawCategory = 'Unknown') {
         }
         case 'FOOD-010': {
           const hasBatch = Boolean(p.batchNumber && p.batchNumber.trim().length > 0);
+          const evidence = p.batchEvidence || p.batchNumber || (rawText.match(/(?:batch|lot|b\.?\s*no)[^,\n]+/i)?.[0]) || null;
           results.push({
             ruleId: rule.ruleId,
             regulation: rule.regulation,
             title: rule.title,
             status: hasBatch ? 'PASS' : 'FAIL',
             observedValue: p.batchNumber || null,
+            evidence,
             requirement: rule.requirement,
             reason: hasBatch
               ? `Batch / lot identification declared: "${p.batchNumber}"`
