@@ -393,6 +393,31 @@ export async function saveScanEditsToDB(scanId: string, reviewerEdits: any): Pro
 }
 
 /**
+ * Direct 1-click submission of complaint to Admin / Enforcement Dashboard
+ */
+export async function submitComplaintToDB(scanId: string): Promise<{ success: boolean; complaint?: any; message?: string }> {
+  try {
+    const token = localStorage.getItem('compliscan_jwt');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/api/scans/${scanId}/complaint`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (e: any) {
+    console.warn('[Submit Complaint Error]:', e.message);
+    return { success: false, message: e.message || 'Failed to submit complaint.' };
+  }
+}
+
+/**
  * Fetch single saved scan by ID from MongoDB Atlas
  */
 export async function fetchScanByIdFromDB(scanId: string): Promise<any | null> {

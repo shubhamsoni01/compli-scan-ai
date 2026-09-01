@@ -13,11 +13,11 @@ import { mockComplianceResult } from '@/data/complianceRules';
 import { getCachedScanResult } from '@/services/scanService';
 import { formatDate } from '@/utils/formatters';
 import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
-import { generateReportPDF } from '@/services/api';
+import { generateReportPDF, submitComplaintToDB } from '@/services/api';
 import { ComplianceReportPreview } from '@/components/report/ComplianceReportPreview';
 import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { EditReportModal } from '@/components/report/EditReportModal';
-import { FileText, Loader2, Edit3 } from 'lucide-react';
+import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
 
 export default function ComplianceResultPage() {
   const navigate = useNavigate();
@@ -33,6 +33,10 @@ export default function ComplianceResultPage() {
 
   // Edit Report Modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // 1-Click Complaint state
+  const [isFilingComplaint, setIsFilingComplaint] = useState(false);
+  const [complaintSuccess, setComplaintSuccess] = useState<string | null>(null);
 
   // Report generation state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -59,6 +63,24 @@ export default function ComplianceResultPage() {
       setReportError(err.message || 'Unable to generate the report. Please try again.');
     } finally {
       setIsGeneratingReport(false);
+    }
+  };
+
+  const handle1ClickComplaint = async () => {
+    setIsFilingComplaint(true);
+    setComplaintSuccess(null);
+    try {
+      const res = await submitComplaintToDB(resolvedResult.scanId);
+      if (res.success) {
+        setComplaintSuccess(`Complaint #${res.complaint?.complaintId || ''} filed with Enforcement Authority.`);
+        setTimeout(() => setComplaintSuccess(null), 5000);
+      } else {
+        alert(res.message || 'Unable to submit complaint.');
+      }
+    } catch (e: any) {
+      alert(e.message || 'Complaint submission failed.');
+    } finally {
+      setIsFilingComplaint(false);
     }
   };
 
@@ -196,9 +218,26 @@ export default function ComplianceResultPage() {
               </>
             )}
           </Button>
+          <Button
+            variant="outline"
+            onClick={handle1ClickComplaint}
+            disabled={isFilingComplaint}
+            title="File Complaint directly to Enforcement Dashboard"
+            className="flex items-center gap-1.5 font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-800"
+          >
+            {isFilingComplaint ? <Loader2 size={16} className="animate-spin" /> : <AlertOctagon size={16} />}
+            <span>File Complaint</span>
+          </Button>
           <Button variant="ghost" className="px-3" title="Share Report"><Share2 size={18} /></Button>
         </div>
       </div>
+
+      {complaintSuccess && (
+        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+          <CheckCircle2 size={18} />
+          <span>{complaintSuccess}</span>
+        </div>
+      )}
 
       {/* Report Generation Error Alert if any */}
       {reportError && (

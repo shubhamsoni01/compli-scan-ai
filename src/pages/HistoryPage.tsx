@@ -10,9 +10,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { fetchScansFromDB, generateReportPDF, fetchScanByIdFromDB } from '@/services/api';
+import { fetchScansFromDB, generateReportPDF, fetchScanByIdFromDB, submitComplaintToDB } from '@/services/api';
 import { EditReportModal } from '@/components/report/EditReportModal';
 import { formatDate, formatTime } from '@/utils/formatters';
+import { AlertOctagon, CheckCircle2 } from 'lucide-react';
 
 const categories = ['All', 'Food', 'Edible Oil', 'Cosmetics', 'Household'];
 const statuses = ['All', 'Compliant', 'Potential Issue', 'Needs Review'];
@@ -28,6 +29,32 @@ export default function HistoryPage() {
   // Edit modal state
   const [editingScan, setEditingScan] = useState<any | null>(null);
   const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
+  const [submittingComplaintId, setSubmittingComplaintId] = useState<string | null>(null);
+  const [complaintSuccessMsg, setComplaintSuccessMsg] = useState<string | null>(null);
+
+  const handle1ClickComplaint = async (scan: any) => {
+    setSubmittingComplaintId(scan.id);
+    setComplaintSuccessMsg(null);
+    try {
+      const res = await submitComplaintToDB(scan.id);
+      if (res.success) {
+        setComplaintSuccessMsg(`Complaint ${res.complaint?.complaintId || ''} submitted to Enforcement Dashboard!`);
+        // Update local status in history
+        setHistoryData((prev) =>
+          prev.map((item) =>
+            item.id === scan.id ? { ...item, complaintData: res.complaint } : item
+          )
+        );
+        setTimeout(() => setComplaintSuccessMsg(null), 4000);
+      } else {
+        alert(res.message || 'Could not submit complaint.');
+      }
+    } catch (e: any) {
+      alert(e.message || 'Error submitting complaint.');
+    } finally {
+      setSubmittingComplaintId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -51,6 +78,7 @@ export default function HistoryPage() {
             category: doc.category || 'Food',
             score: doc.complianceScore ?? 80,
             originalImageUrl: doc.originalImageUrl || null,
+            complaintData: doc.complaintData || null,
             status:
               doc.overallStatus === 'COMPLIANT'
                 ? 'compliant'
@@ -190,6 +218,20 @@ export default function HistoryPage() {
           <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(row)} title="Edit Report">
             <Edit3 size={15} />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handle1ClickComplaint(row)}
+            disabled={submittingComplaintId === row.id || row.complaintData}
+            title={row.complaintData ? `Complaint filed: ${row.complaintData.status}` : 'File Complaint directly to Enforcement'}
+            className={row.complaintData ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 hover:text-red-700'}
+          >
+            {submittingComplaintId === row.id ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <AlertOctagon size={15} />
+            )}
+          </Button>
         </div>
       )
     }
@@ -201,6 +243,13 @@ export default function HistoryPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Scan History</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage your personal scan history</p>
       </div>
+
+      {complaintSuccessMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+          <CheckCircle2 size={16} />
+          <span>{complaintSuccessMsg}</span>
+        </div>
+      )}
 
       <Card className="p-4 space-y-4 shadow-sm border-gray-100 dark:border-gray-800">
         <div className="grid md:grid-cols-[1fr_auto] gap-4">

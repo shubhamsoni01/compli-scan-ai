@@ -197,7 +197,7 @@ router.get('/', requireAuth, async (req, res) => {
     const scans = await Scan.find(query)
       .sort({ createdAt: -1 })
       .limit(Number(limit))
-      .select('scanId productName brand category complianceScore overallStatus createdAt originalImageUrl reportId readabilityResult')
+      .select('scanId productName brand category complianceScore overallStatus createdAt originalImageUrl reportId readabilityResult complaintData')
       .lean();
 
     return res.status(200).json({
@@ -211,6 +211,62 @@ router.get('/', requireAuth, async (req, res) => {
       success: false,
       error: 'Unable to retrieve scan history.',
     });
+  }
+});
+
+/**
+ * POST /api/scans/:id/complaint
+ * Direct 1-click complaint submission to Admin / Enforcement Dashboard
+ * Attaches real user, scan, report, image, and status data without requiring a manual form
+ */
+router.post('/:id/complaint', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isDbConnected()) {
+      return res.status(503).json({ success: false, error: 'Database unavailable.' });
+    }
+
+    const scan = await Scan.findOne({ scanId: id });
+    if (!scan) {
+      return res.status(404).json({ success: false, error: 'Scan not found.' });
+    }
+
+    // Verify ownership
+    if (scan.userId && scan.userId !== req.userId && req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Unauthorized to file a complaint for this scan.' });
+    }
+
+    const complaintData = {
+      complaintId: `CMP-${Date.now()}-${scan.scanId.slice(-4).toUpperCase()}`,
+      status: 'Submitted', // Submitted | Under Review | Investigation | Resolved | Rejected
+      submittedAt: new Date(),
+      userName: scan.userName || req.user?.name || 'CompliScan User',
+      userEmail: scan.userEmail || req.user?.email || '',
+      productName: scan.productName,
+      category: scan.category,
+      complianceScore: scan.complianceScore,
+      overallStatus: scan.overallStatus,
+      scanId: scan.scanId,
+      reportId: scan.reportId,
+      originalImageUrl: scan.originalImageUrl,
+      ruleResultsCount: scan.ruleResults?.length || 0,
+      adminPriority: scan.complianceScore < 60 || scan.overallStatus === 'NEEDS_REVIEW' ? 'HIGH' : 'NORMAL',
+    };
+
+    scan.complaintData = complaintData;
+    await scan.save();
+
+    console.log(`[Complaint Filed]: ${complaintData.complaintId} for scan ${scan.scanId} by ${complaintData.userEmail}`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Complaint submitted directly to Enforcement Dashboard.',
+      complaint: complaintData,
+    });
+  } catch (error) {
+    console.error('[Complaint Submission Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to submit complaint.' });
   }
 });
 
