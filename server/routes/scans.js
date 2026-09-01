@@ -36,6 +36,10 @@ router.post('/', requireAuth, async (req, res) => {
       overallStatus,
       reportData = null,
       readabilityResult = null,
+      originalImageUrl = null,
+      userName = null,
+      userEmail = null,
+      reportId = null,
     } = req.body;
 
     if (!scanId) {
@@ -64,11 +68,10 @@ router.post('/', requireAuth, async (req, res) => {
     // Check for existing scanId to prevent duplicate insertions
     const existing = await Scan.findOne({ scanId });
     if (existing) {
-      // Update any updated reportData if provided
-      if (reportData && !existing.reportData) {
-        existing.reportData = reportData;
-        await existing.save();
-      }
+      // Update any updated reportData or image if provided
+      if (reportData && !existing.reportData) existing.reportData = reportData;
+      if (originalImageUrl && !existing.originalImageUrl) existing.originalImageUrl = originalImageUrl;
+      await existing.save();
       return res.status(200).json({
         success: true,
         scanId,
@@ -84,7 +87,11 @@ router.post('/', requireAuth, async (req, res) => {
 
     const newScan = new Scan({
       scanId,
-      userId,
+      userId: userId || null,
+      userName: userName || (req.user ? req.user.name : 'CompliScan User'),
+      userEmail: userEmail || (req.user ? req.user.email : ''),
+      originalImageUrl: originalImageUrl || null,
+      reportId: reportId || null,
       productName: productName || 'Not detected',
       brand: brand || 'Not detected',
       category: category || 'Unknown',
@@ -164,10 +171,11 @@ router.get('/', requireAuth, async (req, res) => {
       });
     }
 
-    const { limit = 50, category, status } = req.query;
+    const { limit = 50, category, status, search } = req.query;
 
     // Enforce User Ownership: User only retrieves their own records
     const query = { userId: req.userId };
+
     if (category && category !== 'all') {
       query.category = new RegExp(category, 'i');
     }
@@ -175,10 +183,21 @@ router.get('/', requireAuth, async (req, res) => {
       query.overallStatus = new RegExp(status, 'i');
     }
 
+    // Server-side fast case-insensitive search by Product Name, Brand, Category, or Scan ID
+    if (search && typeof search === 'string' && search.trim() !== '') {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$or = [
+        { productName: searchRegex },
+        { brand: searchRegex },
+        { scanId: searchRegex },
+        { category: searchRegex },
+      ];
+    }
+
     const scans = await Scan.find(query)
       .sort({ createdAt: -1 })
       .limit(Number(limit))
-      .select('scanId productName brand category complianceScore overallStatus createdAt')
+      .select('scanId productName brand category complianceScore overallStatus createdAt originalImageUrl reportId readabilityResult')
       .lean();
 
     return res.status(200).json({
@@ -192,6 +211,44 @@ router.get('/', requireAuth, async (req, res) => {
       success: false,
       error: 'Unable to retrieve scan history.',
     });
+  }
+});
+
+/**
+ * PATCH /api/scans/:id/edit
+ * Saves reviewer / user edits for an editable report
+ * Maintains original OCR and AI data intact
+ */
+router.patch('/:id/edit', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reviewerEdits } = req.body;
+
+    if (!isDbConnected()) {
+      return res.status(503).json({ success: false, error: 'Database unavailable.' });
+    }
+
+    const scan = await Scan.findOne({ scanId: id });
+    if (!scan) {
+      return res.status(404).json({ success: false, error: 'Scan not found.' });
+    }
+
+    // Verify ownership: only owner or admin can edit
+    if (scan.userId && scan.userId !== req.userId && req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Unauthorized to edit this scan report.' });
+    }
+
+    scan.reviewerEdits = reviewerEdits;
+    await scan.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Report edits saved successfully.',
+      scan,
+    });
+  } catch (error) {
+    console.error('[Scan Edit Save Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to save report edits.' });
   }
 });
 

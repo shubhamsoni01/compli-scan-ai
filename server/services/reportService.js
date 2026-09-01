@@ -5,6 +5,12 @@
  */
 
 import PDFDocument from 'pdfkit';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function generateCompliancePDF(reportData) {
   return new Promise((resolve, reject) => {
@@ -68,16 +74,31 @@ export async function generateCompliancePDF(reportData) {
       const statusBadgeColor = score >= 80 ? '#059669' : score >= 50 ? '#D97706' : '#DC2626';
       doc.fillColor(statusBadgeColor).fontSize(10).font('Helvetica-Bold').text(overallStatus.toUpperCase(), 360, 65, { align: 'right', width: 195 });
 
-      doc.y = 88;
+      doc.y = 85;
+
+      // User Information Strip
+      const userName = reportData.userName || (reportData.user ? reportData.user.name : 'CompliScan Inspector');
+      const userEmail = reportData.userEmail || (reportData.user ? reportData.user.email : 'inspector@compliscan.ai');
+      doc.rect(40, doc.y, 515, 20).fillAndStroke('#F1F5F9', '#CBD5E1');
+      doc.fillColor('#334155').font('Helvetica-Bold').fontSize(8).text('Inspector / User:', 48, doc.y + 5);
+      doc.font('Helvetica').fillColor('#0F172A').text(`${userName} (${userEmail})`, 130, doc.y - 8);
+      doc.font('Helvetica-Bold').fillColor('#475569').text(`Scan ID: ${scanId}`, 380, doc.y - 8, { align: 'right', width: 165 });
+
+      doc.y = 114;
       drawDivider();
 
       // -------------------------------------------------------------
-      // 1. PRODUCT SUMMARY
+      // 1. PRODUCT SUMMARY & ORIGINAL SCANNED IMAGE
       // -------------------------------------------------------------
-      doc.fillColor(primaryColor).fontSize(12).font('Helvetica-Bold').text('1. Product Information Summary', 40, doc.y);
+      doc.fillColor(primaryColor).fontSize(12).font('Helvetica-Bold').text('1. Product Information Summary & Scanned Label', 40, doc.y);
       doc.moveDown(0.4);
 
-      // Product meta grid
+      const sectionStartY = doc.y;
+      const leftColWidth = 320;
+      const rightColX = 375;
+      const rightColWidth = 180;
+
+      // Product meta items on left column
       const metaItems = [
         ['Product Name', productName],
         ['Brand', productBrand],
@@ -92,17 +113,56 @@ export async function generateCompliancePDF(reportData) {
         ['Regulatory Licence (FSSAI/CDSCO)', extractedInfo['FSSAI / License Number'] || structuredProduct.licenseNumber || 'Not detected'],
       ];
 
-      doc.fillColor(textColor).fontSize(8.5);
+      doc.fillColor(textColor).fontSize(8);
       metaItems.forEach(([label, val]) => {
-        const currentY = doc.y;
-        if (currentY > 740) {
-          doc.addPage();
-        }
-        doc.font('Helvetica-Bold').fillColor(mutedColor).text(label, 45, doc.y, { width: 180 });
-        doc.font('Helvetica').fillColor(val === 'Not detected' ? '#DC2626' : textColor).text(String(val || 'Not detected'), 235, currentY, { width: 315 });
-        doc.moveDown(0.35);
+        const rowY = doc.y;
+        doc.font('Helvetica-Bold').fillColor(mutedColor).text(label, 45, rowY, { width: 140 });
+        doc.font('Helvetica').fillColor(val === 'Not detected' ? '#DC2626' : textColor).text(String(val || 'Not detected'), 190, rowY, { width: 175 });
+        doc.moveDown(0.32);
       });
 
+      const metaEndY = doc.y;
+
+      // Embed Original Scanned Product Image on right side of section 1
+      let imageDrawn = false;
+      const imagePath = reportData.originalImageUrl || reportData.uploadedImage;
+      if (imagePath && typeof imagePath === 'string') {
+        try {
+          let resolvedImgPath = null;
+          if (imagePath.startsWith('/uploads/')) {
+            resolvedImgPath = path.join(__dirname, '..', imagePath);
+          } else if (imagePath.startsWith('http') || imagePath.startsWith('blob:')) {
+            // Checked if exists on disk by filename
+            const basename = path.basename(imagePath);
+            const localCandidate = path.join(__dirname, '..', 'uploads', 'scans', basename);
+            if (fs.existsSync(localCandidate)) {
+              resolvedImgPath = localCandidate;
+            }
+          } else if (fs.existsSync(imagePath)) {
+            resolvedImgPath = imagePath;
+          }
+
+          if (resolvedImgPath && fs.existsSync(resolvedImgPath)) {
+            doc.rect(rightColX, sectionStartY, rightColWidth, 155).stroke(borderColor);
+            doc.image(resolvedImgPath, rightColX + 5, sectionStartY + 5, {
+              fit: [rightColWidth - 10, 130],
+              align: 'center',
+              valign: 'center',
+            });
+            doc.font('Helvetica-Oblique').fontSize(7).fillColor(mutedColor).text('Original Scanned Label', rightColX, sectionStartY + 140, { width: rightColWidth, align: 'center' });
+            imageDrawn = true;
+          }
+        } catch (imgErr) {
+          console.warn('[PDF Image Embed Warning]:', imgErr.message);
+        }
+      }
+
+      if (!imageDrawn) {
+        doc.rect(rightColX, sectionStartY, rightColWidth, 110).fillAndStroke(lightBg, borderColor);
+        doc.font('Helvetica-Oblique').fontSize(8).fillColor(mutedColor).text('Original scan image unavailable or uploaded as memory blob.', rightColX + 10, sectionStartY + 45, { width: rightColWidth - 20, align: 'center' });
+      }
+
+      doc.y = Math.max(metaEndY, sectionStartY + 160);
       drawDivider();
 
       // -------------------------------------------------------------
@@ -298,6 +358,27 @@ export async function generateCompliancePDF(reportData) {
       doc.rect(40, jsonY, 515, 95).fillAndStroke(lightBg, borderColor);
       doc.fillColor('#047857').font('Courier').fontSize(7).text(jsonSnippet, 45, jsonY + 6, { width: 505, height: 83, ellipsis: true });
       doc.y = jsonY + 105;
+
+      // -------------------------------------------------------------
+      // 5. REVIEWER NOTES & CORRECTIVE ACTIONS (EDITABLE LAYER)
+      // -------------------------------------------------------------
+      if (reportData.reviewerEdits) {
+        const edits = reportData.reviewerEdits;
+        if (doc.y > 670) doc.addPage();
+        drawDivider();
+        doc.fillColor(primaryColor).fontSize(12).font('Helvetica-Bold').text('5. Reviewer Notes & Corrective Actions', 40, doc.y);
+        doc.moveDown(0.3);
+
+        const editBoxY = doc.y;
+        doc.rect(40, editBoxY, 515, 60).fillAndStroke(lightBg, borderColor);
+        doc.fillColor(textColor).fontSize(8).font('Helvetica-Bold').text('Reviewer Remarks:', 48, editBoxY + 8);
+        doc.font('Helvetica').fillColor('#334155').text(edits.remarks || 'No specific remarks entered by inspector.', 48, editBoxY + 20, { width: 500 });
+        if (edits.correctiveAction) {
+          doc.fillColor(textColor).font('Helvetica-Bold').text('Recommended Corrective Action:', 48, editBoxY + 36);
+          doc.font('Helvetica').fillColor('#334155').text(edits.correctiveAction, 48, editBoxY + 48, { width: 500 });
+        }
+        doc.y = editBoxY + 70;
+      }
 
       // -------------------------------------------------------------
       // 6. MANDATORY STATUTORY DISCLAIMER

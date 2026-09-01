@@ -38,6 +38,10 @@ const ScanSchema = new mongoose.Schema({
     default: null,
     index: true,
   },
+  userName: { type: String, default: 'CompliScan User' },
+  userEmail: { type: String, default: '' },
+  originalImageUrl: { type: String, default: null },
+  reportId: { type: String, default: null },
   // Extracted Product Metadata
   productName: { type: String, default: 'Not detected' },
   brand: { type: String, default: 'Not detected' },
@@ -75,6 +79,9 @@ const ScanSchema = new mongoose.Schema({
 
   // Font Size & Readability Analysis Results
   readabilityResult: { type: mongoose.Schema.Types.Mixed, default: null },
+
+  // Reviewer / User Edits for Editable Report (Separate from original AI data)
+  reviewerEdits: { type: mongoose.Schema.Types.Mixed, default: null },
 
   // Optional complaint structure for future readiness
   complaintData: { type: mongoose.Schema.Types.Mixed, default: null },

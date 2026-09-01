@@ -16,7 +16,8 @@ import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
 import { generateReportPDF } from '@/services/api';
 import { ComplianceReportPreview } from '@/components/report/ComplianceReportPreview';
 import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
-import { FileText, Loader2 } from 'lucide-react';
+import { EditReportModal } from '@/components/report/EditReportModal';
+import { FileText, Loader2, Edit3 } from 'lucide-react';
 
 export default function ComplianceResultPage() {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ export default function ComplianceResultPage() {
   const score = useAnimatedCounter(resolvedResult.score);
 
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  // Edit Report Modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Report generation state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -167,6 +171,14 @@ export default function ComplianceResultPage() {
           <Link to={`/result/${resolvedResult.scanId}/detail`}>
             <Button variant="outline">View Detailed Inspection</Button>
           </Link>
+          <Button
+            variant="outline"
+            onClick={() => setIsEditModalOpen(true)}
+            className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-700"
+          >
+            <Edit3 size={16} />
+            <span>Edit Report</span>
+          </Button>
           <Button 
             onClick={handleGenerateReport} 
             disabled={isGeneratingReport}
@@ -304,6 +316,13 @@ export default function ComplianceResultPage() {
         pdfFilename={reportFilename}
         isGenerating={isGeneratingReport}
         onDownload={handleDownloadPDF}
+      />
+
+      {/* Editable Report Modal */}
+      <EditReportModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        reportData={resolvedResult}
       />
     </div>
   );

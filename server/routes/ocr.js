@@ -1,8 +1,18 @@
 import express from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { extractTextWithOCR } from '../services/ocrService.js';
 import { getImageDimensionsFromBuffer } from '../services/readabilityAnalyzer.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const scansDir = path.join(__dirname, '..', 'uploads', 'scans');
+if (!fs.existsSync(scansDir)) {
+  fs.mkdirSync(scansDir, { recursive: true });
+}
 
 const router = express.Router();
 
@@ -48,11 +58,25 @@ router.post('/', requireAuth, upload.single('image'), async (req, res) => {
 
     const dimensions = getImageDimensionsFromBuffer(buffer);
 
+    // Save image to server/uploads/scans/ for persistence in PDF report & history
+    let originalImageUrl = null;
+    try {
+      const ext = mimetype.includes('png') ? '.png' : mimetype.includes('webp') ? '.webp' : '.jpg';
+      const cleanScanId = scanId.replace(/[^a-zA-Z0-9_-]/g, '');
+      const savedFilename = `${cleanScanId}_${Date.now()}${ext}`;
+      const savedFilePath = path.join(scansDir, savedFilename);
+      fs.writeFileSync(savedFilePath, buffer);
+      originalImageUrl = `/uploads/scans/${savedFilename}`;
+    } catch (saveImgErr) {
+      console.warn('[OCR Image Save Warning]:', saveImgErr.message);
+    }
+
     return res.status(200).json({
       success: true,
       scanId,
       text: result.text,
       ocrEngine: result.ocrEngine,
+      originalImageUrl,
       ocrData: {
         lines: result.lines || [],
         words: result.words || [],

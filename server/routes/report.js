@@ -1,5 +1,6 @@
 import express from 'express';
 import { generateCompliancePDF } from '../services/reportService.js';
+import { generateComplianceDocx } from '../services/docxReportService.js';
 
 const router = express.Router();
 
@@ -39,6 +40,41 @@ router.post('/', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Unable to generate the report. Please try again.',
+    });
+  }
+});
+
+/**
+ * POST /api/report/docx
+ * Generates an editable DOCX compliance screening draft
+ */
+router.post('/docx', async (req, res) => {
+  try {
+    const reportPayload = req.body;
+
+    if (!reportPayload || !reportPayload.productName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Incomplete compliance report data provided.',
+      });
+    }
+
+    const { docxBuffer, reportId } = await generateComplianceDocx(reportPayload);
+
+    const safeProdName = (reportPayload.productName || 'Product').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+    const filename = `CompliScan_Editable_Report_${safeProdName}_${reportId}.docx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('X-Report-Id', reportId);
+    res.setHeader('Content-Length', docxBuffer.length);
+
+    return res.status(200).send(docxBuffer);
+  } catch (error) {
+    console.error('[DOCX Generation Error]:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Unable to generate editable DOCX report.',
     });
   }
 });

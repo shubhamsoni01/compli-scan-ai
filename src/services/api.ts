@@ -42,6 +42,7 @@ export interface OCRResponse {
   text?: string;
   ocrEngine?: string;
   error?: string;
+  originalImageUrl?: string | null;
   ocrData?: {
     lines?: Array<{ text: string; height?: number | null; minTop?: number | null }>;
     words?: Array<{ wordText: string; left?: number; top?: number; height?: number; width?: number }>;
@@ -300,13 +301,14 @@ export async function saveScanToDB(scanPayload: any): Promise<{ success: boolean
 }
 
 /**
- * Fetch scan history from MongoDB Atlas
+ * Fetch scan history from MongoDB Atlas with optional search and filters
  */
-export async function fetchScansFromDB(filters?: { category?: string; status?: string }): Promise<any[]> {
+export async function fetchScansFromDB(filters?: { category?: string; status?: string; search?: string }): Promise<any[]> {
   try {
     const params = new URLSearchParams();
-    if (filters?.category && filters.category !== 'all') params.append('category', filters.category);
-    if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters?.category && filters.category !== 'all' && filters.category !== 'All') params.append('category', filters.category);
+    if (filters?.status && filters.status !== 'all' && filters.status !== 'All') params.append('status', filters.status);
+    if (filters?.search && filters.search.trim()) params.append('search', filters.search.trim());
 
     const token = localStorage.getItem('compliscan_jwt');
     const headers: Record<string, string> = {};
@@ -325,6 +327,68 @@ export async function fetchScansFromDB(filters?: { category?: string; status?: s
   } catch (err: any) {
     console.warn('[MongoDB Fetch Client Warning]:', err.message);
     return [];
+  }
+}
+
+/**
+ * Generate editable compliance report DOCX from backend
+ */
+export async function generateReportDocx(reportData: any): Promise<{ blob: Blob; filename: string; reportId: string }> {
+  const token = localStorage.getItem('compliscan_jwt');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const response = await fetch(`${API_BASE_URL}/api/report/docx`, {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify(reportData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Unable to generate the editable DOCX report.');
+  }
+
+  const blob = await response.blob();
+  const reportId = response.headers.get('X-Report-Id') || `CS-${Date.now()}`;
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = `CompliScan_Editable_Report_${reportId}.docx`;
+
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="?([^"]+)"?/);
+    if (match && match[1]) {
+      filename = match[1];
+    }
+  }
+
+  return { blob, filename, reportId };
+}
+
+/**
+ * Save reviewer / user edits to an existing scan report
+ */
+export async function saveScanEditsToDB(scanId: string, reviewerEdits: any): Promise<boolean> {
+  try {
+    const token = localStorage.getItem('compliscan_jwt');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/api/scans/${scanId}/edit`, {
+      method: 'PATCH',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ reviewerEdits }),
+    });
+
+    const data = await response.json();
+    return Boolean(data.success);
+  } catch (e: any) {
+    console.warn('[Save Edits Error]:', e.message);
+    return false;
   }
 }
 

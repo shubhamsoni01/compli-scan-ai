@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Search, FileX } from 'lucide-react';
+import { Eye, Search, FileX, Download, Edit3, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Card } from '@/components/ui/Card';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -10,10 +10,9 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { mockScanHistory } from '@/data/scanHistory';
-import * as historyService from '@/services/historyService';
-import { fetchScansFromDB } from '@/services/api';
-import { formatDate, formatTime, getStatusColor, getStatusLabel } from '@/utils/formatters';
+import { fetchScansFromDB, generateReportPDF, fetchScanByIdFromDB } from '@/services/api';
+import { EditReportModal } from '@/components/report/EditReportModal';
+import { formatDate, formatTime } from '@/utils/formatters';
 
 const categories = ['All', 'Food', 'Edible Oil', 'Cosmetics', 'Household'];
 const statuses = ['All', 'Compliant', 'Potential Issue', 'Needs Review'];
@@ -26,20 +25,24 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [historyData, setHistoryData] = useState<any[]>([]);
 
+  // Edit modal state
+  const [editingScan, setEditingScan] = useState<any | null>(null);
+  const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
       try {
-        // Query real scans from MongoDB Atlas
+        // Query real scans from MongoDB Atlas with server-side search and filters
         const realScans = await fetchScansFromDB({
           category: selectedCategory !== 'All' ? selectedCategory : undefined,
           status: selectedStatus !== 'All' ? selectedStatus : undefined,
+          search: searchQuery.trim() || undefined,
         });
 
         let dataToDisplay: any[] = [];
 
         if (realScans && realScans.length > 0) {
-          // Format real MongoDB documents for the history UI
           dataToDisplay = realScans.map((doc: any) => ({
             id: doc.scanId,
             scanId: doc.scanId,
@@ -47,6 +50,7 @@ export default function HistoryPage() {
             brand: doc.brand || 'Detected Brand',
             category: doc.category || 'Food',
             score: doc.complianceScore ?? 80,
+            originalImageUrl: doc.originalImageUrl || null,
             status:
               doc.overallStatus === 'COMPLIANT'
                 ? 'compliant'
@@ -54,20 +58,8 @@ export default function HistoryPage() {
                 ? 'potential-issue'
                 : 'needs-review',
             date: doc.createdAt || new Date().toISOString(),
+            rawDoc: doc,
           }));
-        } else {
-          // No scans recorded yet
-          dataToDisplay = [];
-        }
-
-        // Apply client-side search query
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          dataToDisplay = dataToDisplay.filter((item: any) =>
-            (item.productName || '').toLowerCase().includes(q) ||
-            (item.brand || '').toLowerCase().includes(q) ||
-            (item.scanId || item.id || '').toLowerCase().includes(q)
-          );
         }
 
         setHistoryData(dataToDisplay);
@@ -83,13 +75,67 @@ export default function HistoryPage() {
     return () => clearTimeout(timer);
   }, [searchQuery, selectedCategory, selectedStatus]);
 
+  const handleDownloadPDF = async (scan: any) => {
+    setDownloadingPdfId(scan.id);
+    try {
+      // Fetch complete record if needed
+      const fullDoc = await fetchScanByIdFromDB(scan.id);
+      const payload = fullDoc || scan.rawDoc || {
+        scanId: scan.id,
+        productName: scan.productName,
+        productBrand: scan.brand,
+        category: scan.category,
+        score: scan.score,
+        scanDate: scan.date,
+        overallStatus: scan.status === 'compliant' ? 'COMPLIANT' : 'NEEDS_REVIEW',
+        originalImageUrl: scan.originalImageUrl,
+      };
+
+      const { blob, filename } = await generateReportPDF(payload);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('PDF Download failed:', err);
+    } finally {
+      setDownloadingPdfId(null);
+    }
+  };
+
+  const handleOpenEdit = async (scan: any) => {
+    try {
+      const fullDoc = await fetchScanByIdFromDB(scan.id);
+      setEditingScan(fullDoc || scan.rawDoc || scan);
+    } catch {
+      setEditingScan(scan.rawDoc || scan);
+    }
+  };
+
   const columns = [
     {
       header: 'Product',
       accessor: (row: any) => (
-        <div>
-          <p className="font-medium text-gray-900 dark:text-gray-100">{row.productName}</p>
-          <p className="text-xs text-gray-500">{row.brand}</p>
+        <div className="flex items-center gap-3">
+          {row.originalImageUrl ? (
+            <img 
+              src={row.originalImageUrl} 
+              alt={row.productName} 
+              className="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 shrink-0" 
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 shrink-0">
+              <ImageIcon size={18} />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{row.productName}</p>
+            <p className="text-xs text-gray-500 truncate">{row.brand}</p>
+          </div>
         </div>
       )
     },
@@ -126,11 +172,25 @@ export default function HistoryPage() {
       )
     },
     {
-      header: 'Action',
+      header: 'Actions',
       accessor: (row: any) => (
-        <Button variant="ghost" size="sm" onClick={() => navigate(`/result/${row.id}`)}>
-          <Eye size={16} className="mr-2" /> View
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/result/${row.id}`)} title="View Report">
+            <Eye size={15} className="mr-1" /> View
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleDownloadPDF(row)}
+            disabled={downloadingPdfId === row.id}
+            title="Download PDF"
+          >
+            {downloadingPdfId === row.id ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(row)} title="Edit Report">
+            <Edit3 size={15} />
+          </Button>
+        </div>
       )
     }
   ];
@@ -216,9 +276,24 @@ export default function HistoryPage() {
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full" onClick={() => navigate(`/result/${item.id}`)}>
-                    View Details
-                  </Button>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/result/${item.id}`)} className="text-xs">
+                      <Eye size={14} className="mr-1" /> View
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDownloadPDF(item)}
+                      disabled={downloadingPdfId === item.id}
+                      className="text-xs"
+                    >
+                      {downloadingPdfId === item.id ? <Loader2 size={14} className="animate-spin mr-1" /> : <Download size={14} className="mr-1" />}
+                      PDF
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleOpenEdit(item)} className="text-xs">
+                      <Edit3 size={14} className="mr-1" /> Edit
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -248,6 +323,14 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
+      {/* Edit Report Modal */}
+      {editingScan && (
+        <EditReportModal
+          isOpen={Boolean(editingScan)}
+          onClose={() => setEditingScan(null)}
+          reportData={editingScan}
+        />
+      )}
     </div>
   );
 }

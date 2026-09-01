@@ -18,6 +18,10 @@ export interface ScanResultData extends ComplianceResult {
   uploadedImage?: string;
   evaluatedRules?: ComplianceRuleResult[];
   readabilityResult?: ReadabilityResult;
+  reviewerEdits?: any;
+  reportId?: string;
+  userName?: string;
+  userEmail?: string;
 }
 
 // In-memory session store for current active scans to be viewed on /result/:scanId
@@ -88,6 +92,11 @@ export async function getScanResultAsync(scanId: string): Promise<ScanResultData
         ocrEngine: 'OCR.Space',
         evaluatedRules: dbDoc.ruleResults,
         readabilityResult: dbDoc.readabilityResult || undefined,
+        uploadedImage: dbDoc.originalImageUrl || undefined,
+        reviewerEdits: dbDoc.reviewerEdits || undefined,
+        reportId: dbDoc.reportId || undefined,
+        userName: dbDoc.userName || undefined,
+        userEmail: dbDoc.userEmail || undefined,
       };
 
       scanResultsCache.set(scanId, restoredResult);
@@ -255,7 +264,7 @@ export async function startRealScan(
     structuredProduct: p,
     ocrText: ocrResponse.text,
     ocrEngine: ocrResponse.ocrEngine,
-    uploadedImage,
+    uploadedImage: ocrResponse.originalImageUrl || uploadedImage,
     evaluatedRules: comp?.rules || [],
     readabilityResult,
   };
@@ -264,9 +273,23 @@ export async function startRealScan(
 
   // ASYNCHRONOUSLY PERSIST REAL SCAN TO MONGODB ATLAS
   // If MongoDB fails or is unavailable, never destroy the scan result or disrupt the user
+  const currentUserRaw = localStorage.getItem('compliscan_user_data');
+  let currentAuthUser: any = null;
+  try {
+    if (currentUserRaw) currentAuthUser = JSON.parse(currentUserRaw);
+  } catch {}
+
+  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const shortId = scanId.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || 'X001';
+  const reportId = `CS-${dateStr}-${shortId}`;
+
   const dbPayload = {
     scanId,
-    userId: null, // Ready for future authentication
+    userId: currentAuthUser?.id || null,
+    userName: currentAuthUser?.name || 'CompliScan User',
+    userEmail: currentAuthUser?.email || '',
+    originalImageUrl: ocrResponse.originalImageUrl || null,
+    reportId,
     productName: p.productName || 'Not detected',
     brand: p.brand || 'Not detected',
     category: p.category || userSelectedCategory || 'Unknown',
