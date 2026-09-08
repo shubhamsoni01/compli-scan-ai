@@ -14,6 +14,7 @@ import { fetchRealStats } from '@/services/api';
 const ProductScanner = lazy(() => import('@/components/3d/ProductScanner'));
 import { HackathonShowcaseSection } from '@/components/sections/HackathonShowcaseSection';
 import { LiveCompliancePreviewSection } from '@/components/sections/LiveCompliancePreviewSection';
+import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
 import { CyberGridBackground } from '@/components/ui/CyberGridBackground';
@@ -205,6 +206,9 @@ export default function LandingPage() {
 
       {/* Live Interactive Compliance Audit Simulator */}
       <LiveCompliancePreviewSection />
+
+      {/* Apple-Inspired Bento Architecture Showcase */}
+      <AppleBentoShowcase />
 
       {/* Supported Categories */}
       <section className="py-20 bg-slate-50 dark:bg-[#04080e] border-t border-slate-100 dark:border-white/5">
