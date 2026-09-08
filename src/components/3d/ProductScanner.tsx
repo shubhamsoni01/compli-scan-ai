@@ -37,10 +37,10 @@ const Scene: React.FC<{ isScanning: boolean }> = ({ isScanning }) => {
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0001}
       />
-      {/* Rim light for edge definition */}
-      <directionalLight position={[-6, 4, -4]} intensity={0.7} color="#818cf8" />
-      {/* Subtle floor bounce light */}
-      <pointLight position={[0, -0.4, 2]} intensity={0.4} color="#38bdf8" />
+      {/* Rim light for edge definition with Cyber Emerald & Cyan accent */}
+      <directionalLight position={[-6, 4, -4]} intensity={0.8} color="#10b981" />
+      {/* Floor bounce light with Cyan accent */}
+      <pointLight position={[0, -0.4, 2]} intensity={0.5} color="#06b6d4" />
 
       {/* Floating group for smooth cinematic motion */}
       <Float speed={1.2} rotationIntensity={0.08} floatIntensity={0.25}>
@@ -81,7 +81,7 @@ export const ProductScanner: React.FC<ProductScannerProps> = ({ size = 'lg', isS
   return (
     <div className={`relative ${sizeClass} bg-transparent rounded-3xl overflow-visible flex items-center justify-center`}>
       {/* Subtle decorative background gradient halo */}
-      <div className="absolute inset-0 bg-radial from-indigo-500/12 via-transparent to-transparent pointer-events-none -z-10 rounded-3xl" />
+      <div className="absolute inset-0 bg-radial from-emerald-500/15 via-teal-500/5 to-transparent pointer-events-none -z-10 rounded-3xl" />
       
       <React.Suspense fallback={<FallbackIllustration />}>
         <Canvas
