@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Award, GraduationCap, Building2, Users, FileCheck2, Sparkles, ChevronRight, Scale, ShieldCheck } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
-import { MinistryAura } from '@/components/3d/MinistryAura';
+import { MinistryVectorAura } from '@/components/3d/MinistryVectorAura';
 
 /**
  * Single source of truth configuration for Hackathon / University Presentation.
@@ -98,8 +98,8 @@ export const HackathonShowcaseSection: React.FC = () => {
 
           {/* Right Column: Problem Statement & Ministry of Consumer Affairs Details */}
           <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between space-y-6 relative overflow-hidden">
-            {/* Background Watermark Lion Capital & Ministry Aura */}
-            <MinistryAura />
+            {/* Pure Vector Lion Capital & Ministry Animated Aura */}
+            <MinistryVectorAura />
 
             {/* Top Ministry & SIH Header & PS ID */}
             <div className="relative z-10">
