@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Award, GraduationCap, Building2, Users, FileCheck2, Sparkles, ChevronRight } from 'lucide-react';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 
 /**
  * Single source of truth configuration for Hackathon / University Presentation.
@@ -97,13 +98,16 @@ export const HackathonShowcaseSection: React.FC = () => {
             {/* SIH Header & PS ID */}
             <div>
               <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-slate-800/80">
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Hackathon Initiative</span>
-                  <div className="text-xl font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
-                    <span>{config.hackathonName}</span>
-                    <span className="px-2 py-0.5 text-xs font-semibold rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                      {config.hackathonYear}
-                    </span>
+                <div className="flex items-center gap-3">
+                  <SIHLogo size="md" showText={false} />
+                  <div>
+                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Hackathon Initiative</span>
+                    <div className="text-xl font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
+                      <span>{config.hackathonName}</span>
+                      <span className="px-2 py-0.5 text-xs font-semibold rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                        {config.hackathonYear}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

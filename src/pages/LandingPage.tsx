@@ -66,8 +66,9 @@ export default function LandingPage() {
               animate="visible"
               className="lg:col-span-6 max-w-2xl"
             >
-              <motion.div variants={itemVariants} className="mb-6 inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-indigo-600 bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30 ring-1 ring-inset ring-indigo-500/20">
-                AI-Powered Product Compliance
+              <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs md:text-sm font-semibold text-indigo-700 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/60 ring-1 ring-inset ring-indigo-500/30 shadow-sm">
+                <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-ping" />
+                <span>🇮🇳 Smart India Hackathon 2026 • AI-Powered Compliance</span>
               </motion.div>
               <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-6 font-heading">
                 Scan. Verify. Comply.

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { ShieldCheck, Moon, Sun } from 'lucide-react';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 import { cn } from '@/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
@@ -40,14 +41,19 @@ export const LandingLayout: React.FC = () => {
         )}
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="bg-indigo-600 dark:bg-violet-600 text-white p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
-              <ShieldCheck size={24} />
+          <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="bg-indigo-600 dark:bg-violet-600 text-white p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
+                <ShieldCheck size={24} />
+              </div>
+              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
+                CompliScan AI
+              </span>
+            </Link>
+            <div className="hidden sm:flex items-center pl-3 border-l border-slate-200 dark:border-white/10">
+              <SIHLogo size="sm" showText={false} />
             </div>
-            <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-              CompliScan AI
-            </span>
-          </Link>
+          </div>
 
           <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-gray-600 dark:text-gray-300">
             {[
