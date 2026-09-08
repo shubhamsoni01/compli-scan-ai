@@ -14,6 +14,7 @@ import { fetchRealStats } from '@/services/api';
 const ProductScanner = lazy(() => import('@/components/3d/ProductScanner'));
 import { HackathonShowcaseSection } from '@/components/sections/HackathonShowcaseSection';
 import { TiltCard } from '@/components/ui/TiltCard';
+import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
 
 // Framer motion variants
 const containerVariants = {
@@ -58,6 +59,9 @@ export default function LandingPage() {
         {/* Subtle glowing ambient lighting orbs */}
         <div className="absolute top-10 left-1/3 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
         <div className="absolute top-32 right-10 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-600/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
+
+        {/* Pure Vector SIH Innovation Aura in Background */}
+        <SIHVectorAura />
 
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
