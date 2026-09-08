@@ -3,26 +3,25 @@ import { motion } from 'framer-motion';
 
 export const SIHBackgroundGlowBulb: React.FC = () => {
   return (
-    <div className="absolute left-2 sm:left-6 lg:left-10 top-1/2 -translate-y-1/2 pointer-events-none -z-10 flex items-center justify-center select-none">
-      {/* Gentle, Subtle Background Floating SIH Official Bulb Motif - No Rotating Circle */}
+    <div className="absolute left-4 sm:left-10 lg:left-16 top-1/2 -translate-y-1/2 pointer-events-none z-0 flex items-center justify-center select-none">
+      {/* Background Floating SIH Official Bulb Motif - Clearly Visible Watermark Style */}
       <motion.div
         animate={{
-          y: [-10, 10, -10],
-          x: [-5, 5, -5],
-          rotate: [-2, 2, -2],
-          scale: [0.97, 1.03, 0.97]
+          y: [-12, 12, -12],
+          x: [-6, 6, -6],
+          rotate: [-2.5, 2.5, -2.5],
         }}
         transition={{
-          duration: 6,
+          duration: 5.5,
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="w-[220px] sm:w-[280px] lg:w-[330px] h-[220px] sm:h-[280px] lg:h-[330px] flex items-center justify-center opacity-30 dark:opacity-20 filter blur-[1.5px]"
+        className="w-[260px] sm:w-[320px] lg:w-[380px] h-[260px] sm:h-[320px] lg:h-[380px] flex items-center justify-center opacity-65 dark:opacity-45 filter blur-[0.6px]"
       >
         <img
           src="/assets/sih-official-bulb.jpg"
           alt="Smart India Hackathon Background Motif"
-          className="w-full h-full object-contain rounded-3xl mix-blend-multiply dark:mix-blend-screen drop-shadow-[0_0_35px_rgba(249,115,22,0.3)]"
+          className="w-full h-full object-contain rounded-3xl drop-shadow-[0_0_30px_rgba(249,115,22,0.4)]"
         />
       </motion.div>
     </div>
