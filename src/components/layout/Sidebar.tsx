@@ -13,6 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -70,14 +71,14 @@ export const Sidebar: React.FC = () => {
           ))}
         </nav>
 
-        <div className="p-4 m-4 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950/40 dark:to-violet-950/40 rounded-xl border border-indigo-100/50 dark:border-indigo-500/10">
-          <div className="flex items-center gap-2 text-indigo-700 dark:text-violet-300 font-medium mb-1 text-sm">
-            <Sparkles size={16} />
-            AI-Powered
+        <div className="p-4 border-t border-gray-100 dark:border-white/5 space-y-3">
+          <div className="flex items-center justify-center">
+            <SIHLogo size="sm" showText={true} />
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            Product Compliance checking made easy.
-          </p>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-violet-900/10 dark:to-indigo-900/10 text-xs text-indigo-700 dark:text-violet-300 border border-indigo-100/50 dark:border-white/5">
+            <Sparkles size={14} className="flex-shrink-0" />
+            <span className="font-medium">AI-Powered Compliance</span>
+          </div>
         </div>
       </aside>
 
