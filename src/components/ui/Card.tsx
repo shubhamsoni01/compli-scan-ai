@@ -1,14 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/utils/cn';
 
-export interface CardProps extends Omit<HTMLMotionProps<'div'>, 'ref'> {
+export interface CardProps extends Omit<HTMLMotionProps<'div'>, 'ref' | 'children'> {
   hover?: boolean;
+  spotlight?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  children?: React.ReactNode;
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hover, padding = 'md', children, ...props }, ref) => {
+  ({ className, hover = true, spotlight = true, padding = 'md', children, onMouseMove, onMouseEnter, onMouseLeave, ...props }, ref) => {
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [isHovered, setIsHovered] = useState(false);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setMousePosition({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      if (onMouseMove) onMouseMove(e);
+    };
+
+    const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+      setIsHovered(true);
+      if (onMouseEnter) onMouseEnter(e);
+    };
+
+    const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      setIsHovered(false);
+      if (onMouseLeave) onMouseLeave(e);
+    };
+
     const paddings = {
       none: '',
       sm: 'p-4',
@@ -19,21 +43,44 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <motion.div
         ref={ref}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         whileHover={hover ? { 
-          y: -5, 
-          scale: 1.01,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
+          y: -4, 
           transition: { duration: 0.25, ease: 'easeOut' } 
         } : {}}
         className={cn(
-          'bg-white dark:bg-surface-900 rounded-2xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden backdrop-blur-xl backdrop-filter transition-all duration-300',
-          hover && 'hover:border-indigo-200 dark:hover:border-indigo-500/20',
+          'relative bg-white dark:bg-[#0b101b] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden backdrop-blur-xl transition-all duration-300',
+          hover && 'hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/5',
           paddings[padding],
           className
         )}
         {...props}
       >
-        {children}
+        {/* Spotlight Mouse Cursor Glow */}
+        {spotlight && isHovered && (
+          <>
+            {/* Inner background radial glow */}
+            <div
+              className="pointer-events-none absolute -inset-px rounded-2xl transition-opacity duration-300 -z-0"
+              style={{
+                background: `radial-gradient(450px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(16, 185, 129, 0.10), transparent 80%)`,
+              }}
+            />
+            {/* Border tracking highlight */}
+            <div
+              className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300 -z-0"
+              style={{
+                background: `radial-gradient(300px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(6, 182, 212, 0.15), transparent 70%)`,
+              }}
+            />
+          </>
+        )}
+
+        <div className="relative z-10">
+          {children}
+        </div>
       </motion.div>
     );
   }

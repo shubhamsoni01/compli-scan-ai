@@ -32,22 +32,21 @@ export const LandingLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-surface-950 font-sans transition-colors duration-200 text-gray-900 dark:text-gray-100">
       <header 
-        style={{ height: 'var(--navbar-height, 72px)' }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-[9999] transition-colors duration-200 border-b flex items-center",
+          "z-[9999] transition-all duration-300 flex items-center justify-between",
           scrolled 
-            ? "bg-white/85 dark:bg-surface-950/85 backdrop-blur-md border-gray-200/80 dark:border-white/10 shadow-sm" 
-            : "bg-white/50 dark:bg-surface-950/50 backdrop-blur-sm border-transparent"
+            ? "fixed top-3 left-1/2 -translate-x-1/2 w-[94%] max-w-6xl rounded-2xl md:rounded-full bg-white/85 dark:bg-[#070b12]/85 backdrop-blur-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/10 px-5 sm:px-8 py-2.5" 
+            : "fixed top-0 left-0 right-0 bg-white/40 dark:bg-[#070b12]/40 backdrop-blur-md border-b border-slate-200/40 dark:border-white/5 px-4 sm:px-8 py-4"
         )}
       >
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 p-1.5 rounded-lg shadow-sm shadow-emerald-500/30 group-hover:scale-105 transition-transform font-bold">
-                <ShieldCheck size={24} className="text-slate-950 stroke-[2.5]" />
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 p-2 rounded-xl shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform font-bold">
+                <ShieldCheck size={22} className="text-slate-950 stroke-[2.5]" />
               </div>
-              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-                CompliScan <span className="text-emerald-500 dark:text-emerald-400">AI</span>
+              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white font-heading">
+                CompliScan <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">AI</span>
               </span>
             </Link>
             <div className="hidden sm:flex items-center pl-3 border-l border-slate-200 dark:border-white/10">
@@ -55,30 +54,30 @@ export const LandingLayout: React.FC = () => {
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-gray-600 dark:text-gray-300">
+          <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-slate-600 dark:text-slate-300">
             {[
               { label: 'Features', href: '/#features', isInternal: true },
               { label: 'How It Works', href: '/#how-it-works', isInternal: true },
               { label: 'Development', href: '/development', isInternal: false },
-              { label: 'Pricing', href: '/#pricing', isInternal: true }
+              { label: 'Rules & Gazette', href: '/rules', isInternal: false }
             ].map((link) => (
               link.isInternal ? (
                 <a 
                   key={link.label}
                   href={link.href} 
-                  className="relative py-1 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 group"
+                  className="relative py-1 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors duration-200 group"
                 >
                   <span>{link.label}</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full transition-all duration-300 group-hover:w-full" />
                 </a>
               ) : (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="relative py-1 text-indigo-600 dark:text-cyan-400 font-semibold hover:text-indigo-700 dark:hover:text-cyan-300 transition-colors duration-200 group"
+                  className="relative py-1 text-slate-700 dark:text-slate-200 hover:text-emerald-500 dark:hover:text-cyan-400 font-medium transition-colors duration-200 group"
                 >
                   <span>{link.label}</span>
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-cyan-400 rounded-full transition-all duration-300" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full transition-all duration-300 group-hover:w-full" />
                 </Link>
               )
             ))}
