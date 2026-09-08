@@ -14,7 +14,7 @@ import { fetchRealStats } from '@/services/api';
 const ProductScanner = lazy(() => import('@/components/3d/ProductScanner'));
 import { HackathonShowcaseSection } from '@/components/sections/HackathonShowcaseSection';
 import { TiltCard } from '@/components/ui/TiltCard';
-import { SIHFloatingOrb } from '@/components/3d/SIHFloatingOrb';
+import { SIHBackgroundGlowBulb } from '@/components/3d/SIHBackgroundGlowBulb';
 
 // Framer motion variants
 const containerVariants = {
@@ -66,8 +66,11 @@ export default function LandingPage() {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-6 max-w-2xl"
+              className="lg:col-span-6 max-w-2xl relative"
             >
+              {/* Subtle Animated Floating SIH Bulb Logo in Background behind Text */}
+              <SIHBackgroundGlowBulb />
+
               <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs md:text-sm font-semibold text-indigo-700 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/60 ring-1 ring-inset ring-indigo-500/30 shadow-sm">
                 <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-ping" />
                 <span>🇮🇳 Smart India Hackathon 2026 • AI-Powered Compliance</span>
@@ -103,11 +106,6 @@ export default function LandingPage() {
                 <Suspense fallback={<div className="flex items-center justify-center h-full text-indigo-500"><Scan className="h-10 w-10 animate-spin" /></div>}>
                   <ProductScanner size="md" />
                 </Suspense>
-              </div>
-
-              {/* Floating Revolving SIH Bulb Badge */}
-              <div className="absolute -bottom-6 -right-2 sm:-right-6 z-20">
-                <SIHFloatingOrb />
               </div>
             </motion.div>
           </div>
