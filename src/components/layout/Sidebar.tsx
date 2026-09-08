@@ -33,11 +33,11 @@ export const Sidebar: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 h-full bg-white dark:bg-surface-900 border-r border-gray-200 dark:border-white/5 z-20 transition-colors duration-200">
         <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-white/5">
-          <div className="bg-indigo-600 dark:bg-violet-600 text-white p-1.5 rounded-lg shadow-sm">
-            <ShieldCheck size={24} />
+          <div className="bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 p-1.5 rounded-lg shadow-sm shadow-emerald-500/30">
+            <ShieldCheck size={24} className="stroke-[2.5]" />
           </div>
           <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-            CompliScan AI
+            CompliScan <span className="text-emerald-500 dark:text-emerald-400">AI</span>
           </span>
         </div>
 
@@ -49,7 +49,7 @@ export const Sidebar: React.FC = () => {
               className={({ isActive }) => cn(
                 "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group",
                 isActive 
-                  ? "text-indigo-700 dark:text-violet-300" 
+                  ? "text-emerald-600 dark:text-emerald-400 font-semibold" 
                   : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5"
               )}
             >
@@ -58,12 +58,13 @@ export const Sidebar: React.FC = () => {
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 bg-indigo-50 dark:bg-violet-500/10 rounded-xl"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl border border-emerald-500/20"
                     />
                   )}
-                  <item.icon size={20} className="relative z-10" />
+                  <item.icon size={20} className={cn(
+                    "relative z-10 transition-colors",
+                    isActive ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white"
+                  )} />
                   <span className="relative z-10">{item.name}</span>
                 </>
               )}

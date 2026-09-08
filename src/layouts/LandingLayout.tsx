@@ -43,11 +43,11 @@ export const LandingLayout: React.FC = () => {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="bg-indigo-600 dark:bg-violet-600 text-white p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
-                <ShieldCheck size={24} />
+              <div className="bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 p-1.5 rounded-lg shadow-sm shadow-emerald-500/30 group-hover:scale-105 transition-transform font-bold">
+                <ShieldCheck size={24} className="text-slate-950 stroke-[2.5]" />
               </div>
               <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-                CompliScan AI
+                CompliScan <span className="text-emerald-500 dark:text-emerald-400">AI</span>
               </span>
             </Link>
             <div className="hidden sm:flex items-center pl-3 border-l border-slate-200 dark:border-white/10">
@@ -205,7 +205,7 @@ export const LandingLayout: React.FC = () => {
             )}
             <Link 
               to="/scan"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+              className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-sm transition-all shadow-md shadow-emerald-500/20 border border-emerald-400/30"
             >
               Scan Product
             </Link>

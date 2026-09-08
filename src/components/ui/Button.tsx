@@ -14,11 +14,11 @@ export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref' | 'ch
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, icon, children, disabled, ...props }, ref) => {
     const variants = {
-      primary: 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-violet-600 dark:hover:bg-violet-700 shadow-sm border border-transparent',
-      secondary: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-surface-800 dark:text-violet-300 dark:hover:bg-surface-700 border border-transparent',
+      primary: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold hover:from-emerald-400 hover:to-cyan-400 shadow-md shadow-emerald-500/20 border border-emerald-400/30',
+      secondary: 'bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 border border-emerald-500/20',
       ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-surface-800',
       danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm border border-transparent',
-      outline: 'bg-transparent text-gray-700 border-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-surface-800 border',
+      outline: 'bg-transparent text-gray-700 border-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:border-emerald-500/30 dark:hover:bg-emerald-500/10 border',
     };
 
     const sizes = {
