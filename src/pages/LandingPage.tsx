@@ -63,13 +63,13 @@ export default function LandingPage() {
         {/* Soft-blurred Floating SIH Bulb in the Far Left Background */}
         <SIHBackgroundGlowBulb />
 
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <motion.div 
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-6 max-w-2xl"
+              className="lg:col-span-6 max-w-2xl relative z-10"
             >
 
               <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs md:text-sm font-semibold text-indigo-700 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/60 ring-1 ring-inset ring-indigo-500/30 shadow-sm">
