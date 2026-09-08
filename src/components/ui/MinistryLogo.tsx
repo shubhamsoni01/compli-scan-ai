@@ -12,21 +12,23 @@ export const MinistryLogo: React.FC<MinistryLogoProps> = ({
   showText = true,
 }) => {
   const sizeMap = {
-    sm: { img: 'h-7 w-auto', text: 'text-[11px]' },
-    md: { img: 'h-9 w-auto', text: 'text-xs' },
-    lg: { img: 'h-12 w-auto', text: 'text-sm' },
+    sm: { img: 'h-8 w-auto', text: 'text-[11px]' },
+    md: { img: 'h-10 w-auto', text: 'text-xs' },
+    lg: { img: 'h-13 w-auto', text: 'text-sm' },
   };
 
   const { img, text } = sizeMap[size];
 
   return (
     <div className={`inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/90 dark:bg-slate-900/90 border border-amber-500/30 shadow-md ${className}`}>
-      {/* Official Emblem Image */}
-      <img
-        src="/assets/ministry-of-consumer-affairs.jpg"
-        alt="Ministry of Consumer Affairs, Food & Public Distribution"
-        className={`${img} rounded object-contain filter invert-0 brightness-105`}
-      />
+      {/* Official Emblem Image in high-contrast crisp frame */}
+      <div className="bg-white px-1.5 py-0.5 rounded-md flex items-center justify-center shrink-0">
+        <img
+          src="/assets/ministry-of-consumer-affairs.jpg"
+          alt="Ministry of Consumer Affairs, Food & Public Distribution"
+          className={`${img} object-contain`}
+        />
+      </div>
 
       {showText && (
         <div className="flex flex-col text-left">
