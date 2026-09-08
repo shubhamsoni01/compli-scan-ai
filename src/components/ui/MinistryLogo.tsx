@@ -21,21 +21,21 @@ export const MinistryLogo: React.FC<MinistryLogoProps> = ({
 
   return (
     <div className={`inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/95 dark:bg-slate-900/95 border border-amber-500/40 shadow-lg shadow-amber-500/10 backdrop-blur-xl ${className}`}>
-      {/* Official Ashok Stambh High-Contrast Emblem with Tricolor Strip */}
+      {/* Official Ashok Stambh Transparent Emblem */}
       <div className="relative flex items-center shrink-0">
-        {/* Subtle Tricolor Vertical Accent Pill */}
+        {/* Subtle Tricolor Vertical Strip */}
         <div className="w-1 self-stretch rounded-full overflow-hidden flex flex-col mr-1.5 shadow-sm">
           <div className="flex-1 bg-[#FF9933]" />
           <div className="flex-1 bg-[#FFFFFF]" />
           <div className="flex-1 bg-[#138808]" />
         </div>
 
-        {/* Real Official High-Res Emblem Thumbnail */}
-        <div className="bg-white p-1 rounded-lg shadow-inner flex items-center justify-center">
+        {/* Real Official High-Res Emblem */}
+        <div className="flex items-center justify-center">
           <img
-            src="/assets/ministry-of-consumer-affairs.jpg"
+            src="/assets/ministry-emblem-transparent-gold.png"
             alt="Department of Consumer Affairs, Government of India"
-            className={`${height} w-auto object-contain`}
+            className={`${height} w-auto object-contain drop-shadow-sm`}
           />
         </div>
       </div>
