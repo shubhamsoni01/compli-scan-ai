@@ -113,10 +113,13 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-white dark:bg-[#111827]">
+      <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold font-heading mb-4">How It Works</h2>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-3">
+              Automated Pipeline
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4 text-slate-900 dark:text-white">How It Works</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Get compliance results in seconds with our streamlined 4-step process.</p>
           </div>
           
@@ -127,7 +130,7 @@ export default function LandingPage() {
             viewport={{ once: true, margin: "-100px" }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative"
           >
-            <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-indigo-100 dark:bg-indigo-900/50 z-0" />
+            <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-emerald-500/30 via-teal-500/30 to-cyan-500/30 z-0" />
             
             {[
               { icon: FileText, title: "Upload Image", desc: "Upload a clear image of your product label." },
@@ -137,11 +140,11 @@ export default function LandingPage() {
             ].map((step, i) => (
               <motion.div key={i} variants={itemVariants} className="relative z-10">
                 <TiltCard tiltFactor={6} className="h-full">
-                  <Card className="h-full text-center p-6 bg-white dark:bg-slate-800 transition-all duration-300 border-slate-100 dark:border-slate-700">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center mb-6 shadow-sm border border-indigo-100 dark:border-indigo-800 group-hover:scale-110 transition-transform">
-                      <step.icon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                  <Card className="h-full text-center p-6 bg-white dark:bg-slate-900/60 transition-all duration-300 border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5">
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center mb-6 shadow-sm border border-emerald-100 dark:border-emerald-800/60 group-hover:scale-110 transition-transform">
+                      <step.icon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 mb-4">
+                    <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 mb-4 border border-emerald-500/20">
                       Step {i + 1}
                     </div>
                     <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
@@ -155,10 +158,10 @@ export default function LandingPage() {
       </section>
 
       {/* Supported Categories */}
-      <section className="py-20 bg-slate-50 dark:bg-[#0a0e1a]">
+      <section className="py-20 bg-slate-50 dark:bg-[#04080e] border-t border-slate-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold font-heading mb-4">Supported Categories</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4 text-slate-900 dark:text-white">Supported Categories</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">We support a wide range of product categories for compliance verification.</p>
           </div>
           
@@ -175,12 +178,12 @@ export default function LandingPage() {
                 whileHover={{ y: -6, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
-                className="bg-white dark:bg-[#111827] p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 transition-all group"
+                className="bg-white dark:bg-slate-900/60 p-6 rounded-2xl shadow-sm hover:shadow-xl border border-slate-200/80 dark:border-white/10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-emerald-500/40 transition-all group"
               >
-                <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <cat.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <cat.icon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <span className="font-medium">{cat.label}</span>
+                <span className="font-medium text-slate-900 dark:text-slate-100">{cat.label}</span>
               </motion.div>
             ))}
           </div>
@@ -188,10 +191,10 @@ export default function LandingPage() {
       </section>
 
       {/* Key Features */}
-      <section className="py-20 bg-white dark:bg-[#111827]">
+      <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold font-heading mb-4">Key Features</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4 text-slate-900 dark:text-white">Key Features</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Everything you need to ensure product compliance in one powerful platform.</p>
           </div>
           
@@ -212,9 +215,9 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <motion.div key={i} variants={itemVariants}>
                 <TiltCard tiltFactor={7} className="h-full">
-                  <Card className="h-full p-6 bg-slate-50 dark:bg-slate-800/50 border border-transparent dark:border-slate-800/60 shadow-sm hover:shadow-xl transition-all duration-300 group">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  <Card className="h-full p-6 bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all duration-300 group">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-emerald-100 dark:border-emerald-800/40">
+                      <feature.icon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
@@ -227,9 +230,9 @@ export default function LandingPage() {
       </section>
 
       {/* Why CompliScan AI */}
-      <section className="py-20 bg-indigo-600 dark:bg-indigo-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-emerald-950 via-slate-950 to-teal-950 text-white border-t border-emerald-900/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold font-heading mb-12">Trusted by Compliance Teams</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-12">Trusted by Compliance Teams</h2>
           
           <motion.div 
             variants={containerVariants}
@@ -248,10 +251,10 @@ export default function LandingPage() {
                 variants={itemVariants}
                 whileHover={{ y: -6, scale: 1.03 }}
                 transition={{ duration: 0.25 }}
-                className="p-6 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-white/30 shadow-lg transition-all cursor-default group"
+                className="p-6 rounded-2xl bg-white/5 hover:bg-white/10 backdrop-blur-md border border-emerald-500/20 hover:border-emerald-400/40 shadow-xl shadow-emerald-950/40 transition-all cursor-default group"
               >
-                <div className="text-4xl font-bold mb-2 tracking-tight group-hover:scale-105 transition-transform">{stat.val}</div>
-                <div className="text-indigo-100 font-medium">{stat.label}</div>
+                <div className="text-4xl font-extrabold mb-2 tracking-tight text-transparent bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text group-hover:scale-105 transition-transform">{stat.val}</div>
+                <div className="text-emerald-200/80 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -266,17 +269,17 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start">
             <div className="flex items-center space-x-2 text-white font-bold text-xl mb-2 font-heading">
-              <Scan className="h-6 w-6 text-indigo-400" />
-              <span>CompliScan AI</span>
+              <Scan className="h-6 w-6 text-emerald-400" />
+              <span>CompliScan <span className="text-emerald-400">AI</span></span>
             </div>
             <p className="text-sm text-slate-400">Scan. Verify. Comply.</p>
           </div>
           
           <div className="flex flex-wrap justify-center gap-6">
-            <Link to="/features" className="hover:text-white transition-colors">Features</Link>
-            <Link to="/rules" className="hover:text-white transition-colors">Rules</Link>
-            <Link to="/development" className="text-indigo-400 hover:text-white transition-colors font-medium">Development</Link>
-            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+            <Link to="/features" className="hover:text-emerald-400 transition-colors">Features</Link>
+            <Link to="/rules" className="hover:text-emerald-400 transition-colors">Rules</Link>
+            <Link to="/development" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">Development</Link>
+            <Link to="/contact" className="hover:text-emerald-400 transition-colors">Contact</Link>
           </div>
           
           <div className="flex flex-col items-center md:items-end text-sm text-slate-400">
