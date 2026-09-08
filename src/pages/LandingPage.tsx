@@ -13,8 +13,10 @@ import { fetchRealStats } from '@/services/api';
 
 const ProductScanner = lazy(() => import('@/components/3d/ProductScanner'));
 import { HackathonShowcaseSection } from '@/components/sections/HackathonShowcaseSection';
+import { LiveCompliancePreviewSection } from '@/components/sections/LiveCompliancePreviewSection';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
+import { CyberGridBackground } from '@/components/ui/CyberGridBackground';
 
 // Framer motion variants
 const containerVariants = {
@@ -55,6 +57,7 @@ export default function LandingPage() {
       <section 
         className="relative overflow-hidden flex items-center pt-6 pb-16 md:pt-10 md:pb-24"
       >
+        <CyberGridBackground />
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-[#070b12] dark:via-[#0b1320] dark:to-[#070b12] -z-10 pointer-events-none" />
         {/* Subtle glowing ambient lighting orbs */}
         <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-500/15 dark:bg-emerald-500/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
@@ -199,6 +202,9 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Live Interactive Compliance Audit Simulator */}
+      <LiveCompliancePreviewSection />
 
       {/* Supported Categories */}
       <section className="py-20 bg-slate-50 dark:bg-[#04080e] border-t border-slate-100 dark:border-white/5">
