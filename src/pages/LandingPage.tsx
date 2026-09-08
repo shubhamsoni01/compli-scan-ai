@@ -75,9 +75,11 @@ export default function LandingPage() {
               {/* Pure Vector SIH Innovation Aura in Background */}
               <SIHVectorAura />
 
-              <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs md:text-sm font-semibold text-emerald-800 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 ring-1 ring-inset ring-emerald-500/30 shadow-sm backdrop-blur-md">
+              <motion.div variants={itemVariants} className="mb-6 inline-flex flex-wrap items-center gap-2 rounded-full px-4 py-1.5 text-xs md:text-sm font-semibold text-emerald-800 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/70 ring-1 ring-inset ring-emerald-500/30 shadow-sm backdrop-blur-md">
                 <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                <span>🇮🇳 Smart India Hackathon 2026 • AI-Powered Label Compliance</span>
+                <span>🇮🇳 SIH 2026 • Problem ID: SIH26034</span>
+                <span className="hidden sm:inline text-slate-400">•</span>
+                <span className="hidden sm:inline text-amber-400">Ministry of Consumer Affairs</span>
               </motion.div>
               
               <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 font-heading leading-tight">
