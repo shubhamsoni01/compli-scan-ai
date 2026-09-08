@@ -104,20 +104,12 @@ export const HackathonShowcaseSection: React.FC = () => {
             {/* Top Ministry & SIH Header & PS ID */}
             <div className="relative z-10">
               <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-slate-800/80">
-                <div className="flex flex-wrap items-center gap-3">
-                  <SIHLogo size="sm" showText={false} />
-                  <MinistryLogo size="sm" showText={false} />
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-amber-400 font-bold">
-                      Govt of India • Dept. of Consumer Affairs
-                    </span>
-                    <div className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
-                      <span>{config.ministry}</span>
-                    </div>
-                  </div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <SIHLogo size="sm" showText={true} />
+                  <MinistryLogo size="sm" showText={true} />
                 </div>
 
-                <div className="text-left sm:text-right bg-slate-950/80 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                <div className="text-left sm:text-right bg-slate-950/90 px-3.5 py-2 rounded-xl border border-emerald-500/40 shadow-md shadow-emerald-500/10">
                   <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block">Problem Statement</span>
                   <span className="text-xl sm:text-2xl font-extrabold font-mono text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text">
                     {config.problemStatementNumber}
