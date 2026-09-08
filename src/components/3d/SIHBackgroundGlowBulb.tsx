@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 export const SIHBackgroundGlowBulb: React.FC = () => {
   return (
-    <div className="absolute -left-10 md:left-4 top-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] md:w-[500px] h-[340px] sm:h-[440px] md:h-[500px] pointer-events-none -z-10 flex items-center justify-center select-none overflow-visible">
-      {/* 360 Rotating Glowing Ambient Orbit Ring */}
+    <div className="absolute -left-16 sm:-left-20 lg:-left-12 top-1/2 -translate-y-1/2 pointer-events-none -z-10 flex items-center justify-center select-none">
+      {/* Outer 360 Rotating Glowing Ambient Orbit */}
       <motion.div
         animate={{
           rotate: 360,
@@ -14,31 +14,33 @@ export const SIHBackgroundGlowBulb: React.FC = () => {
           repeat: Infinity,
           ease: "linear"
         }}
-        className="absolute inset-0 rounded-full border border-orange-500/20 dark:border-indigo-500/20 shadow-[0_0_80px_rgba(249,115,22,0.12)] flex items-center justify-center"
+        className="relative w-[340px] sm:w-[420px] lg:w-[480px] h-[340px] sm:h-[420px] lg:h-[480px] rounded-full border border-orange-500/15 dark:border-indigo-500/20 shadow-[0_0_90px_rgba(249,115,22,0.15)] flex items-center justify-center"
       >
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-orange-400/80 blur-[1px] shadow-[0_0_20px_#FB923C]" />
-        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-emerald-400/80 blur-[1px] shadow-[0_0_20px_#34D399]" />
+        {/* Soft Glowing Satellite Nodes */}
+        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-orange-400/90 shadow-[0_0_15px_#FB923C]" />
+        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-emerald-400/90 shadow-[0_0_15px_#34D399]" />
+        <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 rounded-full bg-indigo-400/80 shadow-[0_0_12px_#818CF8]" />
       </motion.div>
 
-      {/* Floating, Motion-Moving Soft Blurred SIH Bulb Logo */}
+      {/* Floating Soft-Blurred SIH Official Bulb Motif */}
       <motion.div
         animate={{
-          y: [-16, 16, -16],
-          x: [-10, 10, -10],
-          rotate: [-4, 4, -4],
-          scale: [0.95, 1.05, 0.95]
+          y: [-12, 12, -12],
+          x: [-6, 6, -6],
+          rotate: [-3, 3, -3],
+          scale: [0.96, 1.04, 0.96]
         }}
         transition={{
-          duration: 7,
+          duration: 6.5,
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="relative w-72 sm:w-88 md:w-96 h-72 sm:h-88 md:h-96 flex items-center justify-center opacity-30 dark:opacity-25 filter blur-[1.5px] hover:blur-none transition-all duration-700"
+        className="absolute w-[220px] sm:w-[280px] lg:w-[320px] h-[220px] sm:h-[280px] lg:h-[320px] flex items-center justify-center opacity-25 dark:opacity-20 filter blur-[2px] transition-all duration-700"
       >
         <img
           src="/assets/sih-official-bulb.jpg"
           alt="Smart India Hackathon Background Motif"
-          className="w-full h-full object-contain rounded-full mix-blend-multiply dark:mix-blend-screen drop-shadow-[0_0_40px_rgba(249,115,22,0.4)]"
+          className="w-full h-full object-contain rounded-full mix-blend-multiply dark:mix-blend-screen drop-shadow-[0_0_35px_rgba(249,115,22,0.35)]"
         />
       </motion.div>
     </div>

@@ -60,16 +60,17 @@ export default function LandingPage() {
         <div className="absolute top-10 left-1/3 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
         <div className="absolute top-32 right-10 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-600/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
 
+        {/* Soft-blurred Floating SIH Bulb in the Far Left Background */}
+        <SIHBackgroundGlowBulb />
+
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <motion.div 
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-6 max-w-2xl relative"
+              className="lg:col-span-6 max-w-2xl"
             >
-              {/* Subtle Animated Floating SIH Bulb Logo in Background behind Text */}
-              <SIHBackgroundGlowBulb />
 
               <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs md:text-sm font-semibold text-indigo-700 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/60 ring-1 ring-inset ring-indigo-500/30 shadow-sm">
                 <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-ping" />
