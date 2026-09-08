@@ -59,9 +59,6 @@ export default function LandingPage() {
         {/* Subtle glowing ambient lighting orbs */}
         <div className="absolute top-10 left-1/3 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
         <div className="absolute top-32 right-10 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-600/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
-        
-        {/* Animated 3D Floating SIH Bulb Emblem */}
-        <SIHFloatingOrb />
 
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -99,13 +96,18 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.25, ease: 'easeOut' }}
-              className="lg:col-span-6 relative w-full flex items-center justify-center py-2 lg:py-0 lg:-translate-y-12"
+              className="lg:col-span-6 relative w-full flex items-center justify-center py-6 lg:py-0 min-h-[380px] sm:min-h-[440px]"
             >
               <div className="relative w-full max-w-[480px] lg:max-w-[460px] xl:max-w-[500px] h-[340px] sm:h-[400px] md:h-[440px] lg:h-[450px] xl:h-[480px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 -z-10 rounded-2xl md:rounded-3xl bg-gradient-to-tr from-indigo-500/10 via-violet-500/5 to-cyan-500/10 dark:from-indigo-950/40 dark:via-slate-900/40 dark:to-cyan-950/30 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-xl shadow-indigo-500/5" />
                 <Suspense fallback={<div className="flex items-center justify-center h-full text-indigo-500"><Scan className="h-10 w-10 animate-spin" /></div>}>
                   <ProductScanner size="md" />
                 </Suspense>
+              </div>
+
+              {/* Floating Revolving SIH Bulb Badge */}
+              <div className="absolute -bottom-6 -right-2 sm:-right-6 z-20">
+                <SIHFloatingOrb />
               </div>
             </motion.div>
           </div>
