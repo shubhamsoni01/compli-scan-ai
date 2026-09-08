@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ImageIcon, FileText, Search, ShieldCheck, CheckCircle2, Camera, AlertCircle, RefreshCw } from 'lucide-react';
+import { ImageIcon, FileText, Search, ShieldCheck, CheckCircle2, Camera, AlertCircle, RefreshCw, Sparkles, Zap } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -9,6 +9,7 @@ import { Chip } from '@/components/ui/Chip';
 import { DropZone } from '@/components/ui/DropZone';
 import { CameraCapture } from '@/components/ui/CameraCapture';
 import { startRealScan } from '@/services/scanService';
+import { createSampleLabelFile } from '@/utils/sampleImages';
 
 const categories = ['Food', 'Edible Oil', 'Cosmetics', 'Household', 'Other'];
 
@@ -155,6 +156,84 @@ export default function ScanPage() {
                       onClick={() => setCategory(c)} 
                     />
                   ))}
+                </div>
+              </div>
+
+              {/* 1-Click Quick Testing Samples Tray */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900/60 to-cyan-950/40 border border-emerald-500/25 shadow-lg shadow-emerald-500/5">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-3">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Judges / Demo Quick Test (1-Click Sample Labels)</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory('Food');
+                      const sampleFile = createSampleLabelFile(
+                        'Classic Masala Instant Noodles 70g',
+                        'Food',
+                        '10012011000168',
+                        '₹14.00 (Incl. of all taxes)',
+                        '70 g',
+                        true
+                      );
+                      handleFile(sampleFile);
+                    }}
+                    className="p-3 rounded-xl bg-slate-900/80 hover:bg-emerald-950/60 border border-slate-700/60 hover:border-emerald-500/50 transition-all text-left group cursor-pointer"
+                  >
+                    <div className="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                      <span>🍜</span>
+                      <span>Instant Noodles</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-1">Food • FSSAI Validated (Pass)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory('Cosmetics');
+                      const sampleFile = createSampleLabelFile(
+                        'Herbal Sunscreen SPF 50+ Lotion',
+                        'Cosmetics',
+                        'NOT DECLARED ⚠',
+                        '₹349.00',
+                        '100 ml',
+                        false
+                      );
+                      handleFile(sampleFile);
+                    }}
+                    className="p-3 rounded-xl bg-slate-900/80 hover:bg-amber-950/60 border border-slate-700/60 hover:border-amber-500/50 transition-all text-left group cursor-pointer"
+                  >
+                    <div className="text-sm font-semibold text-white group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
+                      <span>🧴</span>
+                      <span>Sunscreen Lotion</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-1">Cosmetics • CDSCO Warning</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory('Edible Oil');
+                      const sampleFile = createSampleLabelFile(
+                        'Kachi Ghani Mustard Oil 1 Litre',
+                        'Edible Oil',
+                        '10819003000452',
+                        '₹175.00',
+                        '1 L (910 g Mass Equiv)',
+                        true
+                      );
+                      handleFile(sampleFile);
+                    }}
+                    className="p-3 rounded-xl bg-slate-900/80 hover:bg-cyan-950/60 border border-slate-700/60 hover:border-cyan-500/50 transition-all text-left group cursor-pointer"
+                  >
+                    <div className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
+                      <span>🫒</span>
+                      <span>Musted Oil 1L</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-1">Edible Oil • 100% Metrology Pass</div>
+                  </button>
                 </div>
               </div>
             </motion.div>
