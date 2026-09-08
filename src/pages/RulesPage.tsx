@@ -8,7 +8,8 @@ import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Info, AlertTriangle, Search } from 'lucide-react';
+import { Info, AlertTriangle, Search, Sparkles } from 'lucide-react';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 import * as rulesService from '@/services/rulesService';
 import { complianceRules } from '@/data/complianceRules';
 
@@ -73,13 +74,23 @@ export default function RulesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Rules & Information</h1>
-        <p className="text-slate-500 dark:text-slate-400">Browse applicable Indian product labelling compliance requirements</p>
-        <div className="flex items-center gap-2 mt-2 text-sm text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg">
-          <Info className="w-4 h-4 flex-shrink-0" />
-          <span>Some rules are conditional and may not apply to all products</span>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 mb-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            <span>🇮🇳 SIH 2026 • Official Government Gazette & Regulatory Standards</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-900 dark:text-white">Rules & Statutory Standards</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Browse applicable Indian product labelling compliance requirements (FSSAI, Legal Metrology, CDSCO, BIS)</p>
         </div>
+        <div className="hidden sm:block">
+          <SIHLogo size="sm" showText={true} />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl border border-emerald-500/20">
+        <Info className="w-4 h-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+        <span>Mandatory rules are verified via deterministic logic. Conditional rules automatically adapt based on product category & volume.</span>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

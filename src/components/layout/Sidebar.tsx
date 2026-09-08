@@ -76,15 +76,15 @@ export const Sidebar: React.FC = () => {
           <div className="flex items-center justify-center">
             <SIHLogo size="sm" showText={true} />
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-violet-900/10 dark:to-indigo-900/10 text-xs text-indigo-700 dark:text-violet-300 border border-indigo-100/50 dark:border-white/5">
-            <Sparkles size={14} className="flex-shrink-0" />
-            <span className="font-medium">AI-Powered Compliance</span>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/40 text-xs text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
+            <Sparkles size={14} className="flex-shrink-0 text-emerald-500" />
+            <span className="font-semibold">SIH 2026 Compliance AI</span>
           </div>
         </div>
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-900 border-t border-gray-200 dark:border-white/5 z-50 flex items-center justify-around pb-safe pt-2 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] dark:shadow-none">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#070b12]/90 backdrop-blur-xl border-t border-gray-200 dark:border-white/5 z-50 flex items-center justify-around pb-safe pt-2 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {navItems.filter(item => mobileNavItems.includes(item.path)).map((item) => (
           <NavLink
             key={item.path}
@@ -92,7 +92,7 @@ export const Sidebar: React.FC = () => {
             className={({ isActive }) => cn(
               "flex flex-col items-center justify-center p-2 rounded-xl transition-colors relative mb-2 w-16",
               isActive 
-                ? "text-indigo-600 dark:text-violet-400" 
+                ? "text-emerald-600 dark:text-emerald-400 font-semibold" 
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
             )}
           >
@@ -101,13 +101,11 @@ export const Sidebar: React.FC = () => {
                 {isActive && (
                   <motion.div
                     layoutId="mobileActiveTab"
-                    className="absolute inset-0 bg-indigo-50 dark:bg-violet-500/10 rounded-xl"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl"
                   />
                 )}
-                <item.icon size={20} className="relative z-10 mb-1" />
-                <span className="text-[10px] font-medium relative z-10 leading-none">{item.name}</span>
+                <item.icon size={20} className="relative z-10" />
+                <span className="text-[10px] mt-1 relative z-10">{item.name}</span>
               </>
             )}
           </NavLink>

@@ -11,6 +11,7 @@ import { Table } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
 import { fetchRealStats, fetchScansFromDB, type RealStatsResponse } from '@/services/api';
 import { getGreeting } from '@/utils/formatters';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 
 const ProductScanner = lazy(() => import('@/components/3d/ProductScanner'));
 
@@ -89,13 +90,22 @@ export default function DashboardPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-        <motion.div variants={itemVariants} className="mb-8">
-          <h1 className="text-3xl font-bold font-heading text-slate-900 dark:text-white">
-            {getGreeting()}, Inspector 👋
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Scan any product label and get instant compliance insights.
-          </p>
+        <motion.div variants={itemVariants} className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              <span>🇮🇳 Smart India Hackathon 2026 • AI Compliance Portal</span>
+            </div>
+            <h1 className="text-3xl font-bold font-heading text-slate-900 dark:text-white">
+              {getGreeting()}, Inspector 👋
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">
+              Scan packaged product labels and audit against official FSSAI & Legal Metrology standards.
+            </p>
+          </div>
+          <div className="hidden sm:block">
+            <SIHLogo size="md" showText={true} />
+          </div>
         </motion.div>
 
         {/* Hero Scan Card */}

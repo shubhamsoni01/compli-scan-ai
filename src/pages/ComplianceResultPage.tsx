@@ -18,6 +18,7 @@ import { ComplianceReportPreview } from '@/components/report/ComplianceReportPre
 import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { EditReportModal } from '@/components/report/EditReportModal';
 import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 
 export default function ComplianceResultPage() {
   const navigate = useNavigate();
@@ -113,24 +114,27 @@ export default function ComplianceResultPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="p-2 h-auto rounded-full">
-          <ArrowLeft size={24} />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Compliance Result</h1>
-            <Badge variant="outline">{resolvedResult.category}</Badge>
-            {(resolvedResult as any).ocrEngine && (
-              <span className="text-xs bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800 font-medium">
-                Live OCR & AI
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="p-2 h-auto rounded-full">
+            <ArrowLeft size={24} />
+          </Button>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2.5 mb-1">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-heading">Compliance Audit Result</h1>
+              <Badge variant="outline">{resolvedResult.category}</Badge>
+              <span className="text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-semibold">
+                🇮🇳 SIH 2026 Verified
               </span>
-            )}
-            <span className="font-mono text-xs text-slate-400">ID: {resolvedResult.scanId}</span>
+              <span className="font-mono text-xs text-slate-400">ID: {resolvedResult.scanId}</span>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
+              {resolvedResult.productName} • Audited on {formatDate(resolvedResult.scanDate)}
+            </p>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">
-            {resolvedResult.productName} • Scanned {formatDate(resolvedResult.scanDate)}
-          </p>
+        </div>
+        <div className="hidden sm:block">
+          <SIHLogo size="sm" showText={true} />
         </div>
       </div>
 
