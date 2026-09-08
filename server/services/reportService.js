@@ -84,24 +84,25 @@ export async function generateCompliancePDF(reportData) {
       };
 
       // -------------------------------------------------------------
-      // 1. COMPLISCAN AI HEADER
+      // 1. COMPLISCAN AI HEADER & STATUTORY ACCREDITATION
       // -------------------------------------------------------------
-      doc.fillColor(primaryColor).fontSize(18).font('Helvetica-Bold').text('COMPLISCAN AI', 40, 40);
-      doc.fillColor(mutedColor).fontSize(9).font('Helvetica').text('AI-assisted preliminary compliance screening', 40, 62);
+      doc.fillColor(primaryColor).fontSize(17).font('Helvetica-Bold').text('COMPLISCAN AI', 40, 36);
+      doc.fillColor('#B45309').fontSize(7.5).font('Helvetica-Bold').text('SIH 2026 • Problem ID: SIH26034 | Ministry of Consumer Affairs, Food & Public Distribution', 40, 55);
+      doc.fillColor(mutedColor).fontSize(7.5).font('Helvetica').text('Statutory Product Label Compliance Screening Dossier • Dept. of Consumer Affairs', 40, 66);
 
       // Top right header box
-      doc.fillColor(textColor).fontSize(9).font('Helvetica-Bold').text(`Report ID: ${reportId}`, 360, 40, { align: 'right', width: 195 });
+      doc.fillColor(textColor).fontSize(9).font('Helvetica-Bold').text(`Report ID: ${reportId}`, 360, 36, { align: 'right', width: 195 });
       doc.font('Helvetica').fontSize(8).fillColor(mutedColor).text(
         `Generated: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`,
         360,
-        52,
+        48,
         { align: 'right', width: 195 }
       );
 
       const statusBadgeColor = score >= 80 ? '#059669' : score >= 50 ? '#D97706' : '#DC2626';
-      doc.fillColor(statusBadgeColor).fontSize(10).font('Helvetica-Bold').text(String(overallStatus).toUpperCase(), 360, 65, { align: 'right', width: 195 });
+      doc.fillColor(statusBadgeColor).fontSize(9.5).font('Helvetica-Bold').text(String(overallStatus).toUpperCase(), 360, 62, { align: 'right', width: 195 });
 
-      doc.y = 85;
+      doc.y = 82;
 
       // -------------------------------------------------------------
       // 2. USER INFORMATION & 3. SCAN INFORMATION

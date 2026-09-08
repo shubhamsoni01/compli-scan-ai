@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Info, AlertTriangle, Search, Sparkles } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import * as rulesService from '@/services/rulesService';
 import { complianceRules } from '@/data/complianceRules';
 
@@ -78,12 +79,13 @@ export default function RulesPage() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 mb-2">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-            <span>🇮🇳 SIH 2026 • Official Government Gazette & Regulatory Standards</span>
+            <span>🇮🇳 SIH 2026 (Problem ID: SIH26034) • Ministry of Consumer Affairs Gazette Standards</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-900 dark:text-white">Rules & Statutory Standards</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Browse applicable Indian product labelling compliance requirements (FSSAI, Legal Metrology, CDSCO, BIS)</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Browse applicable Indian product labelling compliance requirements (Legal Metrology Rules 2011, FSSAI, CDSCO, BIS)</p>
         </div>
-        <div className="hidden sm:block">
+        <div className="hidden sm:flex items-center gap-2">
+          <MinistryLogo size="sm" showText={false} />
           <SIHLogo size="sm" showText={true} />
         </div>
       </div>

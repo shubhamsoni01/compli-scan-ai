@@ -106,16 +106,29 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
             <div className="bg-white text-slate-900 rounded-xl shadow-md border border-slate-200 p-8 sm:p-12 space-y-8 max-w-3xl mx-auto">
               {/* Document Letterhead */}
               <div className="flex flex-col sm:flex-row justify-between items-start border-b border-slate-200 pb-6 gap-4">
-                <div>
-                  <h1 className="font-heading font-black text-2xl tracking-tight text-indigo-800">
-                    COMPLISCAN AI
-                  </h1>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mt-0.5">
-                    AI-Powered Product Label Compliance Screening
-                  </p>
-                  <p className="text-[11px] text-slate-400 font-mono mt-1">
-                    Smart India Hackathon 2026 Innovation
-                  </p>
+                <div className="flex items-start gap-4">
+                  {/* Official High-Resolution Ministry Emblem */}
+                  <img
+                    src="/assets/ministry-emblem-transparent-gold.png"
+                    alt="Ministry of Consumer Affairs Emblem"
+                    className="h-14 w-auto object-contain shrink-0"
+                  />
+                  <div>
+                    <h1 className="font-heading font-black text-2xl tracking-tight text-indigo-900">
+                      COMPLISCAN AI
+                    </h1>
+                    <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mt-0.5">
+                      Statutory Product Label Compliance Screening Dossier
+                    </p>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-mono">
+                        SIH 2026 • Problem ID: SIH26034
+                      </span>
+                      <span className="text-[10px] font-semibold text-slate-600">
+                        Ministry of Consumer Affairs, Food & Public Distribution
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div className="text-left sm:text-right space-y-1">
                   <div className="inline-block bg-slate-100 px-3 py-1 rounded font-mono text-xs font-bold text-slate-700">

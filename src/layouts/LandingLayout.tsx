@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { ShieldCheck, Moon, Sun } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { cn } from '@/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,8 +51,9 @@ export const LandingLayout: React.FC = () => {
                 CompliScan <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">AI</span>
               </span>
             </Link>
-            <div className="hidden sm:flex items-center pl-3 border-l border-slate-200 dark:border-white/10">
+            <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-white/10">
               <SIHLogo size="sm" showText={false} />
+              <MinistryLogo size="sm" showText={false} />
             </div>
           </div>
 

@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { DropZone } from '@/components/ui/DropZone';
 import { CameraCapture } from '@/components/ui/CameraCapture';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 import { startRealScan } from '@/services/scanService';
 import { createSampleLabelFile } from '@/utils/sampleImages';
 
@@ -118,10 +120,31 @@ export default function ScanPage() {
 
       {!isScanning ? (
         <div className="space-y-8">
+          {/* Official Ministry of Consumer Affairs & SIH 2026 Authority Header Banner */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 border border-amber-500/30 shadow-lg shadow-amber-500/5">
+            <div className="flex items-center gap-3">
+              <MinistryLogo size="sm" showText={true} className="bg-transparent border-0 p-0 shadow-none" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:block h-8 w-px bg-white/10" />
+              <div className="text-right">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                  <span>SIH 2026</span>
+                  <span className="text-amber-500">•</span>
+                  <span>ID: SIH26034</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                  Legal Metrology Division
+                </div>
+              </div>
+              <SIHLogo size="sm" showText={false} />
+            </div>
+          </div>
+
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-heading">Scan Product</h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Upload a packaged product label image or capture with your camera for real AI analysis.
+              Upload a packaged product label image or capture with your camera for real AI compliance audit.
             </p>
           </div>
 
@@ -276,10 +299,14 @@ export default function ScanPage() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-xs text-slate-600 dark:text-slate-300 space-y-1">
-                  <p className="font-semibold text-indigo-700 dark:text-indigo-400">Live AI Pipeline Ready:</p>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50/70 to-amber-50/40 dark:from-indigo-950/30 dark:to-amber-950/20 border border-indigo-100 dark:border-indigo-900/40 text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-indigo-700 dark:text-indigo-400">Live Statutory AI Pipeline:</p>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">SIH26034</span>
+                  </div>
                   <p>1. OCR.Space extracts complete text from the label.</p>
-                  <p>2. Groq LLM parses and structures fields into compliant JSON.</p>
+                  <p>2. Groq LLM parses mandatory declaration fields.</p>
+                  <p>3. Audits against Legal Metrology Rules 2011 & FSSAI 2020 standards.</p>
                 </div>
 
                 <Button size="lg" className="w-full text-lg h-14" onClick={handleStartScan}>
@@ -295,6 +322,12 @@ export default function ScanPage() {
           animate={{ opacity: 1 }}
           className="flex flex-col items-center justify-center py-8 space-y-8"
         >
+          {/* Official Ministry Badge while scanning */}
+          <div className="flex items-center gap-3">
+            <MinistryLogo size="sm" showText={true} />
+            <SIHLogo size="sm" showText={false} />
+          </div>
+
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-heading">
               {scanError ? 'Analysis Interrupted' : 'Analyzing Product Label'}
@@ -302,7 +335,7 @@ export default function ScanPage() {
             <p className="text-gray-500 dark:text-gray-400">
               {scanError 
                 ? 'An issue occurred during label reading.' 
-                : 'OCR.Space & Groq AI are currently extracting and structuring label information...'}
+                : 'OCR.Space & Groq AI are currently auditing declarations against Ministry of Consumer Affairs & FSSAI standards...'}
             </p>
           </div>
 

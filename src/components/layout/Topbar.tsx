@@ -16,6 +16,8 @@ const useTheme = () => {
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, History, FileText, LogOut } from 'lucide-react';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 
 const mockNotifications = [
   { id: 1, text: 'New scan completed', unread: true },
@@ -62,6 +64,21 @@ export const Topbar: React.FC = () => {
             <span className="capitalize">{title}</span>
           </div>
         )}
+      </div>
+
+      {/* Official Government & SIH Authority Micro-Pill */}
+      <div className="hidden lg:flex items-center gap-2.5 px-3 py-1 rounded-full bg-slate-900/90 dark:bg-slate-900/80 border border-amber-500/30 shadow-sm backdrop-blur-md">
+        <img
+          src="/assets/ministry-emblem-transparent-gold.png"
+          alt="Govt of India"
+          className="h-4.5 w-auto object-contain"
+        />
+        <span className="text-[11px] font-semibold text-white">
+          Ministry of Consumer Affairs
+        </span>
+        <span className="text-[10px] text-amber-400 font-mono border-l border-white/20 pl-2">
+          SIH26034
+        </span>
       </div>
 
       <div className="flex items-center gap-3 md:gap-5">

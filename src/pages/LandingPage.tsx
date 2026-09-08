@@ -18,6 +18,8 @@ import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
 import { CyberGridBackground } from '@/components/ui/CyberGridBackground';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
+import { SIHLogo } from '@/components/ui/SIHLogo';
 
 // Framer motion variants
 const containerVariants = {
@@ -320,26 +322,35 @@ export default function LandingPage() {
       <HackathonShowcaseSection />
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start">
-            <div className="flex items-center space-x-2 text-white font-bold text-xl mb-2 font-heading">
-              <Scan className="h-6 w-6 text-emerald-400" />
-              <span>CompliScan <span className="text-emerald-400">AI</span></span>
+      <footer className="bg-slate-950 text-slate-300 py-14 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-slate-800/80 pb-8">
+            <div className="flex flex-col items-center md:items-start">
+              <div className="flex items-center space-x-2 text-white font-bold text-xl mb-1 font-heading">
+                <Scan className="h-6 w-6 text-emerald-400" />
+                <span>CompliScan <span className="text-emerald-400">AI</span></span>
+              </div>
+              <p className="text-xs text-slate-400">AI-Powered Statutory Product Labelling Compliance Platform</p>
             </div>
-            <p className="text-sm text-slate-400">Scan. Verify. Comply.</p>
+            
+            <div className="flex items-center gap-3">
+              <MinistryLogo size="sm" showText={true} />
+              <SIHLogo size="sm" showText={false} />
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <Link to="/#features" className="hover:text-emerald-400 transition-colors">Features</Link>
+              <Link to="/rules" className="hover:text-emerald-400 transition-colors">Rules & Gazette</Link>
+              <Link to="/development" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">SIH 2026 Dev</Link>
+              <Link to="/history" className="hover:text-emerald-400 transition-colors">Scan History</Link>
+            </div>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-6">
-            <Link to="/features" className="hover:text-emerald-400 transition-colors">Features</Link>
-            <Link to="/rules" className="hover:text-emerald-400 transition-colors">Rules</Link>
-            <Link to="/development" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">Development</Link>
-            <Link to="/contact" className="hover:text-emerald-400 transition-colors">Contact</Link>
-          </div>
-          
-          <div className="flex flex-col items-center md:items-end text-sm text-slate-400">
-            <p className="mb-1">Built for Smart India Hackathon 2026</p>
-            <p>&copy; 2026 CompliScan AI. All rights reserved.</p>
+
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <p className="text-center sm:text-left">
+              Engineered for <span className="text-slate-300 font-semibold">Smart India Hackathon 2026</span> • Problem Statement: <span className="font-mono text-amber-400 font-bold">SIH26034</span> under the aegis of <span className="text-slate-300 font-medium">Ministry of Consumer Affairs, Food & Public Distribution</span> by UCET Hazaribagh.
+            </p>
+            <p className="whitespace-nowrap">&copy; 2026 CompliScan AI. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -19,6 +19,7 @@ import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { EditReportModal } from '@/components/report/EditReportModal';
 import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
 
 export default function ComplianceResultPage() {
   const navigate = useNavigate();
@@ -133,7 +134,8 @@ export default function ComplianceResultPage() {
             </p>
           </div>
         </div>
-        <div className="hidden sm:block">
+        <div className="hidden sm:flex items-center gap-2">
+          <MinistryLogo size="sm" showText={false} />
           <SIHLogo size="sm" showText={true} />
         </div>
       </div>
