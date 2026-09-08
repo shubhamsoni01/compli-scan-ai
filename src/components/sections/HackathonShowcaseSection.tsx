@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Award, GraduationCap, Building2, Users, FileCheck2, Sparkles, ChevronRight } from 'lucide-react';
+import { Award, GraduationCap, Building2, Users, FileCheck2, Sparkles, ChevronRight, Scale, ShieldCheck } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
+import { MinistryAura } from '@/components/3d/MinistryAura';
 
 /**
  * Single source of truth configuration for Hackathon / University Presentation.
@@ -14,13 +16,15 @@ export const HACKATHON_PROJECT_CONFIG = {
   collegeImage: '/assets/ucet-hazaribagh.jpg',
   hackathonName: 'Smart India Hackathon',
   hackathonYear: '2026',
+  ministry: 'Ministry of Consumer Affairs, Food & Public Distribution',
+  department: 'Department of Consumer Affairs (Legal Metrology Division)',
   problemStatementNumber: 'SIH26034',
   problemCategory: 'Smart Automation / AI & Computer Vision',
   problemTitle: 'AI-Powered Packaged Product Labelling & Compliance Screening',
   problemDescription:
     'Automating the verification of packaged commodity labelling against mandatory Indian regulatory standards (Legal Metrology, FSSAI, CDSCO). Leverages Computer Vision, OCR extraction, and deterministic legal rule verification to screen for regulatory non-compliance in real-time.',
   teamName: 'To be updated',
-  teamMembers: [] as string[], // Will be populated once finalized: ['Member 1', 'Member 2', ...]
+  teamMembers: [] as string[],
 };
 
 export const HackathonShowcaseSection: React.FC = () => {
@@ -92,28 +96,30 @@ export const HackathonShowcaseSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Problem Statement & Hackathon Details */}
-          <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between space-y-6">
-            
-            {/* SIH Header & PS ID */}
-            <div>
+          {/* Right Column: Problem Statement & Ministry of Consumer Affairs Details */}
+          <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between space-y-6 relative overflow-hidden">
+            {/* Background Watermark Lion Capital & Ministry Aura */}
+            <MinistryAura />
+
+            {/* Top Ministry & SIH Header & PS ID */}
+            <div className="relative z-10">
               <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-slate-800/80">
-                <div className="flex items-center gap-3">
-                  <SIHLogo size="md" showText={false} />
+                <div className="flex flex-wrap items-center gap-3">
+                  <SIHLogo size="sm" showText={false} />
+                  <MinistryLogo size="sm" showText={false} />
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Hackathon Initiative</span>
-                    <div className="text-xl font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
-                      <span>{config.hackathonName}</span>
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                        {config.hackathonYear}
-                      </span>
+                    <span className="text-[10px] uppercase tracking-wider text-amber-400 font-bold">
+                      Govt of India • Dept. of Consumer Affairs
+                    </span>
+                    <div className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
+                      <span>{config.ministry}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-xs uppercase tracking-wider text-indigo-400 font-semibold block">Problem Statement</span>
-                  <span className="text-2xl font-extrabold font-mono text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text">
+                <div className="text-left sm:text-right bg-slate-950/80 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                  <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block">Problem Statement</span>
+                  <span className="text-xl sm:text-2xl font-extrabold font-mono text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text">
                     {config.problemStatementNumber}
                   </span>
                 </div>
@@ -122,27 +128,39 @@ export const HackathonShowcaseSection: React.FC = () => {
               {/* Problem Brief */}
               <div className="mt-6 space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
-                  <FileCheck2 className="w-4 h-4 text-cyan-400" />
+                  <Scale className="w-4 h-4 text-emerald-400" />
                   <span>{config.problemTitle}</span>
                 </div>
                 <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
                   {config.problemDescription}
                 </p>
+
+                <div className="pt-2 flex flex-wrap gap-2">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800/50">
+                    📜 Legal Metrology Act, 2009
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/50">
+                    🛡️ Packaged Commodities Rules 2011
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/50">
+                    🥗 FSSAI Labelling 2020
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Key Architectural Pillars */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 relative z-10">
               {[
-                { title: 'Vision Model', value: 'OCR.Space + Groq' },
-                { title: 'Legal Metrology', value: 'Rule Engine (PCR 2011)' },
-                { title: 'Enterprise Security', value: 'JWT + Atlas Isolated' }
+                { title: 'Vision Model', value: 'Gemini 2.5 + Tesseract' },
+                { title: 'Regulatory Standard', value: 'PCR 2011 & FSSAI' },
+                { title: 'Deterministic Engine', value: '100% Zero-Hallucination' }
               ].map((pillar, i) => (
                 <motion.div 
                   key={i}
                   whileHover={{ y: -4, scale: 1.02 }}
                   transition={{ duration: 0.2 }}
-                  className="p-3.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-800 hover:border-indigo-500/30 transition-all cursor-default shadow-sm"
+                  className="p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/30 transition-all cursor-default shadow-sm backdrop-blur-md"
                 >
                   <div className="text-xs text-slate-400 font-medium">{pillar.title}</div>
                   <div className="text-sm font-semibold text-slate-200 mt-0.5">{pillar.value}</div>
@@ -151,9 +169,9 @@ export const HackathonShowcaseSection: React.FC = () => {
             </div>
 
             {/* Team Details & Institutional Credits */}
-            <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div>
-                <span className="text-xs uppercase tracking-wider text-slate-400 font-medium block">Developed By</span>
+                <span className="text-xs uppercase tracking-wider text-slate-400 font-medium block">Developed At</span>
                 <span className="text-sm font-semibold text-slate-200">
                   {config.collegeShortName}, Hazaribagh
                 </span>
@@ -161,7 +179,7 @@ export const HackathonShowcaseSection: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <div className="px-3.5 py-1.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-2 text-xs text-slate-300">
-                  <Users className="w-3.5 h-3.5 text-indigo-400" />
+                  <Users className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="text-slate-400 font-medium">Team Details:</span>
                   <span className="font-semibold text-slate-200">{config.teamName}</span>
                 </div>

@@ -20,6 +20,7 @@ import {
 import { TiltCard } from '@/components/ui/TiltCard';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { TEAM_MEMBERS, PIPELINE_STEPS, type TeamMember } from '@/data/teamData';
 import { HACKATHON_PROJECT_CONFIG } from '@/components/sections/HackathonShowcaseSection';
 
@@ -112,9 +113,10 @@ export default function DevelopmentPage() {
               Built at <span className="text-white font-semibold">{config.collegeName}</span> ({config.collegeShortName}), {config.collegeLocation}
             </motion.p>
 
-            {/* 4. SIH26034 Problem Statement Badge */}
-            <motion.div variants={itemVariants} className="pt-2">
-              <span className="inline-block px-4 py-1.5 rounded-xl bg-indigo-950/80 backdrop-blur-md border border-indigo-400/30 text-indigo-200 text-xs sm:text-sm font-mono font-bold tracking-wide shadow-md">
+            {/* Ministry & SIH26034 Problem Statement Badges */}
+            <motion.div variants={itemVariants} className="pt-2 flex flex-wrap items-center justify-center gap-3">
+              <MinistryLogo size="sm" showText={true} />
+              <span className="inline-block px-4 py-1.5 rounded-xl bg-emerald-950/80 backdrop-blur-md border border-emerald-500/30 text-emerald-200 text-xs sm:text-sm font-mono font-bold tracking-wide shadow-md">
                 Problem Statement: <span className="text-cyan-300 font-extrabold">{config.problemStatementNumber}</span>
               </span>
             </motion.div>
