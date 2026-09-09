@@ -116,6 +116,83 @@ const ITEMS: KidScanItem[] = [
   },
 ];
 
+// Web Audio API Synthesizer for zero-dependency realistic sci-fi sound effects
+const playAudioEffect = (type: 'flash' | 'scan' | 'safe' | 'unsafe') => {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    if (type === 'flash') {
+      // Camera Shutter Snap & Flash Click
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(900, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } else if (type === 'scan') {
+      // Futuristic Holographic Radar Laser Sweep
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(920, ctx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } else if (type === 'safe') {
+      // Happy Melodic Victory Chime (C5 -> E5 -> G5 -> C6)
+      const playNote = (freq: number, start: number, duration: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration);
+      };
+      playNote(523.25, 0, 0.18); // C5
+      playNote(659.25, 0.1, 0.22); // E5
+      playNote(783.99, 0.2, 0.3); // G5
+      playNote(1046.50, 0.32, 0.5); // C6
+    } else if (type === 'unsafe') {
+      // Low Warning Alert Buzzer (Double Alert Sawtooth Pulse)
+      const playBuzz = (start: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, ctx.currentTime + start);
+        osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + start + 0.2);
+        gain.gain.setValueAtTime(0.22, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + start + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + 0.2);
+      };
+      playBuzz(0);
+      playBuzz(0.24);
+    }
+  } catch (e) {
+    // AudioContext blocked or unsupported
+  }
+};
+
 export const KidScanningStoryAnimation: React.FC = () => {
   const [itemIndex, setItemIndex] = useState(0);
   const [stage, setStage] = useState<'aim' | 'flash' | 'scanning' | 'extract' | 'verdict'>('aim');
@@ -124,6 +201,13 @@ export const KidScanningStoryAnimation: React.FC = () => {
 
   const currentItem = ITEMS[itemIndex];
   const isSafe = currentItem.status === 'safe';
+
+  // Trigger sounds on stage changes when sound is enabled
+  const triggerAudio = (type: 'flash' | 'scan' | 'safe' | 'unsafe') => {
+    if (soundEnabled) {
+      playAudioEffect(type);
+    }
+  };
 
   // Story Cycle: Aim (1.0s) -> Flash Pulse (0.4s) -> Cyber Scan & Data Stream (2.0s) -> Extract (1.4s) -> Verdict & Stamp (3.5s) -> Next
   useEffect(() => {
@@ -135,10 +219,12 @@ export const KidScanningStoryAnimation: React.FC = () => {
 
     t0 = setTimeout(() => {
       setStage('flash');
+      triggerAudio('flash');
     }, 1000);
 
     t1 = setTimeout(() => {
       setStage('scanning');
+      triggerAudio('scan');
     }, 1400);
 
     t2 = setTimeout(() => {
@@ -147,6 +233,7 @@ export const KidScanningStoryAnimation: React.FC = () => {
 
     t3 = setTimeout(() => {
       setStage('verdict');
+      triggerAudio(isSafe ? 'safe' : 'unsafe');
     }, 4800);
 
     t4 = setTimeout(() => {
@@ -160,13 +247,28 @@ export const KidScanningStoryAnimation: React.FC = () => {
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, [itemIndex, isPaused]);
+  }, [itemIndex, isPaused, soundEnabled, isSafe]);
+
+  const handleToggleSound = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextState = !soundEnabled;
+    setSoundEnabled(nextState);
+    if (nextState) {
+      playAudioEffect('flash'); // Preview chirp on enable
+    }
+  };
 
   return (
     <div 
-      className="w-full max-w-xl mx-auto flex flex-col items-center select-none"
+      className="w-full max-w-xl mx-auto flex flex-col items-center select-none cursor-pointer"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onClick={() => {
+        // User interaction unlocks browser audio policy
+        if (soundEnabled) {
+          playAudioEffect('scan');
+        }
+      }}
     >
       {/* 
         -------------------------------------------------------------
@@ -207,9 +309,11 @@ export const KidScanningStoryAnimation: React.FC = () => {
           {ITEMS.map((item, idx) => (
             <button
               key={item.id}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setItemIndex(idx);
                 setStage('aim');
+                if (soundEnabled) playAudioEffect('scan');
               }}
               className={cn(
                 "w-7 h-7 rounded-xl text-xs flex items-center justify-center transition-all cursor-pointer font-bold",
@@ -225,13 +329,28 @@ export const KidScanningStoryAnimation: React.FC = () => {
             </button>
           ))}
 
-          {/* Sound / Visual FX Indicator */}
+          {/* Sound / Visual FX Interactive Toggle */}
           <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="w-7 h-7 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all ml-1 cursor-pointer"
-            title={soundEnabled ? "Audio-Visual Beep Active" : "Muted"}
+            onClick={handleToggleSound}
+            className={cn(
+              "px-2 py-1 rounded-xl text-[10px] font-bold border flex items-center gap-1 transition-all ml-1 cursor-pointer",
+              soundEnabled
+                ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/20"
+                : "bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white"
+            )}
+            title={soundEnabled ? "Click to Mute Sound" : "Click to Enable Audio FX"}
           >
-            {soundEnabled ? <Volume2 size={13} className="text-cyan-400 animate-pulse" /> : <VolumeX size={13} />}
+            {soundEnabled ? (
+              <>
+                <Volume2 size={13} className="text-cyan-400 animate-pulse" />
+                <span className="hidden sm:inline font-mono">SOUND ON</span>
+              </>
+            ) : (
+              <>
+                <VolumeX size={13} />
+                <span className="hidden sm:inline font-mono">MUTED</span>
+              </>
+            )}
           </button>
         </div>
       </div>
