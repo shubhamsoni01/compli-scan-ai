@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
+import { CompliScanLogo } from '@/components/ui/CompliScanLogo';
 
 export const AuthLayout: React.FC = () => {
   return (
@@ -15,10 +15,7 @@ export const AuthLayout: React.FC = () => {
         
         <div className="relative z-10 flex flex-col justify-between p-16 h-full w-full max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-              <ShieldCheck size={32} />
-            </div>
-            <span className="font-bold text-2xl tracking-tight">CompliScan AI</span>
+            <CompliScanLogo size="md" />
           </div>
           
           <div>
@@ -26,7 +23,7 @@ export const AuthLayout: React.FC = () => {
               Ensure Product <br/> Compliance <br/> Instantly.
             </h1>
             <p className="text-lg text-indigo-100 max-w-md">
-              AI-driven label analysis for FSSAI, FDA, and global regulatory standards. Protect your brand and consumers.
+              AI-driven label analysis for FSSAI, Legal Metrology, and global regulatory standards. Protect your brand and consumers.
             </p>
           </div>
           
@@ -40,8 +37,7 @@ export const AuthLayout: React.FC = () => {
       <div className="w-full lg:w-1/2 flex flex-col relative">
         {/* Mobile Brand Strip */}
         <div className="lg:hidden p-6 flex items-center justify-center gap-2 border-b border-gray-100 dark:border-white/5 bg-white dark:bg-surface-900">
-          <ShieldCheck className="text-indigo-600 dark:text-violet-400" size={24} />
-          <span className="font-bold text-xl text-gray-900 dark:text-white">CompliScan AI</span>
+          <CompliScanLogo size="sm" />
         </div>
         
         <div className="flex-1 flex items-center justify-center p-6 sm:p-12">

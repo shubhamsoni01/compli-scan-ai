@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { ShieldCheck, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
+import { CompliScanLogo } from '@/components/ui/CompliScanLogo';
 import { SIHLogo } from '@/components/ui/SIHLogo';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { CommandPalette } from '@/components/ui/CommandPalette';
@@ -43,13 +44,8 @@ export const LandingLayout: React.FC = () => {
       >
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 p-2 rounded-xl shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform font-bold">
-                <ShieldCheck size={22} className="text-slate-950 stroke-[2.5]" />
-              </div>
-              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white font-heading">
-                CompliScan <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">AI</span>
-              </span>
+            <Link to="/" className="flex items-center group">
+              <CompliScanLogo size="sm" />
             </Link>
             <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-white/10">
               <SIHLogo size="sm" showText={false} />

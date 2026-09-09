@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import Auth3DVisual from '@/components/3d/Auth3DVisual';
+import { CompliScanLogo } from '@/components/ui/CompliScanLogo';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -84,15 +85,9 @@ export default function RegisterPage() {
       <header className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 flex items-center justify-between z-20">
         <Link 
           to="/" 
-          className="group flex items-center gap-2.5 text-slate-900 dark:text-white transition-opacity hover:opacity-90"
+          className="group flex items-center transition-opacity hover:opacity-90"
         >
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-heading font-bold text-lg tracking-tight leading-tight">CompliScan AI</span>
-            <span className="text-[10px] tracking-wider uppercase font-medium text-slate-400 dark:text-slate-400">Compliance Screening</span>
-          </div>
+          <CompliScanLogo size="sm" />
         </Link>
 
         <div className="flex items-center gap-3">

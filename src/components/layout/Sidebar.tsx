@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { SIHLogo } from '@/components/ui/SIHLogo';
+import { CompliScanLogo } from '@/components/ui/CompliScanLogo';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -33,12 +34,7 @@ export const Sidebar: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 h-full bg-white dark:bg-surface-900 border-r border-gray-200 dark:border-white/5 z-20 transition-colors duration-200">
         <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-white/5">
-          <div className="bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 p-1.5 rounded-lg shadow-sm shadow-emerald-500/30">
-            <ShieldCheck size={24} className="stroke-[2.5]" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-            CompliScan <span className="text-emerald-500 dark:text-emerald-400">AI</span>
-          </span>
+          <CompliScanLogo size="sm" />
         </div>
 
         <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
