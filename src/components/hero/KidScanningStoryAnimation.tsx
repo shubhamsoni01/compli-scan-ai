@@ -978,8 +978,8 @@ export const KidScanningStoryAnimation: React.FC = () => {
         <div className={cn(
           "mt-2 p-3 rounded-2xl border transition-all duration-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs",
           isSafe
-            ? "bg-slate-900/90 border-emerald-500/30"
-            : "bg-red-950/40 border-red-500/40"
+            ? "bg-slate-900/90 border-emerald-500/30 shadow-lg shadow-emerald-500/10"
+            : "bg-red-950/40 border-red-500/40 shadow-lg shadow-red-500/10"
         )}>
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -1020,6 +1020,67 @@ export const KidScanningStoryAnimation: React.FC = () => {
             <p className="text-[9px] text-slate-400 mt-0.5">
               SIH Problem Statement Solver
             </p>
+          </div>
+        </div>
+
+        {/* 
+          -------------------------------------------------------------
+          4. INTERACTIVE CLICK-TO-TEST SAMPLE SELECTOR (SIH DEMO BAR)
+          -------------------------------------------------------------
+        */}
+        <div className="mt-3 pt-3 border-t border-slate-800/80">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-amber-400 animate-pulse text-xs">🎮</span>
+              <span className="text-[11px] font-bold text-slate-300 tracking-wide uppercase">
+                Interactive Test Console: <span className="text-emerald-400 font-normal">Click any sample to test</span>
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              {isPaused ? "MANUAL" : "AUTO-CYCLE"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            {ITEMS.map((item, idx) => {
+              const active = idx === itemIndex;
+              const safe = item.status === 'safe';
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setItemIndex(idx);
+                    setStage('aim');
+                    triggerAudio(safe ? 'safe' : 'unsafe');
+                  }}
+                  className={cn(
+                    "px-2 py-1.5 rounded-xl border text-left flex items-center gap-1.5 transition-all duration-300 group cursor-pointer",
+                    active
+                      ? safe
+                        ? "bg-emerald-950/80 border-emerald-400 shadow-md shadow-emerald-500/20 scale-[1.03]"
+                        : "bg-red-950/80 border-red-400 shadow-md shadow-red-500/20 scale-[1.03]"
+                      : "bg-slate-900/60 border-slate-800 hover:border-slate-600 hover:bg-slate-800/60 text-slate-400"
+                  )}
+                >
+                  <span className="text-base shrink-0 group-hover:scale-125 transition-transform">{item.emoji}</span>
+                  <div className="overflow-hidden leading-tight">
+                    <span className={cn(
+                      "text-[10px] font-bold block truncate",
+                      active ? "text-white" : "text-slate-300 group-hover:text-white"
+                    )}>
+                      {item.name.split(' ')[0]} {item.name.split(' ')[1] || ''}
+                    </span>
+                    <span className={cn(
+                      "text-[8px] font-mono font-bold uppercase",
+                      safe ? "text-emerald-400" : "text-red-400"
+                    )}>
+                      {safe ? "SAFE ✓" : "UNSAFE ✗"}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

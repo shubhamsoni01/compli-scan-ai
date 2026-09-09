@@ -98,30 +98,32 @@ export default function LandingPage() {
                 Instantly analyze packaged product labels against Indian regulatory frameworks (FSSAI, Legal Metrology, CDSCO). Ensure 100% label compliance before hitting retail shelves.
               </motion.p>
               
-              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Link to="/scan">
-                  <Button size="lg" className="w-full sm:w-auto shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30">
-                    Scan a Product
-                    <Scan className="ml-2 h-5 w-5" />
+              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8">
+                <Link to="/scan" className="relative group rounded-xl p-[2px] overflow-hidden">
+                  {/* Neon laser border beam running around button */}
+                  <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#f59e0b_0%,#10b981_50%,#06b6d4_100%)] opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <Button size="lg" className="relative w-full sm:w-auto bg-slate-950 text-white hover:bg-slate-900 border border-emerald-500/40 shadow-xl shadow-emerald-500/20 px-8 py-3.5 text-base font-bold flex items-center justify-center gap-2 z-10">
+                    <span>Scan a Product Now</span>
+                    <Scan className="h-5 w-5 text-emerald-400 group-hover:rotate-12 transition-transform" />
                   </Button>
                 </Link>
                 <Link to="/rules">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-300 dark:border-white/15 hover:border-emerald-500/50">
-                    Explore Compliance Rules
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-300 dark:border-white/15 hover:border-amber-500/50 hover:bg-amber-500/5 dark:hover:bg-amber-500/10 px-6 py-3.5 text-base">
+                    Explore 22+ Rules
                   </Button>
                 </Link>
               </motion.div>
 
               {/* Trust & capability micro-pills */}
               <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-400 pt-2 border-t border-slate-200/60 dark:border-white/10">
-                <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-md border border-slate-200/60 dark:border-white/5">
+                <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-md border border-emerald-500/20 text-slate-700 dark:text-slate-300">
                   <span className="text-emerald-500 font-bold">✓</span> 22+ Mandatory Rules
                 </span>
-                <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-md border border-slate-200/60 dark:border-white/5">
-                  <span className="text-teal-500 font-bold">✓</span> Dual-Engine OCR (Gemini + Tesseract)
+                <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-md border border-cyan-500/20 text-slate-700 dark:text-slate-300">
+                  <span className="text-cyan-500 font-bold">✓</span> Dual-Engine OCR (Gemini + Tesseract)
                 </span>
-                <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-md border border-slate-200/60 dark:border-white/5">
-                  <span className="text-cyan-500 font-bold">✓</span> Instant PDF Export
+                <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-md border border-amber-500/20 text-slate-700 dark:text-slate-300">
+                  <span className="text-amber-500 font-bold">✓</span> 100% Free Citizen Inspection
                 </span>
               </motion.div>
             </motion.div>
@@ -143,14 +145,19 @@ export default function LandingPage() {
       <NationalMetricsBar />
 
       {/* How It Works */}
-      <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5 relative overflow-hidden">
+        {/* Subtle Cyber Tiranga ambient lighting in background */}
+        <div className="absolute top-1/2 left-0 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-72 h-72 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-3">
-              Automated Pipeline
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Automated AI Pipeline
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4 text-slate-900 dark:text-white">How It Works</h2>
-            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Get compliance results in seconds with our streamlined 4-step process.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4 text-slate-900 dark:text-white">How CompliScan AI Works</h2>
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Get comprehensive label audits in under 3 seconds with our 4-stage automated pipeline.</p>
           </div>
           
           <motion.div 
@@ -160,25 +167,32 @@ export default function LandingPage() {
             viewport={{ once: true, margin: "-100px" }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative"
           >
-            <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-emerald-500/30 via-teal-500/30 to-cyan-500/30 z-0" />
+            {/* Animated Laser Pulse Connector Line */}
+            <div className="hidden lg:block absolute top-14 left-[10%] right-[10%] h-1 bg-gradient-to-r from-amber-500/30 via-emerald-500/40 to-cyan-500/30 z-0 rounded-full overflow-hidden">
+              <motion.div
+                className="w-24 h-full bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_12px_#10b981]"
+                animate={{ x: ['-100%', '800%'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+              />
+            </div>
             
             {[
-              { icon: FileText, title: "Upload Image", desc: "Upload a clear image of your product label." },
-              { icon: Scan, title: "OCR Extraction", desc: "We extract all text and symbols automatically." },
-              { icon: Cpu, title: "AI Analysis", desc: "Our engine checks against compliance rules." },
-              { icon: CheckCircle, title: "Compliance Report", desc: "Get a detailed, exportable compliance score." }
+              { icon: FileText, title: "1. Upload Image", desc: "Upload or capture packet front, back, or nutrition label.", tag: "Front / Back / MRP", color: "text-amber-500 dark:text-amber-400", border: "hover:border-amber-500/40", bg: "bg-amber-500/10" },
+              { icon: Scan, title: "2. Dual-Engine OCR", desc: "Tesseract + Gemini Vision extract raw Hindi/English text & barcodes.", tag: "Sub-second OCR", color: "text-cyan-500 dark:text-cyan-400", border: "hover:border-cyan-500/40", bg: "bg-cyan-500/10" },
+              { icon: Cpu, title: "3. Rule Engine Audit", desc: "Checks against 22+ Legal Metrology, FSSAI & BIS statutory rules.", tag: "FSSAI & LM Act", color: "text-emerald-500 dark:text-emerald-400", border: "hover:border-emerald-500/40", bg: "bg-emerald-500/10" },
+              { icon: CheckCircle, title: "4. Actionable Report", desc: "Instant compliance score, missing field alert & downloadable PDF report.", tag: "Official Score", color: "text-purple-500 dark:text-purple-400", border: "hover:border-purple-500/40", bg: "bg-purple-500/10" }
             ].map((step, i) => (
               <motion.div key={i} variants={itemVariants} className="relative z-10">
                 <TiltCard tiltFactor={6} className="h-full">
-                  <Card className="h-full text-center p-6 bg-white dark:bg-slate-900/60 transition-all duration-300 border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5">
-                    <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center mb-6 shadow-sm border border-emerald-100 dark:border-emerald-800/60 group-hover:scale-110 transition-transform">
-                      <step.icon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                  <Card className={`h-full text-center p-6 bg-white dark:bg-slate-900/80 transition-all duration-300 border-slate-200/80 dark:border-white/10 ${step.border} shadow-sm hover:shadow-xl group`}>
+                    <div className={`mx-auto w-16 h-16 rounded-2xl ${step.bg} flex items-center justify-center mb-5 shadow-sm border border-white/10 group-hover:scale-110 group-hover:rotate-3 transition-transform`}>
+                      <step.icon className={`h-8 w-8 ${step.color}`} />
                     </div>
-                    <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 mb-4 border border-emerald-500/20">
-                      Step {i + 1}
+                    <div className="inline-block px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 mb-3 border border-slate-200 dark:border-white/10">
+                      {step.tag}
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">{step.desc}</p>
+                    <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-white">{step.title}</h3>
+                    <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">{step.desc}</p>
                   </Card>
                 </TiltCard>
               </motion.div>
