@@ -17,7 +17,7 @@ import { LiveCompliancePreviewSection } from '@/components/sections/LiveComplian
 import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
-import { HeroAIScannerShowcase } from '@/components/hero/HeroAIScannerShowcase';
+import { MobileLiveScannerStory } from '@/components/hero/MobileLiveScannerStory';
 import { CyberGridBackground } from '@/components/ui/CyberGridBackground';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { SIHLogo } from '@/components/ui/SIHLogo';
@@ -124,14 +124,14 @@ export default function LandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right side: High-Tech Live AI Scanner Showcase */}
+            {/* Right side: Mobile Scanner + Instant Result Story Animation */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.25, ease: 'easeOut' }}
               className="lg:col-span-6 relative w-full flex items-center justify-center py-4 lg:py-0"
             >
-              <HeroAIScannerShowcase />
+              <MobileLiveScannerStory />
             </motion.div>
           </div>
         </div>
