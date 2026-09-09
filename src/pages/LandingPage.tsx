@@ -14,6 +14,8 @@ import { fetchRealStats } from '@/services/api';
 const ProductScanner = lazy(() => import('@/components/3d/ProductScanner'));
 import { HackathonShowcaseSection } from '@/components/sections/HackathonShowcaseSection';
 import { LiveCompliancePreviewSection } from '@/components/sections/LiveCompliancePreviewSection';
+import { FakeVsRealComparisonSection } from '@/components/sections/FakeVsRealComparisonSection';
+import { NationalMetricsBar } from '@/components/sections/NationalMetricsBar';
 import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
@@ -59,7 +61,7 @@ export default function LandingPage() {
     <div className="w-full bg-slate-50 dark:bg-[#0a0e1a] text-slate-900 dark:text-slate-100 font-sans">
       {/* Hero Section */}
       <section 
-        className="relative overflow-hidden flex items-center pt-6 pb-16 md:pt-10 md:pb-24"
+        className="relative overflow-hidden flex items-center pt-6 pb-16 md:pt-10 md:pb-20"
       >
         <CyberGridBackground />
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-[#070b12] dark:via-[#0b1320] dark:to-[#070b12] -z-10 pointer-events-none" />
@@ -137,6 +139,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* National Compliance Impact Metrics Bar */}
+      <NationalMetricsBar />
+
       {/* How It Works */}
       <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -184,6 +189,9 @@ export default function LandingPage() {
 
       {/* Live Interactive Compliance Audit Simulator */}
       <LiveCompliancePreviewSection />
+
+      {/* Interactive Fake vs Genuine Label X-Ray Split-Inspection Lens */}
+      <FakeVsRealComparisonSection />
 
       {/* Apple-Inspired Bento Architecture Showcase */}
       <AppleBentoShowcase />
