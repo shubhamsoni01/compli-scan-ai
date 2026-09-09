@@ -17,6 +17,7 @@ import { LiveCompliancePreviewSection } from '@/components/sections/LiveComplian
 import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
+import { ComplianceScanAura } from '@/components/3d/ComplianceScanAura';
 import { CyberGridBackground } from '@/components/ui/CyberGridBackground';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { SIHLogo } from '@/components/ui/SIHLogo';
@@ -184,6 +185,8 @@ export default function LandingPage() {
 
               <div className="relative w-full max-w-[480px] lg:max-w-[460px] xl:max-w-[500px] h-[360px] sm:h-[420px] md:h-[450px] lg:h-[460px] xl:h-[490px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 -z-10 rounded-2xl md:rounded-3xl bg-gradient-to-tr from-emerald-500/15 via-teal-500/5 to-cyan-500/15 dark:from-emerald-950/40 dark:via-slate-900/50 dark:to-cyan-950/30 backdrop-blur-xl border border-emerald-500/20 dark:border-white/10 shadow-xl shadow-emerald-500/5" />
+                {/* High-Tech AI Scanning Shield Hologram behind 3D Product */}
+                <ComplianceScanAura />
                 <Suspense fallback={<div className="flex items-center justify-center h-full text-emerald-500"><Scan className="h-10 w-10 animate-spin" /></div>}>
                   <ProductScanner size="md" productType={activeProduct} />
                 </Suspense>
