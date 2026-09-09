@@ -8,11 +8,13 @@ import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Info, AlertTriangle, Search, Sparkles } from 'lucide-react';
+import { Info, Search, Sparkles } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import * as rulesService from '@/services/rulesService';
 import { complianceRules } from '@/data/complianceRules';
+
+import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
 
 export default function RulesPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,142 +51,125 @@ export default function RulesPage() {
     // Simulate network delay
     const timer = setTimeout(() => fetchRules(), 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, selectedAuthority, selectedStatus]);
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active': return 'success';
-      case 'draft': return 'warning';
-      case 'deprecated': return 'secondary';
-      default: return 'default';
-    }
-  };
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
+  }, [activeTab, selectedAuthority, selectedStatus, searchQuery]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
+      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 mb-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-            <span>🇮🇳 SIH 2026 (Problem ID: SIH26034) • Ministry of Consumer Affairs Gazette Standards</span>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight font-heading text-slate-900 dark:text-slate-100">
+              Rules & Statutory Knowledge Base
+            </h1>
+            <span className="flex items-center gap-1 text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+              <Sparkles size={12} />
+              <span>Gazette 2026 Engine</span>
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-900 dark:text-white">Rules & Statutory Standards</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Browse applicable Indian product labelling compliance requirements (Legal Metrology Rules 2011, FSSAI, CDSCO, BIS)</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Browse official Legal Metrology, FSSAI, and CDSCO packaged commodity labelling mandates.
+          </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2">
-          <MinistryLogo size="sm" showText={false} />
-          <SIHLogo size="sm" showText={true} />
+
+        {/* National Governance Badge */}
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 shadow-xs shrink-0">
+          <SIHLogo size="md" />
+          <div className="h-8 w-px bg-slate-200 dark:border-slate-800" />
+          <MinistryLogo size="md" />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl border border-emerald-500/20">
-        <Info className="w-4 h-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
-        <span>Mandatory rules are verified via deterministic logic. Conditional rules automatically adapt based on product category & volume.</span>
+      {/* Info Callout */}
+      <div className="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-3">
+        <Info className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+        <div className="text-xs text-indigo-900 dark:text-indigo-200 space-y-0.5">
+          <p className="font-semibold">Deterministic Legal Compliance Engine</p>
+          <p className="text-indigo-700/80 dark:text-indigo-300/80">
+            Rules marked conditional depend on product net weight, perishable shelf-life, and mandatory commodity schedules under the Legal Metrology (Packaged Commodities) Rules, 2011 and FSSAI 2020 Gazette.
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
-          <SearchBar
-            value={searchQuery}
-            onChange={(e: any) => setSearchQuery(e.target.value)}
-            placeholder="Search rules..."
+      {/* Search and Filters */}
+      <div className="space-y-4">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by rule ID (e.g. LM-001, FSSAI-001), keyword, or authority..."
+          className="w-full"
+        />
+
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+          <Tabs
+            tabs={categories.map(cat => ({ id: cat, label: cat }))}
+            activeTab={activeTab}
+            onChange={setActiveTab}
           />
-        </div>
-        <div className="flex gap-2">
-          <select 
-            className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-indigo-500"
-            value={selectedAuthority}
-            onChange={(e) => setSelectedAuthority(e.target.value)}
-          >
-            {authorities.map(auth => (
-              <option key={auth} value={auth}>{auth}</option>
-            ))}
-          </select>
-          <select 
-            className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-indigo-500"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-          >
-            {statuses.map(status => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Authority Filter */}
+            <select
+              value={selectedAuthority}
+              onChange={(e) => setSelectedAuthority(e.target.value)}
+              className="text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {authorities.map(auth => (
+                <option key={auth} value={auth}>{auth}</option>
+              ))}
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {statuses.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      <Tabs
-        tabs={categories}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-      />
-
+      {/* Rules Grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="p-5 space-y-4">
-              <Skeleton className="h-6 w-1/3" />
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-              <div className="flex gap-2 pt-2">
-                <Skeleton className="h-6 w-16" />
-                <Skeleton className="h-6 w-16" />
-              </div>
-            </Card>
+          {[1, 2, 3, 4, 5, 6].map(n => (
+            <Skeleton key={n} variant="card" className="h-48" />
           ))}
         </div>
       ) : rules.length > 0 ? (
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          variants={container}
-          initial="hidden"
-          animate="show"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.05 }}
         >
           {rules.map((rule) => (
-            <motion.div key={rule.id} variants={item}>
-              <Card className="h-full flex flex-col p-5 hover:shadow-md transition-shadow">
+            <motion.div
+              key={rule.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card className="h-full flex flex-col p-5 hover:shadow-md transition-shadow border-slate-200 dark:border-slate-800">
                 <div className="flex justify-between items-start mb-3">
-                  <span className="font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-700 dark:text-slate-300">
-                    {rule.id}
+                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                    {rule.ruleId || rule.id}
                   </span>
-                  <Badge variant={getStatusBadgeVariant(rule.status)}>
+                  <Badge variant={rule.status === 'active' ? 'success' : rule.status === 'draft' ? 'warning' : 'outline'}>
                     {rule.status}
                   </Badge>
                 </div>
-                
-                <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white line-clamp-2">
+
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm mb-2 line-clamp-2">
                   {rule.requirement}
                 </h3>
                 
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2 flex-grow">
                   {rule.description}
                 </p>
-
-                {rule.conditional && (
-                  <div className="mb-4 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-xs p-2 rounded flex items-start gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                    <span>{rule.conditionalNote || 'Conditional requirement'}</span>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {rule.applicableTo?.map((cat: string) => (
-                    <Chip key={cat} size="sm" variant="secondary">{cat}</Chip>
-                  ))}
-                </div>
 
                 <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                   <div className="flex flex-col gap-1">
@@ -195,9 +180,14 @@ export default function RulesPage() {
                       Ref: {rule.legalReference}
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full">
-                    View Rule Details
-                  </Button>
+                  <a
+                    href="https://www.fssai.gov.in/upload/uploadfiles/files/Gazette_Notification_Labelling_Display_18_11_2020.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Official Gazette PDF ↗
+                  </a>
                 </div>
               </Card>
             </motion.div>
@@ -220,6 +210,9 @@ export default function RulesPage() {
           }
         />
       )}
+
+      {/* Official Government Gazettes & Acts Direct PDF Library */}
+      <OfficialGazetteDocsCard />
     </div>
   );
 }

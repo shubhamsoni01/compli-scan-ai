@@ -16,6 +16,8 @@ import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
 import { generateReportPDF, submitComplaintToDB } from '@/services/api';
 import { ComplianceReportPreview } from '@/components/report/ComplianceReportPreview';
 import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
+import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard';
+import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
 import { EditReportModal } from '@/components/report/EditReportModal';
 import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
@@ -274,6 +276,13 @@ export default function ComplianceResultPage() {
         <ReadabilityCard data={resolvedResult.readabilityResult} />
       )}
 
+      {/* FSSAI Nutrition & HFSS Threshold Audit (Safe vs Unsafe Comparison Table) */}
+      <NutritionThresholdCard 
+        extractedInfo={resolvedResult.extractedInfo} 
+        category={resolvedResult.category} 
+        auditReport={resolvedResult.nutritionAudit}
+      />
+
       {/* Rule Checklist */}
       <Card className="overflow-hidden">
         <div className="p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center">
@@ -336,7 +345,14 @@ export default function ComplianceResultPage() {
                       </div>
                       <div className="pt-1 flex items-center justify-between text-xs text-gray-400">
                         <span>Official Source: <strong className="text-gray-600 dark:text-gray-300">{check.legalReference}</strong></span>
-                        <span className="text-[11px] text-indigo-500 font-mono">Government of India</span>
+                        <a 
+                          href="https://www.fssai.gov.in/upload/uploadfiles/files/Gazette_Notification_Labelling_Display_18_11_2020.pdf" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-mono"
+                        >
+                          Official Gazette PDF ↗
+                        </a>
                       </div>
                     </div>
                   </motion.div>
@@ -346,6 +362,9 @@ export default function ComplianceResultPage() {
           ))}
         </div>
       </Card>
+
+      {/* Official Government Gazettes & Mother Acts Library */}
+      <OfficialGazetteDocsCard category={resolvedResult.category} />
 
       {/* Mandatory Statutory Screening Disclaimer */}
       <div className="p-4 rounded-xl bg-slate-100 dark:bg-gray-900/80 border border-slate-200 dark:border-gray-800 text-xs text-slate-600 dark:text-slate-400 space-y-1">

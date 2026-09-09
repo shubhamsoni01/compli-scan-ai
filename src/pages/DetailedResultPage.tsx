@@ -13,6 +13,9 @@ import { formatDate } from '@/utils/formatters';
 import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
 import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 
+import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard';
+import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
+
 export default function DetailedResultPage() {
   const { scanId, id } = useParams<{ scanId?: string; id?: string }>();
   const activeId = scanId || id;
@@ -77,13 +80,34 @@ export default function DetailedResultPage() {
                 <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-xs text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700 space-y-1">
                   <p><strong className="text-gray-700 dark:text-gray-200">Requirement:</strong> {check.requirement}</p>
                   <p><strong className="text-gray-700 dark:text-gray-200">Deterministic Reason:</strong> {check.explanation}</p>
-                  <p className="text-[11px] text-gray-400 pt-1">
-                    Official Reference: <span className="font-medium text-gray-600 dark:text-gray-300">{check.legalReference}</span>
-                  </p>
+                  <div className="pt-1 flex items-center justify-between text-[11px] text-gray-400">
+                    <span>Official Reference: <span className="font-medium text-gray-600 dark:text-gray-300">{check.legalReference}</span></span>
+                    <a
+                      href="https://www.fssai.gov.in/upload/uploadfiles/files/Gazette_Notification_Labelling_Display_18_11_2020.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 dark:text-indigo-400 hover:underline font-mono"
+                    >
+                      Gazette PDF ↗
+                    </a>
+                  </div>
                 </div>
               </div>
             </Card>
           ))}
+        </div>
+      )
+    },
+    {
+      id: 'nutrition',
+      label: '🥗 Nutrition & HFSS Audit',
+      content: (
+        <div className="space-y-4">
+          <NutritionThresholdCard 
+            extractedInfo={currentResult.extractedInfo} 
+            category={currentResult.category} 
+            auditReport={currentResult.nutritionAudit}
+          />
         </div>
       )
     },
@@ -98,11 +122,13 @@ export default function DetailedResultPage() {
                 "p-4",
                 idx >= arr.length - (arr.length % 2 === 0 ? 2 : 1) ? "border-b-0" : "border-b border-gray-100 dark:border-gray-800"
               )}>
-                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">{key}</span>
                 <p className={cn(
-                  "font-medium break-words",
-                  !value ? "text-red-500 dark:text-red-400 italic" : "text-gray-900 dark:text-gray-100"
-                )}>{String(value) || 'Not detected'}</p>
+                  "font-medium text-sm mt-1 break-words",
+                  !value ? "text-red-500 dark:text-red-400 italic" : "text-gray-800 dark:text-gray-200"
+                )}>
+                  {value ? (typeof value === 'object' ? JSON.stringify(value) : String(value)) : 'Not detected'}
+                </p>
               </div>
             ))}
           </div>
@@ -111,15 +137,20 @@ export default function DetailedResultPage() {
     },
     {
       id: 'readability',
-      label: 'Font Size & Readability',
+      label: 'Readability Analysis',
       content: currentResult.readabilityResult ? (
-        <div className="space-y-4">
-          <ReadabilityCard data={currentResult.readabilityResult} />
-        </div>
+        <ReadabilityCard data={currentResult.readabilityResult} />
       ) : (
         <Card className="p-6 text-center text-gray-500">
           <p>Readability analysis data is not available for this scan.</p>
         </Card>
+      )
+    },
+    {
+      id: 'gazettes',
+      label: '🏛️ Official Acts & Gazettes',
+      content: (
+        <OfficialGazetteDocsCard category={currentResult.category} />
       )
     },
     {
