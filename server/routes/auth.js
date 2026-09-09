@@ -545,4 +545,188 @@ router.delete('/profile/photo', requireAuth, async (req, res) => {
   }
 });
 
+/**
+ * Super Admin Seeder Helper
+ */
+export async function seedSuperAdmin() {
+  try {
+    if (!isDbConnected()) return;
+    const SUPER_EMAIL = 'sih@gmail.com';
+    const SUPER_PASS = '822115';
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(SUPER_PASS, salt);
+
+    let superUser = await User.findOne({ email: SUPER_EMAIL });
+    if (!superUser) {
+      superUser = new User({
+        name: 'Super Admin (National Governance)',
+        email: SUPER_EMAIL,
+        passwordHash,
+        authProvider: 'email',
+        role: 'super_admin',
+        organization: 'Ministry of Consumer Affairs & FSSAI',
+      });
+      await superUser.save();
+      console.log('[Super Admin Seeded]: sih@gmail.com initialized as super_admin');
+    } else {
+      superUser.role = 'super_admin';
+      superUser.passwordHash = passwordHash;
+      superUser.organization = 'Ministry of Consumer Affairs & FSSAI';
+      await superUser.save();
+    }
+  } catch (err) {
+    console.warn('[Super Admin Seed Warning]:', err.message);
+  }
+}
+
+// Automatically seed Super Admin on route load
+setTimeout(seedSuperAdmin, 2500);
+
+/**
+ * GET /api/auth/admins
+ * Super Admin Only: List all appointed ministry admins / officers
+ */
+router.get('/admins', requireAuth, async (req, res) => {
+  try {
+    const isSuper = req.user.email === 'sih@gmail.com' || req.user.role === 'super_admin';
+    if (!isSuper) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: Only Super Admin (sih@gmail.com) can manage officers.',
+      });
+    }
+
+    const admins = await User.find({
+      role: { $in: ['admin', 'Ministry Enforcement Officer', 'super_admin'] }
+    }).select('-passwordHash').sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      admins: admins.map((a) => ({
+        id: a._id,
+        name: a.name,
+        email: a.email,
+        role: a.role,
+        organization: a.organization,
+        createdAt: a.createdAt,
+        lastLoginAt: a.lastLoginAt,
+      })),
+    });
+  } catch (error) {
+    console.error('[Get Admins Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve admin list.' });
+  }
+});
+
+/**
+ * POST /api/auth/admins
+ * Super Admin Only: Appoint a new Ministry Admin with assigned password & department
+ */
+router.post('/admins', requireAuth, async (req, res) => {
+  try {
+    const isSuper = req.user.email === 'sih@gmail.com' || req.user.role === 'super_admin';
+    if (!isSuper) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: Only Super Admin can appoint new administrators.',
+      });
+    }
+
+    const { name, email, password, organization = 'Ministry Enforcement Cell' } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, and assigned password are required.',
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    let user = await User.findOne({ email: normalizedEmail });
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    if (user) {
+      // Elevate existing user to admin with the assigned password
+      user.name = name.trim();
+      user.role = 'admin';
+      user.organization = organization;
+      user.passwordHash = passwordHash;
+      await user.save();
+    } else {
+      user = new User({
+        name: name.trim(),
+        email: normalizedEmail,
+        passwordHash,
+        authProvider: 'email',
+        role: 'admin',
+        organization,
+        lastLoginAt: new Date(),
+      });
+      await user.save();
+    }
+
+    console.log(`[Admin Appointed]: Super Admin created officer "${user.name}" (${user.email})`);
+
+    return res.status(201).json({
+      success: true,
+      message: `Ministry Officer ${user.name} successfully appointed!`,
+      admin: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organization: user.organization,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('[Create Admin Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to appoint officer.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/admins/:id
+ * Super Admin Only: Revoke an officer's admin privileges
+ */
+router.delete('/admins/:id', requireAuth, async (req, res) => {
+  try {
+    const isSuper = req.user.email === 'sih@gmail.com' || req.user.role === 'super_admin';
+    if (!isSuper) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: Only Super Admin can revoke officer permissions.',
+      });
+    }
+
+    const adminUser = await User.findById(req.params.id);
+    if (!adminUser) {
+      return res.status(404).json({ success: false, error: 'Officer record not found.' });
+    }
+
+    if (adminUser.email === 'sih@gmail.com') {
+      return res.status(400).json({
+        success: false,
+        error: 'Super Admin account (sih@gmail.com) cannot be removed.',
+      });
+    }
+
+    // Downgrade role or delete
+    adminUser.role = 'Citizen Inspector';
+    await adminUser.save();
+
+    console.log(`[Admin Revoked]: Super Admin revoked officer ${adminUser.email}`);
+
+    return res.status(200).json({
+      success: true,
+      message: `Officer access revoked for ${adminUser.name}.`,
+    });
+  } catch (error) {
+    console.error('[Revoke Admin Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to revoke officer.' });
+  }
+});
+
 export default router;

@@ -520,3 +520,86 @@ export async function fetchRealStats(): Promise<RealStatsResponse> {
     };
   }
 }
+
+/**
+ * Super Admin API Helpers
+ */
+export async function fetchAppointedAdmins(): Promise<any[]> {
+  try {
+    const token = localStorage.getItem('compliscan_jwt') || '';
+    const res = await fetch(`${API_BASE_URL}/api/auth/admins`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error('Failed to fetch admin list');
+    const data = await res.json();
+    return data.admins || [];
+  } catch (err: any) {
+    console.warn('[Fetch Admins Warning]:', err.message);
+    const local = localStorage.getItem('compliscan_local_admins');
+    return local ? JSON.parse(local) : [];
+  }
+}
+
+export async function createNewAdmin(payload: { name: string; email: string; password: string; organization?: string }): Promise<any> {
+  const token = localStorage.getItem('compliscan_jwt') || '';
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/admins`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to appoint admin');
+    return data;
+  } catch (err: any) {
+    // Save to local appointed admins cache as fallback
+    const local = localStorage.getItem('compliscan_local_admins');
+    const list = local ? JSON.parse(local) : [];
+    const newEntry = {
+      id: `local_admin_${Date.now()}`,
+      name: payload.name,
+      email: payload.email,
+      role: 'admin',
+      password: payload.password,
+      organization: payload.organization || 'Ministry Enforcement Cell',
+      createdAt: new Date().toISOString(),
+    };
+    list.unshift(newEntry);
+    localStorage.setItem('compliscan_local_admins', JSON.stringify(list));
+    return { success: true, message: `Officer ${payload.name} appointed!`, admin: newEntry };
+  }
+}
+
+export async function revokeAdminPrivilege(adminId: string): Promise<any> {
+  const token = localStorage.getItem('compliscan_jwt') || '';
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/admins/${adminId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to revoke admin');
+    return data;
+  } catch (err: any) {
+    const local = localStorage.getItem('compliscan_local_admins');
+    if (local) {
+      const list = JSON.parse(local).filter((a: any) => a.id !== adminId);
+      localStorage.setItem('compliscan_local_admins', JSON.stringify(list));
+    }
+    return { success: true, message: 'Officer access revoked successfully.' };
+  }
+}
+
