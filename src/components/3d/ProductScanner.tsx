@@ -5,13 +5,15 @@ import * as THREE from 'three';
 import { PackagedProduct } from './PackagedProduct';
 import { FuturisticPlatform } from './FuturisticPlatform';
 import { FallbackIllustration } from './FallbackIllustration';
+import type { ProductType } from './useProductPackageTexture';
 
 interface ProductScannerProps {
   size?: 'sm' | 'md' | 'lg';
   isScanning?: boolean;
+  productType?: ProductType;
 }
 
-const Scene: React.FC<{ isScanning: boolean }> = ({ isScanning }) => {
+const Scene: React.FC<{ isScanning: boolean; productType?: ProductType }> = ({ isScanning, productType = 'food' }) => {
   useFrame((state) => {
     // Elegant smooth mouse parallax without rapid jumps
     const mouseX = state.mouse.x * 1.5;
@@ -29,10 +31,10 @@ const Scene: React.FC<{ isScanning: boolean }> = ({ isScanning }) => {
         - Light mode: Soft ambient + crisp key directional light
         - Dark mode: Indigo/cyan subtle rim highlights without oversaturated neon
       */}
-      <ambientLight intensity={0.85} />
+      <ambientLight intensity={0.9} />
       <directionalLight
         position={[6, 8, 6]}
-        intensity={1.2}
+        intensity={1.3}
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0001}
@@ -40,12 +42,12 @@ const Scene: React.FC<{ isScanning: boolean }> = ({ isScanning }) => {
       {/* Rim light for edge definition with Cyber Emerald & Cyan accent */}
       <directionalLight position={[-6, 4, -4]} intensity={0.8} color="#10b981" />
       {/* Floor bounce light with Cyan accent */}
-      <pointLight position={[0, -0.4, 2]} intensity={0.5} color="#06b6d4" />
+      <pointLight position={[0, -0.4, 2]} intensity={0.6} color="#06b6d4" />
 
       {/* Floating group for smooth cinematic motion */}
       <Float speed={1.2} rotationIntensity={0.08} floatIntensity={0.25}>
         <Center position={[0, 0, 0]}>
-          <PackagedProduct isScanning={isScanning} />
+          <PackagedProduct isScanning={isScanning} productType={productType} />
           <FuturisticPlatform isScanning={isScanning} />
         </Center>
       </Float>
@@ -53,7 +55,11 @@ const Scene: React.FC<{ isScanning: boolean }> = ({ isScanning }) => {
   );
 };
 
-export const ProductScanner: React.FC<ProductScannerProps> = ({ size = 'lg', isScanning = false }) => {
+export const ProductScanner: React.FC<ProductScannerProps> = ({ 
+  size = 'lg', 
+  isScanning = false,
+  productType = 'food'
+}) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -90,7 +96,7 @@ export const ProductScanner: React.FC<ProductScannerProps> = ({ size = 'lg', isS
           gl={{ antialias: true, alpha: true }}
           className="w-full h-full"
         >
-          <Scene isScanning={isScanning} />
+          <Scene isScanning={isScanning} productType={productType} />
           <OrbitControls
             enableZoom={false}
             enablePan={false}

@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import * as THREE from 'three';
 
-export function useProductPackageTexture() {
+export type ProductType = 'food' | 'cosmetics' | 'oil';
+
+export function useProductPackageTexture(type: ProductType = 'food') {
   return useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
@@ -9,212 +11,475 @@ export function useProductPackageTexture() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // Background gradient: Elegant premium Indian snack pouch (deep royal indigo to warm spice gold/amber gradient header)
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, 1440);
-    bgGrad.addColorStop(0, '#1e1b4b');     // deep indigo-950
-    bgGrad.addColorStop(0.18, '#312e81');  // indigo-900
-    bgGrad.addColorStop(0.55, '#4338ca');  // rich royal indigo
-    bgGrad.addColorStop(0.85, '#1e1b4b');  // deep bottom
-    bgGrad.addColorStop(1, '#0f172a');     // slate-900 sealed edge
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, 1024, 1440);
+    if (type === 'food') {
+      // -------------------------------------------------------------
+      // 1. FOOD: ROYAL MASALA CRUNCH (Vibrant Indian Spice & Gold Foil)
+      // -------------------------------------------------------------
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, 1440);
+      bgGrad.addColorStop(0, '#3f0d12');    // Deep ruby crimson
+      bgGrad.addColorStop(0.2, '#7c1d24');  // Rich royal red
+      bgGrad.addColorStop(0.55, '#991b1b'); // Bright spice red
+      bgGrad.addColorStop(0.85, '#450a0a'); // Deep roasted base
+      bgGrad.addColorStop(1, '#1c0406');    // Bottom sealed crimp
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1024, 1440);
 
-    // Subtle metallic pouch texture lines / micro-foil sheen
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-    for (let i = 0; i < 1440; i += 6) {
-      ctx.fillRect(0, i, 1024, 2);
-    }
+      // Gold shimmer micro-foil pattern
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.05)';
+      for (let i = 0; i < 1440; i += 7) {
+        ctx.fillRect(0, i, 1024, 2);
+      }
 
-    // Top Heat-Seal crimp ridges
-    const sealGrad = ctx.createLinearGradient(0, 0, 0, 90);
-    sealGrad.addColorStop(0, '#0f172a');
-    sealGrad.addColorStop(0.5, '#334155');
-    sealGrad.addColorStop(1, '#1e1b4b');
-    ctx.fillStyle = sealGrad;
-    ctx.fillRect(0, 0, 1024, 90);
+      // Top crimp heat-seal
+      const sealGrad = ctx.createLinearGradient(0, 0, 0, 95);
+      sealGrad.addColorStop(0, '#1c0406');
+      sealGrad.addColorStop(0.5, '#450a0a');
+      sealGrad.addColorStop(1, '#7c1d24');
+      ctx.fillStyle = sealGrad;
+      ctx.fillRect(0, 0, 1024, 95);
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.lineWidth = 3;
-    for (let x = 10; x < 1024; x += 18) {
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+      ctx.lineWidth = 3;
+      for (let x = 12; x < 1024; x += 18) {
+        ctx.beginPath();
+        ctx.moveTo(x, 10);
+        ctx.lineTo(x, 85);
+        ctx.stroke();
+      }
+
+      // Bottom crimp heat-seal
+      ctx.fillStyle = sealGrad;
+      ctx.fillRect(0, 1355, 1024, 85);
+      for (let x = 12; x < 1024; x += 18) {
+        ctx.beginPath();
+        ctx.moveTo(x, 1365);
+        ctx.lineTo(x, 1435);
+        ctx.stroke();
+      }
+
+      // Metallic Gold Foil Ribbon Band
+      const goldRibbon = ctx.createLinearGradient(0, 125, 1024, 125);
+      goldRibbon.addColorStop(0, '#b45309');
+      goldRibbon.addColorStop(0.5, '#fde047');
+      goldRibbon.addColorStop(1, '#b45309');
+      ctx.fillStyle = goldRibbon;
+      ctx.fillRect(0, 125, 1024, 14);
+
+      // FSSAI Green Veg Logo in Top Right
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(840, 160, 90, 90);
+      ctx.fillStyle = '#16a34a';
       ctx.beginPath();
-      ctx.moveTo(x, 10);
-      ctx.lineTo(x, 80);
-      ctx.stroke();
-    }
+      ctx.arc(885, 205, 26, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Bottom Heat-Seal crimp ridges
-    const bSealGrad = ctx.createLinearGradient(0, 1360, 0, 1440);
-    bSealGrad.addColorStop(0, '#1e1b4b');
-    bSealGrad.addColorStop(0.5, '#334155');
-    bSealGrad.addColorStop(1, '#0f172a');
-    ctx.fillStyle = bSealGrad;
-    ctx.fillRect(0, 1360, 1024, 80);
+      // Brand Category Tag
+      ctx.fillStyle = '#fde68a';
+      ctx.font = '700 28px sans-serif';
+      ctx.letterSpacing = '5px';
+      ctx.fillText('HERITAGE SPICE FOODS', 80, 185);
 
-    for (let x = 10; x < 1024; x += 18) {
+      // Main Brand Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 84px sans-serif';
+      ctx.fillText('ROYAL MASALA', 80, 280);
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '900 84px sans-serif';
+      ctx.fillText('CRUNCH', 620, 280);
+
+      // Subtitle
+      ctx.fillStyle = '#fecaca';
+      ctx.font = '500 32px sans-serif';
+      ctx.fillText('Roasted Multigrain Herb Crisp Snacking Pouch', 80, 335);
+
+      // Center Graphic Badge
+      const badgeGrad = ctx.createRadialGradient(512, 545, 30, 512, 545, 260);
+      badgeGrad.addColorStop(0, 'rgba(251, 191, 36, 0.45)');
+      badgeGrad.addColorStop(0.65, 'rgba(180, 83, 9, 0.15)');
+      badgeGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = badgeGrad;
+      ctx.fillRect(100, 370, 824, 350);
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(x, 1370);
-      ctx.lineTo(x, 1430);
+      ctx.arc(512, 545, 140, 0, Math.PI * 2);
       ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('100% ROASTED GRAIN', 512, 530);
+      ctx.font = '600 26px sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.fillText('ZERO TRANS-FAT • NO PRESERVATIVES', 512, 575);
+
+      // Regulatory Compliance Card (Legal Metrology & FSSAI)
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(28, 4, 6, 0.85)';
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(65, 770, 894, 475, 20);
+      ctx.fill();
+      ctx.stroke();
+
+      // Card Title
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '800 26px sans-serif';
+      ctx.fillText('MANDATORY DECLARATIONS (LM RULES 2011 & FSSAI 2020)', 95, 815);
+
+      // Row 1: Net Qty & MRP
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('NET QUANTITY', 95, 868);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 36px sans-serif';
+      ctx.fillText('200 g', 95, 910);
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('MAX RETAIL PRICE (MRP)', 450, 868);
+      ctx.fillStyle = '#34d399';
+      ctx.font = '800 36px sans-serif';
+      ctx.fillText('₹ 99.00', 450, 910);
+      ctx.font = '500 20px sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.fillText('(Incl. of all taxes)', 585, 910);
+
+      ctx.font = '600 22px sans-serif';
+      ctx.fillStyle = '#fecdd3';
+      ctx.fillText('Unit Sale Price: ₹ 0.495 / g', 450, 948);
+
+      // Row 2: Batch & Dates
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('BATCH NUMBER', 95, 1010);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 28px monospace';
+      ctx.fillText('RMC-2026-X09', 95, 1048);
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('MFG & BEST BEFORE', 450, 1010);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 26px sans-serif';
+      ctx.fillText('MFG: SEP 2026 • BEST BEFORE 9 MONTHS', 450, 1048);
+
+      // Row 3: Manufacturer
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '500 21px sans-serif';
+      ctx.fillText('MFD BY: Royal Foods India Ltd., Industrial Park, Mumbai 400072, India', 95, 1110);
+      ctx.fillText('Consumer Care: care@royalcrunch.in | Toll-Free: 1800-11-2026', 95, 1148);
+
+      // FSSAI & Barcode
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 24px sans-serif';
+      ctx.fillText('fssai Lic. No. 10026022001489', 95, 1205);
+
+    } else if (type === 'cosmetics') {
+      // -------------------------------------------------------------
+      // 2. COSMETICS: AURA BOTANICS RADIANCE SERUM (Luxury Emerald & Rose-Gold)
+      // -------------------------------------------------------------
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, 1440);
+      bgGrad.addColorStop(0, '#022c22');    // Deep emerald 950
+      bgGrad.addColorStop(0.2, '#064e3b');  // Emerald 900
+      bgGrad.addColorStop(0.55, '#047857'); // Vibrant rich emerald
+      bgGrad.addColorStop(0.85, '#064e3b');
+      bgGrad.addColorStop(1, '#022c22');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1024, 1440);
+
+      // Rose-gold hairline aesthetic
+      ctx.strokeStyle = 'rgba(244, 114, 182, 0.15)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 1440; i += 12) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(1024, i);
+        ctx.stroke();
+      }
+
+      // Top Rose-Gold Accent
+      const roseGold = ctx.createLinearGradient(0, 120, 1024, 120);
+      roseGold.addColorStop(0, '#f472b6');
+      roseGold.addColorStop(0.5, '#fde047');
+      roseGold.addColorStop(1, '#f472b6');
+      ctx.fillStyle = roseGold;
+      ctx.fillRect(0, 120, 1024, 10);
+
+      // Brand Category Tag
+      ctx.fillStyle = '#6ee7b7';
+      ctx.font = '700 26px sans-serif';
+      ctx.letterSpacing = '6px';
+      ctx.fillText('AYURVEDIC DERMO-CARE', 80, 185);
+
+      // Main Brand Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 86px sans-serif';
+      ctx.fillText('AURA BOTANICS', 80, 280);
+
+      // Subtitle
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '500 32px sans-serif';
+      ctx.fillText('Kumkumadi & Vitamin-C Radiance Elixir Serum', 80, 335);
+
+      // Center Graphic Badge
+      const badgeGrad = ctx.createRadialGradient(512, 545, 30, 512, 545, 260);
+      badgeGrad.addColorStop(0, 'rgba(52, 211, 153, 0.4)');
+      badgeGrad.addColorStop(0.7, 'rgba(4, 120, 87, 0.1)');
+      badgeGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = badgeGrad;
+      ctx.fillRect(100, 370, 824, 350);
+
+      ctx.strokeStyle = '#f472b6';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(512, 545, 140, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('100% HERBAL EXTRACT', 512, 530);
+      ctx.font = '600 24px sans-serif';
+      ctx.fillStyle = '#6ee7b7';
+      ctx.fillText('DERMATOLOGICALLY TESTED • CRUELTY FREE', 512, 575);
+
+      // Regulatory Compliance Card (Cosmetics Rules 2020 & CDSCO)
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(2, 44, 34, 0.88)';
+      ctx.strokeStyle = 'rgba(244, 114, 182, 0.4)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(65, 770, 894, 475, 20);
+      ctx.fill();
+      ctx.stroke();
+
+      // Card Title
+      ctx.fillStyle = '#f472b6';
+      ctx.font = '800 26px sans-serif';
+      ctx.fillText('STATUTORY DECLARATIONS (COSMETICS RULES 2020 & CDSCO)', 95, 815);
+
+      // Row 1: Net Volume & MRP
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('NET VOLUME', 95, 868);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 36px sans-serif';
+      ctx.fillText('100 ml', 95, 910);
+
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('MAX RETAIL PRICE (MRP)', 450, 868);
+      ctx.fillStyle = '#34d399';
+      ctx.font = '800 36px sans-serif';
+      ctx.fillText('₹ 499.00', 450, 910);
+      ctx.font = '500 20px sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.fillText('(Incl. of all taxes)', 610, 910);
+
+      ctx.font = '600 22px sans-serif';
+      ctx.fillStyle = '#6ee7b7';
+      ctx.fillText('Unit Sale Price: ₹ 4.99 / ml', 450, 948);
+
+      // Row 2: Batch & Dates
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('BATCH NUMBER', 95, 1010);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 28px monospace';
+      ctx.fillText('AB-SERUM-2026-9', 95, 1048);
+
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('MFG DATE & EXPIRY', 450, 1010);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 26px sans-serif';
+      ctx.fillText('MFG: AUG 2026 • USE BEFORE 24 MONTHS', 450, 1048);
+
+      // Row 3: Manufacturer
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '500 21px sans-serif';
+      ctx.fillText('MFD BY: Aura Botanics Laboratories, Green Valley Estate, Baddi 173205, HP', 95, 1110);
+      ctx.fillText('Consumer Care: support@aurabotanics.com | Toll-Free: 1800-44-2026', 95, 1148);
+
+      // CDSCO Lic No
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 24px sans-serif';
+      ctx.fillText('Mfg. Lic. No.: COS/HP/2026/089 (CDSCO Compliant)', 95, 1205);
+
+    } else {
+      // -------------------------------------------------------------
+      // 3. EDIBLE OIL: GOLDEN HARVEST KACHI GHANI (Warm Brass & Amber Gold)
+      // -------------------------------------------------------------
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, 1440);
+      bgGrad.addColorStop(0, '#451a03');    // Deep amber brown
+      bgGrad.addColorStop(0.2, '#78350f');  // Rich mustard amber
+      bgGrad.addColorStop(0.55, '#b45309'); // Glowing gold amber
+      bgGrad.addColorStop(0.85, '#78350f');
+      bgGrad.addColorStop(1, '#291002');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1024, 1440);
+
+      // Shimmering brass highlights
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.06)';
+      for (let i = 0; i < 1440; i += 8) {
+        ctx.fillRect(0, i, 1024, 3);
+      }
+
+      // Metallic Top Band
+      const brassBand = ctx.createLinearGradient(0, 120, 1024, 120);
+      brassBand.addColorStop(0, '#d97706');
+      brassBand.addColorStop(0.5, '#fef08a');
+      brassBand.addColorStop(1, '#d97706');
+      ctx.fillStyle = brassBand;
+      ctx.fillRect(0, 120, 1024, 12);
+
+      // FSSAI Green Veg Logo in Top Right
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(840, 160, 90, 90);
+      ctx.fillStyle = '#16a34a';
+      ctx.beginPath();
+      ctx.arc(885, 205, 26, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Brand Category Tag
+      ctx.fillStyle = '#fde68a';
+      ctx.font = '700 28px sans-serif';
+      ctx.letterSpacing = '5px';
+      ctx.fillText('100% PURE VIRGIN COLD-PRESSED', 80, 185);
+
+      // Main Brand Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 84px sans-serif';
+      ctx.fillText('GOLDEN HARVEST', 80, 280);
+
+      // Subtitle
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = '500 32px sans-serif';
+      ctx.fillText('Kachi Ghani Pure Mustard Oil (Agmark Grade-1)', 80, 335);
+
+      // Center Graphic Badge
+      const badgeGrad = ctx.createRadialGradient(512, 545, 30, 512, 545, 260);
+      badgeGrad.addColorStop(0, 'rgba(251, 191, 36, 0.5)');
+      badgeGrad.addColorStop(0.7, 'rgba(180, 83, 9, 0.15)');
+      badgeGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = badgeGrad;
+      ctx.fillRect(100, 370, 824, 350);
+
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(512, 545, 140, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AGMARK GRADE 1', 512, 530);
+      ctx.font = '600 24px sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.fillText('NATURAL OMEGA-3 • ZERO ADULTERATION', 512, 575);
+
+      // Regulatory Compliance Card (LM Dual Mass-Volume Amendment & FSSAI)
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(41, 16, 2, 0.88)';
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.4)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(65, 770, 894, 475, 20);
+      ctx.fill();
+      ctx.stroke();
+
+      // Card Title
+      ctx.fillStyle = '#fde047';
+      ctx.font = '800 24px sans-serif';
+      ctx.fillText('MANDATORY DUAL DECLARATION (LEGAL METROLOGY AMENDMENT)', 95, 815);
+
+      // Row 1: Dual Net Volume + Mass & MRP
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('NET QUANTITY (VOLUME + MASS EQUIV)', 95, 868);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 32px sans-serif';
+      ctx.fillText('1 Litre (910 g Mass)', 95, 910);
+
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('MAX RETAIL PRICE (MRP)', 450, 868);
+      ctx.fillStyle = '#34d399';
+      ctx.font = '800 36px sans-serif';
+      ctx.fillText('₹ 175.00', 450, 910);
+      ctx.font = '500 20px sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.fillText('(Incl. of all taxes)', 605, 910);
+
+      ctx.font = '600 22px sans-serif';
+      ctx.fillStyle = '#fde68a';
+      ctx.fillText('Unit Sale Price: ₹ 0.175 / ml', 450, 948);
+
+      // Row 2: Batch & Dates
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('BATCH NUMBER', 95, 1010);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 28px monospace';
+      ctx.fillText('GH-OIL-2026-M04', 95, 1048);
+
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = '600 22px sans-serif';
+      ctx.fillText('MFG & BEST BEFORE', 450, 1010);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 26px sans-serif';
+      ctx.fillText('MFG: AUG 2026 • BEST BEFORE 12 MONTHS', 450, 1048);
+
+      // Row 3: Manufacturer
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = '500 21px sans-serif';
+      ctx.fillText('MFD & PACKED BY: Golden Harvest Agro Oils Ltd., GT Road, Kanpur 208001, UP', 95, 1110);
+      ctx.fillText('Consumer Care: oils@goldenharvest.in | Toll-Free: 1800-88-2026', 95, 1148);
+
+      // FSSAI Lic
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 24px sans-serif';
+      ctx.fillText('fssai Lic. No. 10819003000452 | Agmark: CA-0988', 95, 1205);
     }
 
-    // Modern Gold Accent Band
-    const goldGrad = ctx.createLinearGradient(0, 120, 1024, 120);
-    goldGrad.addColorStop(0, '#d97706');
-    goldGrad.addColorStop(0.5, '#fbbf24');
-    goldGrad.addColorStop(1, '#d97706');
-    ctx.fillStyle = goldGrad;
-    ctx.fillRect(0, 120, 1024, 12);
-
-    // Green Veg Symbol (FSSAI mandatory compliant icon)
-    // Box
-    ctx.strokeStyle = '#16a34a';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(840, 160, 90, 90);
-    // Green Filled Circle
-    ctx.fillStyle = '#16a34a';
-    ctx.beginPath();
-    ctx.arc(885, 205, 25, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Brand Tag / Category Header
-    ctx.fillStyle = '#a5b4fc';
-    ctx.font = '600 32px sans-serif';
-    ctx.letterSpacing = '4px';
-    ctx.fillText('NATURAL ARTISANAL FOODS', 80, 180);
-
-    // Product Title (Large & Premium)
+    // Common Barcode & Certified Stamp for all packages
+    // High-res Barcode
     ctx.fillStyle = '#ffffff';
-    ctx.font = '800 86px sans-serif';
-    ctx.fillText('CompliScan', 80, 280);
-
-    ctx.fillStyle = '#f59e0b'; // Warm Amber/Gold
-    ctx.font = '800 86px sans-serif';
-    ctx.fillText('Sample', 560, 280);
-
-    // Product Subtitle
-    ctx.fillStyle = '#e0e7ff';
-    ctx.font = '500 34px sans-serif';
-    ctx.fillText('Roasted Multigrain Herb Crisp Snacking Pouch', 80, 340);
-
-    // Decorative illustration zone: Floating crisp / ingredient badge
-    const badgeGrad = ctx.createRadialGradient(512, 560, 40, 512, 560, 280);
-    badgeGrad.addColorStop(0, 'rgba(99, 102, 241, 0.45)');
-    badgeGrad.addColorStop(0.7, 'rgba(99, 102, 241, 0.1)');
-    badgeGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = badgeGrad;
-    ctx.fillRect(100, 380, 824, 380);
-
-    // Central circular food graphic / quality seal
-    ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(512, 560, 150, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.font = '700 36px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('100% WHOLE GRAIN', 512, 545);
-    ctx.font = '500 28px sans-serif';
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillText('TRANS-FAT FREE • ZERO CHOLESTEROL', 512, 595);
-
-    // Regulatory Compliance Information Grid (Indian Packaged Commodities Standards)
-    ctx.textAlign = 'left';
-    
-    // Background card for regulatory details
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(70, 790, 884, 460, 20);
-    ctx.fill();
-    ctx.stroke();
-
-    // Compliance Grid Header
-    ctx.fillStyle = '#818cf8';
-    ctx.font = '700 26px sans-serif';
-    ctx.fillText('MANDATORY DECLARATIONS (LM & FSSAI COMPLIANT)', 105, 835);
-
-    // Grid row 1: Net Qty & MRP
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 24px sans-serif';
-    ctx.fillText('NET QUANTITY', 105, 890);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 34px sans-serif';
-    ctx.fillText('150 g', 105, 930);
-
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 24px sans-serif';
-    ctx.fillText('MAX RETAIL PRICE (MRP)', 460, 890);
-    ctx.fillStyle = '#34d399'; // Emerald
-    ctx.font = '700 34px sans-serif';
-    ctx.fillText('₹ 75.00', 460, 930);
-    ctx.font = '400 20px sans-serif';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText('(Incl. of all taxes)', 590, 930);
-
-    // Unit Sale Price
-    ctx.font = '500 22px sans-serif';
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('Unit Sale Price: ₹ 0.50 / g', 460, 965);
-
-    // Grid row 2: Dates & Batch
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 24px sans-serif';
-    ctx.fillText('BATCH NO.', 105, 1030);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 28px monospace';
-    ctx.fillText('CS-2026-B08', 105, 1065);
-
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 24px sans-serif';
-    ctx.fillText('MFG DATE & BEST BEFORE', 460, 1030);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '600 26px sans-serif';
-    ctx.fillText('MFG: AUG 2026  •  EXP: MAY 2027', 460, 1065);
-
-    // Grid row 3: Manufacturer & Customer Care
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 22px sans-serif';
-    ctx.fillText('MFD & MKTD BY: CompliScan Consumer Foods Pvt. Ltd., MIDC Industrial Area, Pune 411018, India', 105, 1130);
-    ctx.fillText('Consumer Care Cell: care@compliscan.ai | Toll Free: 1800-2026-COMPLI', 105, 1170);
-
-    // FSSAI License & Barcode Section
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = '700 24px sans-serif';
-    ctx.fillText('fssai  Lic. No. 10026022001489', 105, 1220);
-
-    // High resolution mock EAN-13 barcode
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(720, 1180, 200, 60);
+    ctx.fillRect(720, 1175, 210, 60);
     ctx.fillStyle = '#000000';
     const barPattern = [3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 3, 1, 2, 3, 4, 1, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 2, 1, 4, 2];
     let barX = 730;
     for (let b = 0; b < barPattern.length; b++) {
       const w = barPattern[b];
       if (b % 2 === 0) {
-        ctx.fillRect(barX, 1185, w * 2.2, 45);
+        ctx.fillRect(barX, 1180, w * 2.2, 44);
       }
       barX += w * 2.2 + 2;
-      if (barX > 910) break;
+      if (barX > 915) break;
     }
     ctx.font = '12px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('8 901234 567890', 820, 1238);
+    ctx.fillText('8 901234 567890', 825, 1232);
 
-    // Certified Compliant Watermark stamp in corner
+    // Certified Compliant Watermark stamp
     ctx.save();
     ctx.translate(850, 1000);
     ctx.rotate(-0.15);
-    ctx.strokeStyle = 'rgba(52, 211, 153, 0.85)';
+    ctx.strokeStyle = 'rgba(52, 211, 153, 0.9)';
     ctx.lineWidth = 4;
     ctx.strokeRect(-110, -35, 220, 70);
     ctx.fillStyle = 'rgba(52, 211, 153, 0.95)';
     ctx.font = '800 22px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('COMPLIANT', 0, -5);
-    ctx.font = '600 16px sans-serif';
+    ctx.font = '600 15px sans-serif';
     ctx.fillText('SIH 2026 VERIFIED', 0, 20);
     ctx.restore();
 
@@ -225,5 +490,5 @@ export function useProductPackageTexture() {
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
     return texture;
-  }, []);
+  }, [type]);
 }

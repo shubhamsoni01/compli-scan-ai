@@ -44,6 +44,7 @@ export default function LandingPage() {
     totalScans: 0,
     totalVisits: 0,
   });
+  const [activeProduct, setActiveProduct] = useState<'food' | 'cosmetics' | 'oil'>('food');
 
   useEffect(() => {
     fetchRealStats().then(data => {
@@ -123,39 +124,68 @@ export default function LandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right side: 3D Scanner with Floating HUD Tags */}
+            {/* Right side: 3D Scanner with Multi-Product Switcher & HUD */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.25, ease: 'easeOut' }}
-              className="lg:col-span-6 relative w-full flex items-center justify-center py-6 lg:py-0 min-h-[400px] sm:min-h-[460px]"
+              className="lg:col-span-6 relative w-full flex flex-col items-center justify-center py-4 lg:py-0 min-h-[440px] sm:min-h-[500px]"
             >
-              {/* Floating HUD Widget 1: Top-Left */}
-              <motion.div 
-                initial={{ opacity: 0, x: -20, y: -10 }}
-                animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
-                transition={{ opacity: { delay: 0.6, duration: 0.6 }, y: { repeat: Infinity, duration: 4.5, ease: 'easeInOut' } }}
-                className="absolute top-2 left-2 sm:-left-4 z-20 hidden sm:flex items-center gap-2.5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl px-3.5 py-2 rounded-xl border border-emerald-500/30 shadow-lg shadow-emerald-500/10 text-xs font-semibold text-slate-800 dark:text-emerald-200"
-              >
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                <span>🛡️ FSSAI & Metrology Verified</span>
-              </motion.div>
+              {/* Interactive Category Switcher Toolbar */}
+              <div className="z-30 mb-3 flex items-center gap-1.5 p-1.5 rounded-full bg-slate-900/90 dark:bg-slate-900/95 border border-emerald-500/30 shadow-xl backdrop-blur-xl">
+                <button
+                  type="button"
+                  onClick={() => setActiveProduct('food')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                    activeProduct === 'food'
+                      ? "bg-gradient-to-r from-red-600 to-amber-600 text-white shadow-md shadow-red-500/25"
+                      : "text-slate-400 hover:text-white"
+                  )}
+                >
+                  <span>🍜</span>
+                  <span>Food Pouch</span>
+                </button>
 
-              {/* Floating HUD Widget 2: Bottom-Right */}
-              <motion.div 
-                initial={{ opacity: 0, x: 20, y: 20 }}
-                animate={{ opacity: 1, x: 0, y: [0, 6, 0] }}
-                transition={{ opacity: { delay: 0.8, duration: 0.6 }, y: { repeat: Infinity, duration: 5, ease: 'easeInOut', delay: 1 } }}
-                className="absolute bottom-4 right-2 sm:-right-4 z-20 hidden sm:flex items-center gap-2.5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl px-3.5 py-2 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10 text-xs font-semibold text-slate-800 dark:text-cyan-200"
-              >
-                <span className="text-cyan-400">⚡</span>
-                <span>0.8s Scan Speed • 100% Deterministic</span>
-              </motion.div>
+                <button
+                  type="button"
+                  onClick={() => setActiveProduct('cosmetics')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                    activeProduct === 'cosmetics'
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/25"
+                      : "text-slate-400 hover:text-white"
+                  )}
+                >
+                  <span>🧴</span>
+                  <span>Cosmetics</span>
+                </button>
 
-              <div className="relative w-full max-w-[480px] lg:max-w-[460px] xl:max-w-[500px] h-[350px] sm:h-[410px] md:h-[450px] lg:h-[460px] xl:h-[490px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setActiveProduct('oil')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                    activeProduct === 'oil'
+                      ? "bg-gradient-to-r from-amber-600 to-yellow-600 text-slate-950 font-bold shadow-md shadow-amber-500/25"
+                      : "text-slate-400 hover:text-white"
+                  )}
+                >
+                  <span>🫒</span>
+                  <span>Edible Oil</span>
+                </button>
+              </div>
+
+              {/* Floating Top Indicator */}
+              <div className="z-20 hidden sm:flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-medium text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>Live AI Laser Audit: {activeProduct === 'food' ? 'Legal Metrology & FSSAI 2020' : activeProduct === 'cosmetics' ? 'Cosmetics Rules 2020 (CDSCO)' : 'Legal Metrology Dual Declaration'}</span>
+              </div>
+
+              <div className="relative w-full max-w-[480px] lg:max-w-[460px] xl:max-w-[500px] h-[360px] sm:h-[420px] md:h-[450px] lg:h-[460px] xl:h-[490px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 -z-10 rounded-2xl md:rounded-3xl bg-gradient-to-tr from-emerald-500/15 via-teal-500/5 to-cyan-500/15 dark:from-emerald-950/40 dark:via-slate-900/50 dark:to-cyan-950/30 backdrop-blur-xl border border-emerald-500/20 dark:border-white/10 shadow-xl shadow-emerald-500/5" />
                 <Suspense fallback={<div className="flex items-center justify-center h-full text-emerald-500"><Scan className="h-10 w-10 animate-spin" /></div>}>
-                  <ProductScanner size="md" />
+                  <ProductScanner size="md" productType={activeProduct} />
                 </Suspense>
               </div>
             </motion.div>
