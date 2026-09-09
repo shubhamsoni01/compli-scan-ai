@@ -375,56 +375,105 @@ export const KidScanningStoryAnimation: React.FC = () => {
 
         {/* 
           -------------------------------------------------------------
-          TOP CYBER HUD SPEEDOMETER / SCORE METER WIDGET
+          TOP CYBER HUD: SCORE GAUGE (LEFT) & MINISTRY REACTION (RIGHT)
           -------------------------------------------------------------
         */}
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-3 bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-2xl backdrop-blur-md shadow-lg">
-          {/* Radial Circular Progress Gauge */}
-          <div className="relative w-11 h-11 flex items-center justify-center">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              {/* Gauge Background Track */}
-              <circle
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke="#1e293b"
-                strokeWidth="3.5"
-              />
-              {/* Gauge Animated Value Arc */}
-              <circle
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke={isSafe ? '#10b981' : '#ef4444'}
-                strokeWidth="3.5"
-                strokeDasharray="88"
-                strokeDashoffset={stage === 'aim' ? 88 : 88 - (88 * currentItem.score) / 100}
-                strokeLinecap="round"
-                className="transition-all duration-1000 ease-out"
-                filter={isSafe ? "drop-shadow(0 0 4px #10b981)" : "drop-shadow(0 0 4px #ef4444)"}
-              />
-            </svg>
-            <span className={cn(
-              "absolute font-mono font-black text-[11px]",
-              isSafe ? "text-emerald-400" : "text-red-400"
-            )}>
-              {stage === 'aim' ? '--' : `${currentItem.score}%`}
-            </span>
+        <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex items-center justify-between gap-2 pointer-events-none">
+          {/* Left: Radial Score Gauge */}
+          <div className="flex items-center gap-2.5 bg-slate-950/85 border border-slate-800 px-3 py-1.5 rounded-2xl backdrop-blur-md shadow-lg pointer-events-auto">
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#1e293b" strokeWidth="3.5" />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="14"
+                  fill="none"
+                  stroke={isSafe ? '#10b981' : '#ef4444'}
+                  strokeWidth="3.5"
+                  strokeDasharray="88"
+                  strokeDashoffset={stage === 'aim' ? 88 : 88 - (88 * currentItem.score) / 100}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                  filter={isSafe ? "drop-shadow(0 0 4px #10b981)" : "drop-shadow(0 0 4px #ef4444)"}
+                />
+              </svg>
+              <span className={cn(
+                "absolute font-mono font-black text-[10px]",
+                isSafe ? "text-emerald-400" : "text-red-400"
+              )}>
+                {stage === 'aim' ? '--' : `${currentItem.score}%`}
+              </span>
+            </div>
+
+            <div className="hidden sm:block">
+              <span className="text-[8px] font-mono uppercase text-slate-400 block tracking-wider">
+                COMPLIANCE
+              </span>
+              <span className={cn(
+                "text-[9px] font-black tracking-wide px-1.5 py-0.2 rounded inline-block font-mono",
+                isSafe ? "bg-emerald-950 text-emerald-300 border border-emerald-500/30" : "bg-red-950 text-red-300 border border-red-500/30"
+              )}>
+                {stage === 'aim' ? 'SCANNING...' : currentItem.grade}
+              </span>
+            </div>
           </div>
 
-          <div>
-            <span className="text-[9px] font-mono uppercase text-slate-400 block tracking-wider">
-              COMPLIANCE SCORE
-            </span>
-            <span className={cn(
-              "text-[10px] font-black tracking-wide px-1.5 py-0.2 rounded inline-block font-mono",
-              isSafe ? "bg-emerald-950 text-emerald-300 border border-emerald-500/30" : "bg-red-950 text-red-300 border border-red-500/30"
-            )}>
-              {stage === 'aim' ? 'CALCULATING...' : currentItem.grade}
-            </span>
-          </div>
+          {/* Right: Ministry of Consumer Affairs Live Reaction Badge (Happy vs Angry) */}
+          <motion.div 
+            key={currentItem.id + stage}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-2xl border backdrop-blur-md shadow-lg pointer-events-auto transition-colors duration-500",
+              isSafe
+                ? "bg-slate-950/90 border-emerald-500/40 shadow-emerald-500/10"
+                : "bg-slate-950/90 border-red-500/50 shadow-red-500/15"
+            )}
+          >
+            {/* Indian Tricolor Strip & Ashoka Emblem */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="w-1 h-7 rounded-full overflow-hidden flex flex-col">
+                <div className="flex-1 bg-[#FF9933]" />
+                <div className="flex-1 bg-[#FFFFFF]" />
+                <div className="flex-1 bg-[#138808]" />
+              </div>
+              <img
+                src="/assets/ministry-emblem-transparent-gold.png"
+                alt="Ministry of Consumer Affairs"
+                className="h-6 w-auto object-contain drop-shadow-sm"
+                onError={(e) => {
+                  // Fallback to text emoji if img not found
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            </div>
+
+            <div className="flex flex-col text-left">
+              <div className="flex items-center gap-1">
+                <span className="text-[8px] font-extrabold uppercase tracking-wider text-amber-400">
+                  GOVT. OF INDIA
+                </span>
+                <span className={cn(
+                  "text-[8px] font-mono px-1 py-0.2 rounded font-bold uppercase",
+                  isSafe ? "bg-emerald-950 text-emerald-300 border border-emerald-500/30" : "bg-red-950 text-red-300 border border-red-500/30"
+                )}>
+                  {isSafe ? "HAPPY 😊" : "ANGRY 😡"}
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-white tracking-tight leading-tight">
+                Ministry of Consumer Affairs
+              </span>
+              <span className={cn(
+                "text-[8.5px] font-semibold leading-tight",
+                isSafe ? "text-emerald-400" : "text-red-400"
+              )}>
+                {isSafe 
+                  ? "✓ Approved: 100% Compliant" 
+                  : "🚨 Action: Non-Compliance Notice Issued!"}
+              </span>
+            </div>
+          </motion.div>
         </div>
 
         {/* 
@@ -441,7 +490,7 @@ export const KidScanningStoryAnimation: React.FC = () => {
           ANIMATED SVG STAGE (PACKET + FLYING DATA + KID + STAMP)
           -------------------------------------------------------------
         */}
-        <div className="relative w-full h-[280px] sm:h-[300px] flex items-center justify-center mt-6">
+        <div className="relative w-full h-[280px] sm:h-[300px] flex items-center justify-center mt-8 sm:mt-6">
           <svg
             viewBox="0 0 520 320"
             className="w-full h-full max-w-[500px]"
