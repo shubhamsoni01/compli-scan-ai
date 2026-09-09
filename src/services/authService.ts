@@ -100,9 +100,17 @@ export async function signup(
 
 async function responseJsonSafe(res: Response): Promise<any> {
   try {
-    return await res.json();
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      if (res.status === 502 || res.status === 503 || res.status === 504) {
+        return { success: false, error: 'Backend server is currently waking up from sleep. Please wait 10-15 seconds and try again.' };
+      }
+      return { success: false, error: `Server error (${res.status}): Please check backend connection.` };
+    }
   } catch {
-    return { success: false, error: 'Server response error.' };
+    return { success: false, error: 'Network error: Unable to connect to server.' };
   }
 }
 
