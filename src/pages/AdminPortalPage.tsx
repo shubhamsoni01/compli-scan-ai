@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldAlert, ShieldCheck, Scale, FileText, Users, AlertTriangle, 
@@ -16,6 +16,12 @@ import { useAuth } from '@/context/AuthContext';
 
 export const AdminPortalPage: React.FC = () => {
   const { user } = useAuth();
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
+    return sessionStorage.getItem('compliscan_admin_unlocked') === 'true';
+  });
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+
   const [stats, setStats] = useState<RealStatsResponse | null>(null);
   const [scans, setScans] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +29,25 @@ export const AdminPortalPage: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [noticeModalScan, setNoticeModalScan] = useState<any | null>(null);
   const [noticeSentToast, setNoticeSentToast] = useState<string | null>(null);
+
+  const handleUnlock = (overridePin?: string) => {
+    const pinToTest = (overridePin || pinInput).trim().toUpperCase();
+    const VALID_PINS = ['SIH2026', 'ADMIN2026', 'GOVT2026', '1234', 'ADMIN'];
+    
+    if (VALID_PINS.includes(pinToTest)) {
+      setIsUnlocked(true);
+      sessionStorage.setItem('compliscan_admin_unlocked', 'true');
+      setPinError('');
+    } else {
+      setPinError('Invalid Officer Authorization Passcode. Try SIH2026.');
+    }
+  };
+
+  const handleLock = () => {
+    setIsUnlocked(false);
+    sessionStorage.removeItem('compliscan_admin_unlocked');
+    setPinInput('');
+  };
 
   const loadData = async () => {
     setIsRefreshing(true);
@@ -41,8 +66,101 @@ export const AdminPortalPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isUnlocked) {
+      loadData();
+    }
+  }, [isUnlocked]);
+
+  // If locked, render the Government Officer PIN Terminal
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center p-4 sm:p-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="w-full max-w-md rounded-3xl bg-slate-900/95 border border-amber-500/40 p-6 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-2xl text-center"
+        >
+          {/* Ambient Glows */}
+          <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 shadow-lg">
+            <Lock size={30} />
+          </div>
+
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <MinistryLogo size="sm" showText={false} />
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400">
+              RESTRICTED OFFICER ACCESS
+            </span>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-black text-white font-heading mb-1">
+            Ministry Admin Terminal
+          </h2>
+          <p className="text-xs text-slate-400 mb-6">
+            Enter Government Officer Authorization Passcode to access national enforcement records.
+          </p>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleUnlock();
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="Enter Passcode (e.g. SIH2026)"
+                  value={pinInput}
+                  onChange={(e) => {
+                    setPinInput(e.target.value);
+                    setPinError('');
+                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-center font-mono font-bold tracking-widest text-lg text-amber-300 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 uppercase"
+                  autoFocus
+                />
+              </div>
+              {pinError && (
+                <p className="text-xs text-red-400 mt-2 font-medium">
+                  {pinError}
+                </p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-950 font-bold py-3"
+            >
+              <Gavel size={16} className="mr-2" />
+              Authorize Enforcement Access
+            </Button>
+          </form>
+
+          {/* Quick 1-Click Demo Passcode Pill for SIH Judges */}
+          <div className="mt-6 pt-5 border-t border-slate-800">
+            <p className="text-[11px] text-slate-400 mb-2">
+              🔑 SIH 2026 Demo Officer Credentials:
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setPinInput('SIH2026');
+                handleUnlock('SIH2026');
+              }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold transition-all hover:scale-105 cursor-pointer"
+            >
+              <span>Auto-Fill & Unlock: <strong className="text-white">SIH2026</strong></span>
+              <ArrowUpRight size={14} />
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   const handleIssueNotice = (scan: any) => {
     setNoticeModalScan(scan);
@@ -112,6 +230,15 @@ export const AdminPortalPage: React.FC = () => {
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               Sync Telemetry
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLock}
+              className="border-red-500/40 text-red-300 hover:bg-red-500/10"
+            >
+              <Lock size={14} className="mr-1.5" />
+              Lock
             </Button>
             <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-700">
               <MinistryLogo size="sm" />
