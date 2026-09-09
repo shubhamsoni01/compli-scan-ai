@@ -20,6 +20,7 @@ const RulesPage = lazy(() => import('@/pages/RulesPage'));
 const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 const DevelopmentPage = lazy(() => import('@/pages/DevelopmentPage'));
+const AdminPortalPage = lazy(() => import('@/pages/AdminPortalPage'));
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function LazyFallback() {
@@ -180,6 +181,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <SettingsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'admin',
+        element: (
+          <SuspenseWrapper>
+            <AdminPortalPage />
           </SuspenseWrapper>
         ),
       },

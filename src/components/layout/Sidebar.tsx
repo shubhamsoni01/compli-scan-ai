@@ -9,6 +9,7 @@ import {
   BookOpen,
   BarChart3,
   Settings,
+  Gavel,
   ShieldCheck,
   Sparkles
 } from 'lucide-react';
@@ -23,6 +24,7 @@ const navItems = [
   { name: 'Reports', path: '/reports', icon: FileText },
   { name: 'Rules & Info', path: '/rules', icon: BookOpen },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { name: 'Ministry Admin', path: '/admin', icon: Gavel },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
 

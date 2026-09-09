@@ -57,6 +57,7 @@ export const LandingLayout: React.FC = () => {
             {[
               { label: 'Features', href: '/#features', isInternal: true },
               { label: 'How It Works', href: '/#how-it-works', isInternal: true },
+              { label: 'Ministry Admin', href: '/admin', isInternal: false },
               { label: 'Development', href: '/development', isInternal: false },
               { label: 'Rules & Gazette', href: '/rules', isInternal: false }
             ].map((link) => (
