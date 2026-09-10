@@ -3,18 +3,16 @@ import { Outlet } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Topbar } from '../components/layout/Topbar';
-import { NationalAmbientBackground } from '@/components/ui/NationalAmbientBackground';
 
 export const AppLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="relative flex h-screen bg-gray-50 dark:bg-surface-950 text-gray-900 dark:text-gray-100 overflow-hidden font-sans">
-      <NationalAmbientBackground />
+    <div className="flex h-screen bg-gray-50 dark:bg-surface-950 text-gray-900 dark:text-gray-100 overflow-hidden font-sans">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 overflow-hidden">
         <Topbar />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8 relative">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

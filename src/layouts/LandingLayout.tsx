@@ -9,7 +9,6 @@ import { cn } from '@/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
-import { NationalAmbientBackground } from '@/components/ui/NationalAmbientBackground';
 
 export const LandingLayout: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -26,8 +25,7 @@ export const LandingLayout: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-gray-50 dark:bg-surface-950 font-sans transition-colors duration-200 text-gray-900 dark:text-gray-100">
-      <NationalAmbientBackground />
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-surface-950 font-sans transition-colors duration-200 text-gray-900 dark:text-gray-100">
       <header 
         className={cn(
           "z-[9999] transition-all duration-300 flex items-center justify-between",
