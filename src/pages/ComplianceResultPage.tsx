@@ -10,7 +10,7 @@ import { ProgressRing } from '@/components/ui/ProgressRing';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 import { mockComplianceResult } from '@/data/complianceRules';
-import { getCachedScanResult } from '@/services/scanService';
+import { getCachedScanResult, getScanResultAsync } from '@/services/scanService';
 import { formatDate } from '@/utils/formatters';
 import { AIProcessingDetails } from '@/components/scan/AIProcessingDetails';
 import { generateReportPDF, submitComplaintToDB } from '@/services/api';
@@ -28,9 +28,19 @@ export default function ComplianceResultPage() {
   const { scanId, id } = useParams<{ scanId?: string; id?: string }>();
   const activeId = scanId || id;
 
+  const [dbResult, setDbResult] = useState<any | null>(null);
+
+  React.useEffect(() => {
+    if (activeId && !getCachedScanResult(activeId)) {
+      getScanResultAsync(activeId).then((res) => {
+        if (res) setDbResult(res);
+      });
+    }
+  }, [activeId]);
+
   const currentResult = activeId ? getCachedScanResult(activeId) : null;
   // If explicitly requesting a mock record (e.g. scan_001 from history) or fallback
-  const resolvedResult = currentResult || (activeId === 'scan_001' ? mockComplianceResult : currentResult || mockComplianceResult);
+  const resolvedResult = currentResult || dbResult || (activeId === 'scan_001' ? mockComplianceResult : mockComplianceResult);
   const score = useAnimatedCounter(resolvedResult.score);
 
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -295,7 +305,7 @@ export default function ComplianceResultPage() {
           <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Click rule to inspect source</span>
         </div>
         <div className="divide-y divide-gray-100 dark:divide-gray-800">
-          {resolvedResult.checks.map((check) => (
+          {(resolvedResult.checks || []).map((check: any) => (
             <div key={check.ruleId} className="flex flex-col">
               <div 
                 className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
