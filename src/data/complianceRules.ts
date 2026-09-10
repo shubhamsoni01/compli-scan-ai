@@ -717,7 +717,7 @@ export function calculateNutritionAudit(
       if (match && match[1]) {
         const numStr = match[1].replace(/,/g, '.');
         const num = parseFloat(numStr);
-        if (!isNaN(num)) {
+        if (!isNaN(num) && num > 0) {
           const unit = match[2] || (num > 50 ? 'mg' : 'g');
           return { text: `${num} ${unit}`, num };
         }
@@ -726,11 +726,11 @@ export function calculateNutritionAudit(
     return { text: 'Not detected', num: null };
   };
 
-  // 1. Sodium (Salt)
+  // 1. Sodium (Salt Equivalent) - Strict word boundary to avoid unquantified ingredients or cholesterol
   const sodiumData = extractNutrient([
-    /sodium[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
-    /sodium[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
-    /salt[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
+    /\bsodium\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
+    /\bsodium\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
+    /\bsalt\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
   ]);
   let sodiumNumeric = sodiumData.num;
   if (sodiumData.text.includes('g') && !sodiumData.text.includes('mg') && sodiumNumeric !== null && sodiumNumeric < 10) {
@@ -755,14 +755,20 @@ export function calculateNutritionAudit(
     }
   }
 
-  // 2. Added Sugars & Total Sugars (Priority: Added Sugar > Total Sugar)
-  const sugarData = extractNutrient([
-    /added\s*sugars?[®™\s]*[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-    /added\s*sugars?[®™\s]*[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /total\s*sugars?[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-    /total\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /sugars?[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+  // 2. Added Sugars & Total Sugars (Strict: Added Sugars prioritized, NEVER matches Carbohydrate)
+  const addedSugarData = extractNutrient([
+    /\badded\s*sugars?[®™\s]*[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /\badded\s*sugars?[®™\s]*[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
   ]);
+
+  const totalSugarData = extractNutrient([
+    /\btotal\s*sugars?[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /\btotal\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+    /\bsugars?\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+  ]);
+
+  const sugarData = addedSugarData.num !== null ? addedSugarData : totalSugarData;
+
   const sugarLimit = isLiquid ? 6 : 10; // g per 100g
   let sugarStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let sugarDev: number | null = null;
@@ -784,9 +790,9 @@ export function calculateNutritionAudit(
 
   // 3. Saturated Fat
   const satFatData = extractNutrient([
-    /saturated\s*fat[^\d\n]{0,15}(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-    /saturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /sat\s*fat[^\d\n]{0,15}(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+    /\bsaturated\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /\bsaturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+    /\bsat\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
   ]);
   const satFatLimit = 6.0; // g per 100g
   let satFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
@@ -809,10 +815,10 @@ export function calculateNutritionAudit(
 
   // 4. Trans Fat (Strict 2% FSSAI Limit)
   let transFatData = extractNutrient([
-    /trans\s*fat[\s\S]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /\btrans\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
     /trans\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
   ]);
-  if (transFatData.num === null && /<[uU0oO]?i?l?g|<0\.1/i.test(nutText)) {
+  if (transFatData.num === null && /trans\s*fat[^\n]{0,15}<\s*0?\.?1/i.test(nutText)) {
     transFatData = { text: '<0.1 g', num: 0.09 };
   }
   const transFatLimit = 0.2; // g per 100g
