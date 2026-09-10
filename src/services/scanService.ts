@@ -585,6 +585,53 @@ export async function startRealMultiScan(
 
   setCachedScanResult(scanId, result);
 
+  let currentAuthUser: any = null;
+  const currentUserRaw = localStorage.getItem('compliscan_user_data');
+  try {
+    if (currentUserRaw) currentAuthUser = JSON.parse(currentUserRaw);
+  } catch {}
+
+  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const shortId = scanId.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || 'M001';
+  const reportId = `CS-${dateStr}-${shortId}`;
+
+  const dbPayload = {
+    scanId,
+    userId: currentAuthUser?.id || null,
+    userName: currentAuthUser?.name || 'CompliScan User',
+    userEmail: currentAuthUser?.email || '',
+    originalImageUrl: primaryOcrResponse?.originalImageUrl || null,
+    originalFilename: primaryFile.name || 'Multi-Angle Packaging',
+    reportId,
+    productName: p.productName || 'Not detected',
+    brand: p.brand || 'Not detected',
+    category: p.category || userSelectedCategory || 'Unknown',
+    mrp: p.mrp || null,
+    netQuantity: p.netQuantity || null,
+    manufacturer: p.manufacturer || null,
+    manufacturingDate: p.manufacturingDate || null,
+    expiryDate: p.expiryDate || null,
+    batchNumber: p.batchNumber || null,
+    consumerCare: p.consumerCare || null,
+    ingredients: p.ingredients || null,
+    countryOfOrigin: p.countryOfOrigin || null,
+    licenseNumber: p.licenseNumber || null,
+    rawOCRText: combinedOCRText || '',
+    groqStructuredJSON: p || {},
+    ruleResults: comp?.rules || [],
+    complianceScore: computedScore,
+    overallStatus: overallStatus,
+    readabilityResult: readabilityResult || null,
+  };
+
+  saveScanToDB(dbPayload).then((res) => {
+    if (res.success) {
+      console.log(`[CompliScan Client]: Multi-angle scan saved to DB with ID: ${scanId}`);
+    }
+  }).catch((err) => {
+    console.warn('[CompliScan Client]: DB save error (non-fatal):', err.message);
+  });
+
   return result;
 }
 

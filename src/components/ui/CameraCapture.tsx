@@ -56,6 +56,18 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose
     };
   }, [facingMode]);
 
+function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime, lastModified: Date.now() });
+}
+
   const handleCapture = () => {
     if (!videoRef.current) return;
     const video = videoRef.current;
@@ -69,19 +81,12 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose
     const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
     setCapturedDataUrl(dataUrl);
 
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          const file = new File([blob], `label-capture-${Date.now()}.jpg`, {
-            type: 'image/jpeg',
-            lastModified: Date.now(),
-          });
-          setCapturedFile(file);
-        }
-      },
-      'image/jpeg',
-      0.92
-    );
+    try {
+      const file = dataURLtoFile(dataUrl, `label-capture-${Date.now()}.jpg`);
+      setCapturedFile(file);
+    } catch (e) {
+      console.warn('Sync file conversion fallback:', e);
+    }
   };
 
   const handleRetake = () => {
@@ -90,11 +95,15 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose
   };
 
   const handleConfirm = () => {
-    if (capturedFile) {
+    let fileToUse = capturedFile;
+    if (!fileToUse && capturedDataUrl) {
+      fileToUse = dataURLtoFile(capturedDataUrl, `label-capture-${Date.now()}.jpg`);
+    }
+    if (fileToUse) {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
-      onCapture(capturedFile);
+      onCapture(fileToUse);
     }
   };
 
