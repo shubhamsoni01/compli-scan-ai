@@ -107,38 +107,38 @@ export async function generateCompliancePDF(reportData) {
       let headerOffset = 40;
       if (ministryLogoPath) {
         try {
-          doc.image(ministryLogoPath, headerOffset, 32, { fit: [36, 36] });
-          headerOffset += 40;
+          doc.image(ministryLogoPath, headerOffset, 28, { width: 40, height: 40, fit: [40, 40] });
+          headerOffset += 45;
         } catch (e) {
           console.warn('[PDFKit] Ministry logo render warning:', e.message);
         }
       }
       if (sihLogoPath) {
         try {
-          doc.image(sihLogoPath, headerOffset, 32, { fit: [36, 36] });
-          headerOffset += 40;
+          doc.image(sihLogoPath, headerOffset, 28, { width: 40, height: 40, fit: [40, 40] });
+          headerOffset += 45;
         } catch (e) {
           console.warn('[PDFKit] SIH logo render warning:', e.message);
         }
       }
 
-      doc.fillColor(primaryColor).fontSize(16).font('Helvetica-Bold').text('COMPLISCAN AI', headerOffset, 34);
-      doc.fillColor('#B45309').fontSize(7.5).font('Helvetica-Bold').text('SIH 2026 • Problem ID: SIH26034 | Ministry of Consumer Affairs, Food & Public Distribution', headerOffset, 52);
-      doc.fillColor(mutedColor).fontSize(7).font('Helvetica').text('Statutory Product Label Compliance Screening Dossier • Dept. of Consumer Affairs', headerOffset, 63);
+      doc.fillColor(primaryColor).fontSize(16).font('Helvetica-Bold').text('COMPLISCAN AI', headerOffset, 30, { width: 220 });
+      doc.fillColor('#B45309').fontSize(7.5).font('Helvetica-Bold').text('SIH 2026 • Problem ID: SIH26034 | Ministry of Consumer Affairs', headerOffset, 48, { width: 220 });
+      doc.fillColor(mutedColor).fontSize(7).font('Helvetica').text('Statutory Product Label Compliance Screening Dossier • DOCA', headerOffset, 59, { width: 220 });
 
       // Top right header box
-      doc.fillColor(textColor).fontSize(9).font('Helvetica-Bold').text(`Report ID: ${reportId}`, 360, 34, { align: 'right', width: 195 });
+      doc.fillColor(textColor).fontSize(9).font('Helvetica-Bold').text(`Report ID: ${reportId}`, 365, 30, { align: 'right', width: 190 });
       doc.font('Helvetica').fontSize(8).fillColor(mutedColor).text(
         `Generated: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`,
-        360,
-        46,
-        { align: 'right', width: 195 }
+        365,
+        42,
+        { align: 'right', width: 190 }
       );
 
       const statusBadgeColor = score >= 80 ? '#059669' : score >= 50 ? '#D97706' : '#DC2626';
-      doc.fillColor(statusBadgeColor).fontSize(9.5).font('Helvetica-Bold').text(String(overallStatus).toUpperCase(), 360, 59, { align: 'right', width: 195 });
+      doc.fillColor(statusBadgeColor).fontSize(9.5).font('Helvetica-Bold').text(String(overallStatus).toUpperCase(), 365, 55, { align: 'right', width: 190 });
 
-      doc.y = 80;
+      doc.y = 82;
 
       // -------------------------------------------------------------
       // 2. USER INFORMATION & 3. SCAN INFORMATION
@@ -675,19 +675,20 @@ export async function generateCompliancePDF(reportData) {
       for (let i = 0; i < totalPages; i++) {
         doc.switchToPage(i);
 
-        // Prominent large official Ministry emblem watermark in center of page
+        // Prominent large official Ministry & SIH emblems watermark in center of page
         if (ministryLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.08); // Clearly visible watermark seal
-            doc.image(ministryLogoPath, (595.28 - 380) / 2, (841.89 - 380) / 2 - 10, { fit: [380, 380] });
+            doc.opacity(0.095); // High clarity official government watermark seal
+            doc.image(ministryLogoPath, (595.28 - 340) / 2, (841.89 - 340) / 2 - 40, { fit: [340, 340] });
             doc.restore();
           } catch (e) {}
-        } else if (sihLogoPath) {
+        }
+        if (sihLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.08);
-            doc.image(sihLogoPath, (595.28 - 360) / 2, (841.89 - 360) / 2 - 10, { fit: [360, 360] });
+            doc.opacity(0.085); // Clearly visible SIH emblem
+            doc.image(sihLogoPath, (595.28 - 180) / 2, (841.89 - 180) / 2 + 130, { fit: [180, 180] });
             doc.restore();
           } catch (e) {}
         }
