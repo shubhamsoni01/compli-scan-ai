@@ -160,53 +160,69 @@ EXPECTED JSON OUTPUT STRUCTURE:
 ${fullOcrSlice}
 --- COMPLETE OCR TEXT END ---`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+  const modelsToTry = [
+    process.env.GROQ_MODEL?.trim() || 'llama-3.3-70b-versatile',
+    'llama-3.1-8b-instant',
+    'gemma2-9b-it'
+  ];
 
-  const model = process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b';
+  let rawContent = null;
+  let lastError = null;
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey.trim()}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.1,
-        response_format: { type: 'json_object' },
-      }),
-      signal: controller.signal,
-    });
+  for (const model of modelsToTry) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-    clearTimeout(timeoutId);
+    try {
+      console.log(`[Groq Model Attempt]: Requesting model: ${model}`);
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey.trim()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.1,
+          response_format: { type: 'json_object' },
+        }),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      let errBody = '';
-      try {
-        const errJson = await response.json();
-        errBody = errJson?.error?.message || JSON.stringify(errJson);
-      } catch {
-        errBody = await response.text();
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        rawContent = data.choices?.[0]?.message?.content;
+        if (rawContent) {
+          console.log(`[Groq Model Success]: ${model} structured response received.`);
+          break;
+        }
+      } else {
+        const status = response.status;
+        console.warn(`[Groq Notice]: Model ${model} returned status ${status}. Attempting fallback...`);
+        if (status === 429) {
+          // Rate limit: wait 500ms before trying lighter model
+          await new Promise((r) => setTimeout(r, 500));
+        }
       }
-      console.error(`[Groq API ${response.status}]:`, errBody);
-
-      if (response.status === 429) {
-        throw new Error('AI analysis rate limit reached. Please retry in a few moments.');
-      }
-      if (response.status === 401) {
-        throw new Error('Invalid GROQ_API_KEY. Please verify the API key in your .env file.');
-      }
-      throw new Error(`AI service responded with status ${response.status}: ${errBody || 'Request error'}`);
+    } catch (fetchErr) {
+      clearTimeout(timeoutId);
+      lastError = fetchErr;
+      console.warn(`[Groq Model Error]: ${model} failed (${fetchErr.message}).`);
     }
+  }
 
-    const data = await response.json();
-    const messageContent = data.choices?.[0]?.message?.content;
+  if (!rawContent) {
+    console.warn('[Groq Warning]: All Groq models busy or rate-limited. Falling back to deterministic OCR parser.');
+    return {};
+  }
+
+  const messageContent = rawContent;
 
     if (!messageContent) {
       throw new Error('AI service returned an empty response.');
@@ -298,11 +314,4 @@ ${fullOcrSlice}
       otherMandatoryDeclarations: parsed.otherMandatoryDeclarations || null,
       rawText: ocrText,
     };
-  } catch (err) {
-    clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
-      throw new Error('AI analysis request timed out. Please try again.');
-    }
-    throw err;
-  }
 }

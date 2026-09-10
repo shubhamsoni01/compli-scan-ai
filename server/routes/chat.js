@@ -59,24 +59,32 @@ ${contextSummary}
         { role: 'user', content: message },
       ];
 
-      const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages,
-          temperature: 0.3,
-          max_tokens: 1024,
-        }),
-      });
+      for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']) {
+        try {
+          const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages,
+              temperature: 0.3,
+              max_tokens: 1024,
+            }),
+          });
 
-      if (groqResponse.ok) {
-        const data = await groqResponse.json();
-        const reply = data.choices?.[0]?.message?.content || 'No response generated.';
-        return res.status(200).json({ success: true, reply });
+          if (groqResponse.ok) {
+            const data = await groqResponse.json();
+            const reply = data.choices?.[0]?.message?.content;
+            if (reply) {
+              return res.status(200).json({ success: true, reply });
+            }
+          }
+        } catch (chatErr) {
+          console.warn(`[CompliBot Model Error]: ${model} failed, trying next...`);
+        }
       }
     }
 
