@@ -742,12 +742,95 @@ export function calculateNutritionAudit(
     return { text: 'Not detected', num: null };
   };
 
-  // 1. Sodium (Salt Equivalent)
-  const sodiumData = extractNutrient([
+  // 1. First pass: Inline Regex Extraction
+  let sodiumData = extractNutrient([
     /\bsodium\b[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
     /sodium[\s\S]{0,15}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
     /\bsalt\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
   ], 'sodium');
+
+  let addedSugarData = extractNutrient([
+    /\badded\s*sugars?[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
+    /addedsugar[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
+  ], 'sugar');
+
+  let totalSugarData = extractNutrient([
+    /\btotal\s*sugars?[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
+    /\bsugars?\b[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
+  ], 'sugar');
+
+  let satFatData = extractNutrient([
+    /\bsaturated\s*fat\b[^\d\n]{0,25}?(?:<\s*)?([0-9lI]+(?:[.,][0-9lI]+)?)\s*(g|mg|[90])?/i,
+    /satuatedfat[^\d\n]{0,25}?(?:<\s*)?([0-9lI]+(?:[.,][0-9lI]+)?)\s*(g|mg|[90])?/i,
+  ], 'sat_fat');
+
+  let transFatData = extractNutrient([
+    /\btrans\s*fat\b[^\d\n]{0,25}?(?:<\s*)?(0?\.\d+|\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+    /transat[^\d\n]{0,25}?(?:<\s*)?(0?\.\d+|\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+  ], 'trans_fat');
+
+  // 2. Second pass: Columnar Multi-Column Table Mapping (for OCR that extracts names in 1 block and values in 2nd block)
+  if (sodiumData.num === null || addedSugarData.num === null || satFatData.num === null) {
+    const lines = nutText.split('\n').map(l => l.trim()).filter(Boolean);
+    const targetNutrients = [
+      { key: 'energy', pattern: /\benergy\b/i },
+      { key: 'protein', pattern: /\bprotein\b/i },
+      { key: 'carbohydrate', pattern: /\bcarbohydrate\b/i },
+      { key: 'total_sugar', pattern: /\btotal\s*sugars?\b/i },
+      { key: 'added_sugar', pattern: /\badded\s*sugars?\b/i },
+      { key: 'total_fat', pattern: /\btotal\s*fat\b/i },
+      { key: 'saturated_fat', pattern: /\bsaturated\s*fat\b/i },
+      { key: 'trans_fat', pattern: /\btrans\s*fat\b/i },
+      { key: 'cholesterol', pattern: /\bcholesterol\b|\bcholestrol\b/i },
+      { key: 'sodium', pattern: /\bsodium\b/i },
+    ];
+
+    const foundKeys: string[] = [];
+    for (const line of lines) {
+      for (const t of targetNutrients) {
+        if (t.pattern.test(line) && !foundKeys.includes(t.key)) {
+          foundKeys.push(t.key);
+          break;
+        }
+      }
+    }
+
+    const valRegex = /^(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(kcal|kj|g|mg|gm|mcg)?$/i;
+    const foundValues: Array<{ numStr: string; unit?: string }> = [];
+    for (const line of lines) {
+      const m = line.match(valRegex);
+      if (m) {
+        foundValues.push({ numStr: m[1], unit: m[2] });
+      }
+    }
+
+    if (foundKeys.length > 0 && foundValues.length >= foundKeys.length) {
+      foundKeys.forEach((k, idx) => {
+        const v = foundValues[idx];
+        if (v) {
+          let num = parseFloat(v.numStr.replace(/,/g, '.'));
+          let unit = v.unit || (num > 50 ? 'mg' : 'g');
+          if (k === 'sodium' && sodiumData.num === null) {
+            sodiumData = { text: `${num} ${unit}`, num };
+          }
+          if (k === 'added_sugar' && addedSugarData.num === null) {
+            addedSugarData = { text: `${num} ${unit}`, num };
+          }
+          if (k === 'total_sugar' && totalSugarData.num === null) {
+            totalSugarData = { text: `${num} ${unit}`, num };
+          }
+          if (k === 'saturated_fat' && satFatData.num === null) {
+            satFatData = { text: `${num} ${unit}`, num };
+          }
+          if (k === 'trans_fat' && transFatData.num === null) {
+            transFatData = { text: `${num} ${unit}`, num };
+          }
+        }
+      });
+    }
+  }
+
+  // 1. Sodium resolution
   let sodiumNumeric = sodiumData.num;
   if (sodiumData.text.includes('g') && !sodiumData.text.includes('mg') && sodiumNumeric !== null && sodiumNumeric < 10) {
     sodiumNumeric = sodiumNumeric * 1000;
@@ -771,19 +854,8 @@ export function calculateNutritionAudit(
     }
   }
 
-  // 2. Added Sugars & Total Sugars (Strict: Added Sugars prioritized, NEVER matches Carbohydrate)
-  const addedSugarData = extractNutrient([
-    /\badded\s*sugars?[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
-    /addedsugar[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
-  ], 'sugar');
-
-  const totalSugarData = extractNutrient([
-    /\btotal\s*sugars?[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
-    /\bsugars?\b[^\d\n]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg|[90])?/i,
-  ], 'sugar');
-
+  // 2. Sugar resolution
   const sugarData = addedSugarData.num !== null ? addedSugarData : totalSugarData;
-
   const sugarLimit = isLiquid ? 6 : 10; // g per 100g
   let sugarStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let sugarDev: number | null = null;
@@ -803,11 +875,7 @@ export function calculateNutritionAudit(
     }
   }
 
-  // 3. Saturated Fat
-  const satFatData = extractNutrient([
-    /\bsaturated\s*fat\b[^\d\n]{0,25}?(?:<\s*)?([0-9lI]+(?:[.,][0-9lI]+)?)\s*(g|mg|[90])?/i,
-    /satuatedfat[^\d\n]{0,25}?(?:<\s*)?([0-9lI]+(?:[.,][0-9lI]+)?)\s*(g|mg|[90])?/i,
-  ], 'sat_fat');
+  // 3. Saturated Fat resolution
   const satFatLimit = 6.0; // g per 100g
   let satFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let satFatDev: number | null = null;
@@ -827,11 +895,7 @@ export function calculateNutritionAudit(
     }
   }
 
-  // 4. Trans Fat (Strict 2% FSSAI Limit)
-  let transFatData = extractNutrient([
-    /\btrans\s*fat\b[^\d\n]{0,25}?(?:<\s*)?(0?\.\d+|\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /transat[^\d\n]{0,25}?(?:<\s*)?(0?\.\d+|\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-  ], 'trans_fat');
+  // 4. Trans Fat resolution
   if (transFatData.num === null && /trans(?:at|\s*fat)[^\n]{0,15}<\s*0?\.?1/i.test(nutText)) {
     transFatData = { text: '<0.1 g', num: 0.09 };
   }
