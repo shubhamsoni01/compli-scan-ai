@@ -29,8 +29,51 @@ export interface ScanResultData extends ComplianceResult {
 // In-memory session store for current active scans to be viewed on /result/:scanId
 const scanResultsCache = new Map<string, ScanResultData>();
 
+export function setCachedScanResult(scanId: string, result: ScanResultData): void {
+  if (!scanId || !result) return;
+  scanResultsCache.set(scanId, result);
+  try {
+    const serialized = JSON.stringify(result);
+    sessionStorage.setItem(`compliscan_scan_${scanId}`, serialized);
+    localStorage.setItem(`compliscan_scan_${scanId}`, serialized);
+    
+    // Save to recent scan IDs index
+    const indexRaw = localStorage.getItem('compliscan_recent_scan_ids');
+    const ids: string[] = indexRaw ? JSON.parse(indexRaw) : [];
+    const updatedIds = [scanId, ...ids.filter((id) => id !== scanId)].slice(0, 15);
+    localStorage.setItem('compliscan_recent_scan_ids', JSON.stringify(updatedIds));
+  } catch (e) {
+    console.warn('[CompliScan Client] Storage save warning:', e);
+  }
+}
+
 export function getCachedScanResult(scanId: string): ScanResultData | null {
-  return scanResultsCache.get(scanId) || null;
+  if (!scanId) return null;
+  if (scanResultsCache.has(scanId)) {
+    return scanResultsCache.get(scanId)!;
+  }
+  
+  // Try sessionStorage first (fastest for same tab / refresh)
+  try {
+    const sessionItem = sessionStorage.getItem(`compliscan_scan_${scanId}`);
+    if (sessionItem) {
+      const parsed = JSON.parse(sessionItem);
+      scanResultsCache.set(scanId, parsed);
+      return parsed;
+    }
+  } catch (e) {}
+
+  // Fallback to localStorage
+  try {
+    const localItem = localStorage.getItem(`compliscan_scan_${scanId}`);
+    if (localItem) {
+      const parsed = JSON.parse(localItem);
+      scanResultsCache.set(scanId, parsed);
+      return parsed;
+    }
+  } catch (e) {}
+
+  return null;
 }
 
 export async function getScanResultAsync(scanId: string): Promise<ScanResultData | null> {
@@ -111,7 +154,7 @@ export async function getScanResultAsync(scanId: string): Promise<ScanResultData
         userEmail: dbDoc.userEmail || undefined,
       };
 
-      scanResultsCache.set(scanId, restoredResult);
+      setCachedScanResult(scanId, restoredResult);
       return restoredResult;
     }
   } catch (err) {
@@ -288,7 +331,7 @@ export async function startRealScan(
     readabilityResult,
   };
 
-  scanResultsCache.set(scanId, result);
+  setCachedScanResult(scanId, result);
 
   // ASYNCHRONOUSLY PERSIST REAL SCAN TO MONGODB ATLAS
   // If MongoDB fails or is unavailable, never destroy the scan result or disrupt the user

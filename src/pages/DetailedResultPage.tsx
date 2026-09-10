@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ZoomIn, ZoomOut, RotateCw, Maximize2, Package } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ZoomIn, ZoomOut, RotateCw, Maximize2, Package, Loader2, AlertOctagon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Card } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
@@ -17,22 +17,65 @@ import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard
 import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
 
 export default function DetailedResultPage() {
+  const navigate = useNavigate();
   const { scanId, id } = useParams<{ scanId?: string; id?: string }>();
   const activeId = scanId || id;
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
 
+  const cached = activeId ? getCachedScanResult(activeId) : null;
   const [dbResult, setDbResult] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!cached && activeId !== 'scan_001');
 
   React.useEffect(() => {
-    if (activeId && !getCachedScanResult(activeId)) {
-      getScanResultAsync(activeId).then((res) => {
-        if (res) setDbResult(res);
-      });
+    if (activeId && !getCachedScanResult(activeId) && activeId !== 'scan_001') {
+      setIsLoading(true);
+      getScanResultAsync(activeId)
+        .then((res) => {
+          if (res) setDbResult(res);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
     }
   }, [activeId]);
 
-  const currentResult = (activeId ? getCachedScanResult(activeId) : null) || dbResult || (activeId === 'scan_001' ? mockComplianceResult : mockComplianceResult);
+  const currentResult = cached || dbResult || (activeId === 'scan_001' ? mockComplianceResult : null);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 max-w-md flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+        <Loader2 className="w-10 h-10 text-indigo-600 dark:text-indigo-400 animate-spin" />
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 font-heading">Loading Detailed Inspection...</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Retrieving full statutory compliance audit breakdown.</p>
+      </div>
+    );
+  }
+
+  if (!currentResult) {
+    return (
+      <div className="container mx-auto px-4 py-20 max-w-lg text-center space-y-6">
+        <Card className="p-8 border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 text-center space-y-4">
+          <AlertOctagon className="w-12 h-12 text-amber-600 dark:text-amber-400 mx-auto" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 font-heading">Inspection Record Not Found</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            The detailed record for this scan could not be loaded. Please perform a fresh scan or select an item from history.
+          </p>
+          <div className="flex justify-center gap-3 pt-2">
+            <Button variant="primary" onClick={() => navigate('/scan')}>
+              Scan Product
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/history')}>
+              View History
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   const productRules = complianceRules.filter(r => (r.applicableTo as string[]).includes(currentResult.category) || (r.applicableTo as string[]).includes('all'));
 
   const tabData = [

@@ -28,20 +28,27 @@ export default function ComplianceResultPage() {
   const { scanId, id } = useParams<{ scanId?: string; id?: string }>();
   const activeId = scanId || id;
 
+  const cached = activeId ? getCachedScanResult(activeId) : null;
   const [dbResult, setDbResult] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!cached && activeId !== 'scan_001');
 
   React.useEffect(() => {
-    if (activeId && !getCachedScanResult(activeId)) {
-      getScanResultAsync(activeId).then((res) => {
-        if (res) setDbResult(res);
-      });
+    if (activeId && !getCachedScanResult(activeId) && activeId !== 'scan_001') {
+      setIsLoading(true);
+      getScanResultAsync(activeId)
+        .then((res) => {
+          if (res) setDbResult(res);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
     }
   }, [activeId]);
 
-  const currentResult = activeId ? getCachedScanResult(activeId) : null;
-  // If explicitly requesting a mock record (e.g. scan_001 from history) or fallback
-  const resolvedResult = currentResult || dbResult || (activeId === 'scan_001' ? mockComplianceResult : mockComplianceResult);
-  const score = useAnimatedCounter(resolvedResult.score);
+  const resolvedResult = cached || dbResult || (activeId === 'scan_001' ? mockComplianceResult : null);
+  const score = useAnimatedCounter(resolvedResult?.score ?? 0);
 
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
@@ -123,6 +130,38 @@ export default function ComplianceResultPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 max-w-md flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+        <Loader2 className="w-10 h-10 text-indigo-600 dark:text-indigo-400 animate-spin" />
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 font-heading">Restoring Compliance Dossier...</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading verified compliance data from scan cache.</p>
+      </div>
+    );
+  }
+
+  if (!resolvedResult) {
+    return (
+      <div className="container mx-auto px-4 py-20 max-w-lg text-center space-y-6">
+        <Card className="p-8 border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 text-center space-y-4">
+          <AlertOctagon className="w-12 h-12 text-amber-600 dark:text-amber-400 mx-auto" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 font-heading">Scan Record Not Found</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            The requested scan result was not found in active session cache. You can start a new scan or check your saved history.
+          </p>
+          <div className="flex justify-center gap-3 pt-2">
+            <Button variant="primary" onClick={() => navigate('/scan')}>
+              Scan Product
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/history')}>
+              View History
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
