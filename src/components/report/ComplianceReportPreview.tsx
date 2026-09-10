@@ -110,7 +110,23 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
 
           {/* Document Body (Clean white paper style for professional demonstration) */}
           <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 bg-slate-100/50 dark:bg-[#0b0f19]">
-            <div className="bg-white text-slate-900 rounded-xl shadow-md border border-slate-200 p-8 sm:p-12 space-y-8 max-w-3xl mx-auto">
+            <div className="bg-white text-slate-900 rounded-xl shadow-md border border-slate-200 p-8 sm:p-12 space-y-8 max-w-3xl mx-auto relative overflow-hidden">
+              {/* Official Watermark in Background */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04] select-none z-0">
+                <div className="flex flex-col items-center gap-6 transform -rotate-12 scale-125">
+                  <img
+                    src="/assets/ministry-emblem-transparent-gold.png"
+                    alt="Ministry Emblem Watermark"
+                    className="w-80 h-80 object-contain"
+                  />
+                  <div className="text-center font-heading font-black text-3xl tracking-widest text-slate-900 uppercase">
+                    GOVT OF INDIA • DOCA • SIH 2026
+                  </div>
+                </div>
+              </div>
+
+              {/* Document Content */}
+              <div className="relative z-10 space-y-8">
               {/* Document Letterhead */}
               <div className="flex flex-col sm:flex-row justify-between items-start border-b border-slate-200 pb-6 gap-4">
                 <div className="flex items-start gap-4">
@@ -465,6 +481,7 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
                 <p>
                   This report provides an AI-assisted preliminary screening of visible product-label information against configured regulatory requirements. It does not constitute government certification, regulatory approval, laboratory testing, legal advice, or a final determination of compliance. Results should be verified against the current applicable regulations and competent authority.
                 </p>
+              </div>
               </div>
             </div>
           </div>

@@ -669,14 +669,25 @@ export async function generateCompliancePDF(reportData) {
       );
 
       // -------------------------------------------------------------
-      // FOOTER ON ALL PAGES
+      // WATERMARK & FOOTER ON ALL PAGES
       // -------------------------------------------------------------
       const totalPages = doc.bufferedPageRange().count;
       for (let i = 0; i < totalPages; i++) {
         doc.switchToPage(i);
+
+        // Large official Ministry emblem watermark in center of page
+        if (ministryLogoPath) {
+          try {
+            doc.save();
+            doc.opacity(0.045);
+            doc.image(ministryLogoPath, (595.28 - 330) / 2, (841.89 - 330) / 2 - 20, { fit: [330, 330] });
+            doc.restore();
+          } catch (e) {}
+        }
+
         doc.fillColor('#94A3B8').fontSize(7.5).font('Helvetica');
-        doc.text(`CompliScan AI • Compliance Screening Report • ${reportId}`, 40, 805, { width: 250 });
-        doc.text(`Page ${i + 1} of ${totalPages}`, 355, 805, { width: 200, align: 'right' });
+        doc.text(`CompliScan AI • SIH 2026 (SIH26034) • Ministry of Consumer Affairs • ${reportId}`, 40, 805, { width: 360 });
+        doc.text(`Page ${i + 1} of ${totalPages}`, 400, 805, { width: 155, align: 'right' });
       }
 
       doc.end();
