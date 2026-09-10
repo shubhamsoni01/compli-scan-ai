@@ -15,6 +15,7 @@ import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 
 import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard';
 import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
+import { VoiceAudioAssistantCard } from '@/components/voice/VoiceAudioAssistantCard';
 
 export default function DetailedResultPage() {
   const navigate = useNavigate();
@@ -138,6 +139,15 @@ export default function DetailedResultPage() {
               </div>
             </Card>
           ))}
+        </div>
+      )
+    },
+    {
+      id: 'voice-brief',
+      label: '🎙️ AI Voice Brief',
+      content: (
+        <div className="space-y-4">
+          <VoiceAudioAssistantCard scanData={currentResult} />
         </div>
       )
     },

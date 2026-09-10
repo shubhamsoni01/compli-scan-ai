@@ -18,6 +18,7 @@ import { ComplianceReportPreview } from '@/components/report/ComplianceReportPre
 import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard';
 import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
+import { VoiceAudioAssistantCard } from '@/components/voice/VoiceAudioAssistantCard';
 import { EditReportModal } from '@/components/report/EditReportModal';
 import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
@@ -319,6 +320,9 @@ export default function ComplianceResultPage() {
           </Button>
         </div>
       )}
+
+      {/* Multilingual Voice Audio Assistant (Hindi, English, Hinglish readout with live audio waves) */}
+      <VoiceAudioAssistantCard scanData={resolvedResult} className="shadow-sm" />
 
       {/* Estimated Font Size & Readability Analysis Layer (Non-calibrated heuristic assessment) */}
       {resolvedResult.readabilityResult && (
