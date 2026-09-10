@@ -728,7 +728,7 @@ export function calculateNutritionAudit(
 
   // 1. Sodium (Salt)
   const sodiumData = extractNutrient([
-    /sodium[\s\S]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
+    /sodium[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
     /sodium[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
     /salt[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
   ]);
@@ -755,13 +755,13 @@ export function calculateNutritionAudit(
     }
   }
 
-  // 2. Added Sugars & Total Sugars
+  // 2. Added Sugars & Total Sugars (Priority: Added Sugar > Total Sugar)
   const sugarData = extractNutrient([
-    /added\s*sugars?[®™\s]*[\s\S]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /added\s*sugars?[®™\s]*[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
     /added\s*sugars?[®™\s]*[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /total\s*sugars?[\s\S]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /total\s*sugars?[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
     /total\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+    /sugars?[^\d\n]{0,15}(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
   ]);
   const sugarLimit = isLiquid ? 6 : 10; // g per 100g
   let sugarStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
@@ -784,9 +784,9 @@ export function calculateNutritionAudit(
 
   // 3. Saturated Fat
   const satFatData = extractNutrient([
-    /saturated\s*fat[\s\S]{0,25}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+    /saturated\s*fat[^\d\n]{0,15}(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
     /saturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-    /sat\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+    /sat\s*fat[^\d\n]{0,15}(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
   ]);
   const satFatLimit = 6.0; // g per 100g
   let satFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
