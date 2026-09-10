@@ -114,12 +114,19 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
               {/* Document Letterhead */}
               <div className="flex flex-col sm:flex-row justify-between items-start border-b border-slate-200 pb-6 gap-4">
                 <div className="flex items-start gap-4">
-                  {/* Official High-Resolution Ministry Emblem */}
-                  <img
-                    src="/assets/ministry-emblem-transparent-gold.png"
-                    alt="Ministry of Consumer Affairs Emblem"
-                    className="h-14 w-auto object-contain shrink-0"
-                  />
+                  {/* Official High-Resolution Ministry & SIH Emblems */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <img
+                      src="/assets/ministry-emblem-transparent-gold.png"
+                      alt="Ministry of Consumer Affairs Emblem"
+                      className="h-14 w-auto object-contain"
+                    />
+                    <img
+                      src="/assets/sih-transparent-bulb.png"
+                      alt="Smart India Hackathon 2026 Logo"
+                      className="h-14 w-auto object-contain"
+                    />
+                  </div>
                   <div>
                     <h1 className="font-heading font-black text-2xl tracking-tight text-indigo-900">
                       COMPLISCAN AI

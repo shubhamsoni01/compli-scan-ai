@@ -86,23 +86,59 @@ export async function generateCompliancePDF(reportData) {
       // -------------------------------------------------------------
       // 1. COMPLISCAN AI HEADER & STATUTORY ACCREDITATION
       // -------------------------------------------------------------
-      doc.fillColor(primaryColor).fontSize(17).font('Helvetica-Bold').text('COMPLISCAN AI', 40, 36);
-      doc.fillColor('#B45309').fontSize(7.5).font('Helvetica-Bold').text('SIH 2026 • Problem ID: SIH26034 | Ministry of Consumer Affairs, Food & Public Distribution', 40, 55);
-      doc.fillColor(mutedColor).fontSize(7.5).font('Helvetica').text('Statutory Product Label Compliance Screening Dossier • Dept. of Consumer Affairs', 40, 66);
+      const ministryLogoCandidates = [
+        path.join(__dirname, '../assets/ministry-emblem-transparent-gold.png'),
+        path.join(__dirname, '../../public/assets/ministry-emblem-transparent-gold.png'),
+        path.join(process.cwd(), 'public/assets/ministry-emblem-transparent-gold.png'),
+        path.join(process.cwd(), 'server/assets/ministry-emblem-transparent-gold.png'),
+      ];
+      const sihLogoCandidates = [
+        path.join(__dirname, '../assets/sih-official-bulb.jpg'),
+        path.join(__dirname, '../../public/assets/sih-official-bulb.jpg'),
+        path.join(__dirname, '../assets/sih-transparent-bulb.png'),
+        path.join(__dirname, '../../public/assets/sih-transparent-bulb.png'),
+        path.join(process.cwd(), 'public/assets/sih-transparent-bulb.png'),
+        path.join(process.cwd(), 'server/assets/sih-transparent-bulb.png'),
+      ];
+
+      const ministryLogoPath = ministryLogoCandidates.find((p) => fs.existsSync(p));
+      const sihLogoPath = sihLogoCandidates.find((p) => fs.existsSync(p));
+
+      let headerOffset = 40;
+      if (ministryLogoPath) {
+        try {
+          doc.image(ministryLogoPath, headerOffset, 32, { fit: [36, 36] });
+          headerOffset += 40;
+        } catch (e) {
+          console.warn('[PDFKit] Ministry logo render warning:', e.message);
+        }
+      }
+      if (sihLogoPath) {
+        try {
+          doc.image(sihLogoPath, headerOffset, 32, { fit: [36, 36] });
+          headerOffset += 40;
+        } catch (e) {
+          console.warn('[PDFKit] SIH logo render warning:', e.message);
+        }
+      }
+
+      doc.fillColor(primaryColor).fontSize(16).font('Helvetica-Bold').text('COMPLISCAN AI', headerOffset, 34);
+      doc.fillColor('#B45309').fontSize(7.5).font('Helvetica-Bold').text('SIH 2026 • Problem ID: SIH26034 | Ministry of Consumer Affairs, Food & Public Distribution', headerOffset, 52);
+      doc.fillColor(mutedColor).fontSize(7).font('Helvetica').text('Statutory Product Label Compliance Screening Dossier • Dept. of Consumer Affairs', headerOffset, 63);
 
       // Top right header box
-      doc.fillColor(textColor).fontSize(9).font('Helvetica-Bold').text(`Report ID: ${reportId}`, 360, 36, { align: 'right', width: 195 });
+      doc.fillColor(textColor).fontSize(9).font('Helvetica-Bold').text(`Report ID: ${reportId}`, 360, 34, { align: 'right', width: 195 });
       doc.font('Helvetica').fontSize(8).fillColor(mutedColor).text(
         `Generated: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`,
         360,
-        48,
+        46,
         { align: 'right', width: 195 }
       );
 
       const statusBadgeColor = score >= 80 ? '#059669' : score >= 50 ? '#D97706' : '#DC2626';
-      doc.fillColor(statusBadgeColor).fontSize(9.5).font('Helvetica-Bold').text(String(overallStatus).toUpperCase(), 360, 62, { align: 'right', width: 195 });
+      doc.fillColor(statusBadgeColor).fontSize(9.5).font('Helvetica-Bold').text(String(overallStatus).toUpperCase(), 360, 59, { align: 'right', width: 195 });
 
-      doc.y = 82;
+      doc.y = 80;
 
       // -------------------------------------------------------------
       // 2. USER INFORMATION & 3. SCAN INFORMATION
@@ -260,92 +296,118 @@ export async function generateCompliancePDF(reportData) {
       // -------------------------------------------------------------
       // 7.5. FSSAI NUTRITION & HFSS THRESHOLD AUDIT (Safe vs Unsafe)
       // -------------------------------------------------------------
-      const nutText = (extractedInfo['Nutritional Info'] || extractedInfo['Nutrition Facts'] || '') + ' ' + (extractedInfo['Ingredients'] || '') + ' ' + ocrText;
-      const isLiquid = /ml|litre|liquid|beverage|drink|juice/i.test(extractedInfo['Net Quantity'] || '');
+      let nutrientRows = [];
+      let detectedAdditives = [];
+      let healthGrade = 'B';
+      let hfssStatusLabel = 'MODERATE_HFSS';
 
-      // Dynamic Extraction Helper with strict word boundaries and zero fallbacks
-      const extractNutrientValue = (patterns) => {
-        for (const pat of patterns) {
-          const m = nutText.match(pat);
-          if (m && m[1]) {
-            const num = parseFloat(m[1].replace(/,/g, '.'));
-            if (!isNaN(num) && num > 0) return { text: `${num} ${m[2] || 'g'}`, num };
+      if (reportData.nutritionAudit && Array.isArray(reportData.nutritionAudit.nutrients) && reportData.nutritionAudit.nutrients.length > 0) {
+        healthGrade = reportData.nutritionAudit.overallHealthGrade || 'B';
+        hfssStatusLabel = reportData.nutritionAudit.hfssStatus || 'SAFE';
+        detectedAdditives = reportData.nutritionAudit.additives || [];
+        nutrientRows = reportData.nutritionAudit.nutrients.map((n) => {
+          let badgeColor = '#059669';
+          if (n.safetyStatus === 'HIGH_RISK') badgeColor = '#DC2626';
+          else if (n.safetyStatus === 'ELEVATED') badgeColor = '#D97706';
+          else if (n.safetyStatus === 'SAFE') badgeColor = '#059669';
+          else badgeColor = '#64748B';
+
+          return {
+            name: n.name,
+            obs: n.observedValue || 'Not detected',
+            std: n.standardLimit || '',
+            status: n.safetyStatus === 'HIGH_RISK' ? 'HIGH RISK' : n.safetyStatus === 'ELEVATED' ? 'ELEVATED' : n.safetyStatus === 'SAFE' ? 'SAFE' : 'N/A',
+            verdict: n.verdict || 'Standard verification',
+            badgeColor,
+          };
+        });
+      } else {
+        const nutText = (extractedInfo['Nutritional Info'] || extractedInfo['Nutrition Facts'] || '') + ' ' + (extractedInfo['Ingredients'] || '') + ' ' + ocrText;
+        const isLiquid = /ml|litre|liquid|beverage|drink|juice/i.test(extractedInfo['Net Quantity'] || '');
+
+        const extractNutrientValue = (patterns) => {
+          for (const pat of patterns) {
+            const m = nutText.match(pat);
+            if (m && m[1]) {
+              const num = parseFloat(m[1].replace(/,/g, '.'));
+              if (!isNaN(num) && num > 0) return { text: `${num} ${m[2] || 'g'}`, num };
+            }
           }
-        }
-        return { text: 'Not detected', num: null };
-      };
+          return { text: 'Not detected', num: null };
+        };
 
-      const sodData = extractNutrientValue([
-        /\bsodium\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
-        /\bsodium\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
-        /\bsalt\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
-      ]);
-      let sodNum = sodData.num;
-      if (sodData.text.includes('g') && !sodData.text.includes('mg') && sodNum !== null && sodNum < 10) sodNum *= 1000;
-      const sodLimit = isLiquid ? 300 : 600;
-
-      let sugData = extractNutrientValue([
-        /\badded\s*sugars?[®™\s]*[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-        /\badded\s*sugars?[®™\s]*[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-      ]);
-      if (sugData.num === null) {
-        sugData = extractNutrientValue([
-          /\btotal\s*sugars?[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-          /\btotal\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-          /\bsugars?\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+        const sodData = extractNutrientValue([
+          /\bsodium\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
+          /\bsodium\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
+          /\bsalt\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
         ]);
+        let sodNum = sodData.num;
+        if (sodData.text.includes('g') && !sodData.text.includes('mg') && sodNum !== null && sodNum < 10) sodNum *= 1000;
+        const sodLimit = isLiquid ? 300 : 600;
+
+        let sugData = extractNutrientValue([
+          /\badded\s*sugars?[®™\s]*[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+          /\badded\s*sugars?[®™\s]*[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+        ]);
+        if (sugData.num === null) {
+          sugData = extractNutrientValue([
+            /\btotal\s*sugars?[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+            /\btotal\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+            /\bsugars?\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+          ]);
+        }
+        const sugLimit = isLiquid ? 6 : 10;
+
+        const satData = extractNutrientValue([
+          /\bsaturated\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+          /\bsaturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+          /\bsat\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+        ]);
+        const satLimit = 6.0;
+
+        let traData = extractNutrientValue([
+          /\btrans\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+        ]);
+        if (traData.num === null && /trans\s*fat[^\n]{0,15}<\s*0?\.?1/i.test(nutText)) {
+          traData = { text: '<0.1 g', num: 0.09 };
+        }
+        const traLimit = 0.2;
+
+        nutrientRows = [
+          {
+            name: 'Sodium (Salt)',
+            obs: sodNum !== null ? `${sodNum} mg / 100g` : 'Not detected',
+            std: `≤ ${sodLimit} mg / 100g`,
+            status: sodNum !== null ? (sodNum > sodLimit * 1.3 ? 'HIGH RISK' : sodNum > sodLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
+            verdict: sodNum !== null ? (sodNum > sodLimit ? `Exceeds FSSAI solid threshold (+${Math.round(((sodNum-sodLimit)/sodLimit)*100)}%)` : `Safe (${sodNum}mg <= ${sodLimit}mg)`) : 'Not declared on panel',
+            badgeColor: sodNum !== null ? (sodNum > sodLimit * 1.3 ? '#DC2626' : sodNum > sodLimit ? '#D97706' : '#059669') : '#64748B',
+          },
+          {
+            name: 'Added Sugars',
+            obs: sugData.num !== null ? `${sugData.num} g / 100g` : 'Not detected',
+            std: `≤ ${sugLimit} g / 100g`,
+            status: sugData.num !== null ? (sugData.num > sugLimit * 1.5 ? 'HIGH RISK' : sugData.num > sugLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
+            verdict: sugData.num !== null ? (sugData.num > sugLimit ? `High Sugar (+${Math.round(((sugData.num-sugLimit)/sugLimit)*100)}%)` : `Safe level (${sugData.num}g <= ${sugLimit}g)`) : 'Not declared on panel',
+            badgeColor: sugData.num !== null ? (sugData.num > sugLimit * 1.5 ? '#DC2626' : sugData.num > sugLimit ? '#D97706' : '#059669') : '#64748B',
+          },
+          {
+            name: 'Saturated Fat',
+            obs: satData.num !== null ? `${satData.num} g / 100g` : 'Not detected',
+            std: `≤ ${satLimit} g / 100g`,
+            status: satData.num !== null ? (satData.num > satLimit * 1.5 ? 'HIGH RISK' : satData.num > satLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
+            verdict: satData.num !== null ? (satData.num > satLimit ? `Elevated SFA (+${Math.round(((satData.num-satLimit)/satLimit)*100)}%)` : 'Safe SFA level') : 'Not declared on panel',
+            badgeColor: satData.num !== null ? (satData.num > satLimit * 1.5 ? '#DC2626' : satData.num > satLimit ? '#D97706' : '#059669') : '#64748B',
+          },
+          {
+            name: 'Trans Fat',
+            obs: traData.num !== null ? `${traData.num} g / 100g` : 'Not detected',
+            std: `≤ 0.2 g / 100g (<2%)`,
+            status: traData.num !== null ? (traData.num > 0.4 ? 'HIGH RISK' : 'SAFE') : 'N/A',
+            verdict: traData.num !== null ? (traData.num > 0.4 ? 'Violates 2% Trans Fat Order' : 'Compliant with 2% Trans Fat Cap') : 'Not declared on panel',
+            badgeColor: traData.num !== null ? (traData.num > 0.4 ? '#DC2626' : '#059669') : '#64748B',
+          },
+        ];
       }
-      const sugLimit = isLiquid ? 6 : 10;
-
-      const satData = extractNutrientValue([
-        /\bsaturated\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-        /\bsaturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-        /\bsat\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
-      ]);
-      const satLimit = 6.0;
-
-      let traData = extractNutrientValue([
-        /\btrans\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
-      ]);
-      if (traData.num === null && /trans\s*fat[^\n]{0,15}<\s*0?\.?1/i.test(nutText)) {
-        traData = { text: '<0.1 g', num: 0.09 };
-      }
-      const traLimit = 0.2;
-
-      const nutrientRows = [
-        {
-          name: 'Sodium (Salt)',
-          obs: sodNum !== null ? `${sodNum} mg / 100g` : 'Not detected',
-          std: `≤ ${sodLimit} mg / 100g`,
-          status: sodNum !== null ? (sodNum > sodLimit * 1.3 ? 'HIGH RISK' : sodNum > sodLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
-          verdict: sodNum !== null ? (sodNum > sodLimit ? `Exceeds FSSAI solid threshold (+${Math.round(((sodNum-sodLimit)/sodLimit)*100)}%)` : `Safe (${sodNum}mg <= ${sodLimit}mg)`) : 'Not declared on panel',
-          badgeColor: sodNum !== null ? (sodNum > sodLimit * 1.3 ? '#DC2626' : sodNum > sodLimit ? '#D97706' : '#059669') : '#64748B',
-        },
-        {
-          name: 'Added Sugars',
-          obs: sugData.num !== null ? `${sugData.num} g / 100g` : 'Not detected',
-          std: `≤ ${sugLimit} g / 100g`,
-          status: sugData.num !== null ? (sugData.num > sugLimit * 1.5 ? 'HIGH RISK' : sugData.num > sugLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
-          verdict: sugData.num !== null ? (sugData.num > sugLimit ? `High Sugar (+${Math.round(((sugData.num-sugLimit)/sugLimit)*100)}%)` : `Safe level (${sugData.num}g <= ${sugLimit}g)`) : 'Not declared on panel',
-          badgeColor: sugData.num !== null ? (sugData.num > sugLimit * 1.5 ? '#DC2626' : sugData.num > sugLimit ? '#D97706' : '#059669') : '#64748B',
-        },
-        {
-          name: 'Saturated Fat',
-          obs: satData.num !== null ? `${satData.num} g / 100g` : 'Not detected',
-          std: `≤ ${satLimit} g / 100g`,
-          status: satData.num !== null ? (satData.num > satLimit * 1.5 ? 'HIGH RISK' : satData.num > satLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
-          verdict: satData.num !== null ? (satData.num > satLimit ? `Elevated SFA (+${Math.round(((satData.num-satLimit)/satLimit)*100)}%)` : 'Safe SFA level') : 'Not declared on panel',
-          badgeColor: satData.num !== null ? (satData.num > satLimit * 1.5 ? '#DC2626' : satData.num > satLimit ? '#D97706' : '#059669') : '#64748B',
-        },
-        {
-          name: 'Trans Fat',
-          obs: traData.num !== null ? `${traData.num} g / 100g` : 'Not detected',
-          std: `≤ 0.2 g / 100g (<2%)`,
-          status: traData.num !== null ? (traData.num > 0.4 ? 'HIGH RISK' : 'SAFE') : 'N/A',
-          verdict: traData.num !== null ? (traData.num > 0.4 ? 'Violates 2% Trans Fat Order' : 'Compliant with 2% Trans Fat Cap') : 'Not declared on panel',
-          badgeColor: traData.num !== null ? (traData.num > 0.4 ? '#DC2626' : '#059669') : '#64748B',
-        },
-      ];
 
       if (doc.y > 620) doc.addPage();
 
@@ -380,6 +442,15 @@ export async function generateCompliancePDF(reportData) {
       });
 
       doc.moveDown(0.2);
+      if (detectedAdditives && detectedAdditives.length > 0) {
+        const addBoxY = doc.y;
+        doc.rect(40, addBoxY, 515, 22).fillAndStroke('#F8FAFC', '#E2E8F0');
+        doc.fillColor('#0F172A').fontSize(7.5).font('Helvetica-Bold').text(`Detected Food Additives / INS Codes (${detectedAdditives.length}):`, 45, addBoxY + 6);
+        const addNames = detectedAdditives.map((a) => `${a.code} (${a.name})`).join(', ');
+        doc.font('Helvetica').fontSize(7).fillColor('#334155').text(addNames, 220, addBoxY + 6, { width: 325 });
+        doc.y = addBoxY + 26;
+      }
+
       doc.fillColor(mutedColor).fontSize(7).font('Helvetica-Oblique').text(
         'Official References: FSSAI Labelling Reg. 2020 (Gazette 18/11/2020), FSS Act 2006 (Act 34 of 2006), ICMR-NIN 2024 Guidelines.',
         45,
