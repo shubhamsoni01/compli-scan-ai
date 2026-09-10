@@ -47,9 +47,9 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
   const score = Math.round(reportData.score ?? 80);
 
   // Compute Nutrition & HFSS Audit (Safe vs Unsafe Table)
-  const nutritionAudit: NutritionAuditReport = reportData.nutritionAudit || calculateNutritionAudit(
+  const nutritionAudit: NutritionAuditReport = calculateNutritionAudit(
     reportData.extractedInfo || {},
-    reportData.category || 'food'
+    (reportData.category?.toLowerCase().replace(' ', '-') || 'food') as any
   );
   const statusColor = score >= 80 ? 'text-emerald-600 dark:text-emerald-400' : score >= 50 ? 'text-amber-600 dark:text-amber-500' : 'text-red-600 dark:text-red-400';
   const statusBadgeVariant = score >= 80 ? 'success' : score >= 50 ? 'warning' : 'destructive';

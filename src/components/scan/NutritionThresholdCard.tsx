@@ -32,8 +32,8 @@ export const NutritionThresholdCard: React.FC<NutritionThresholdCardProps> = ({
   const [showAdditives, setShowAdditives] = useState(false);
   const [expandedNutrient, setExpandedNutrient] = useState<string | null>(null);
 
-  // Compute or use provided audit report
-  const report: NutritionAuditReport = auditReport || calculateNutritionAudit(extractedInfo, category);
+  // Always dynamically calculate from current extractedInfo & rawText to guarantee latest strict rule engine accuracy
+  const report: NutritionAuditReport = calculateNutritionAudit(extractedInfo, category);
 
   const getStatusBadge = (status: NutrientComparisonItem['safetyStatus']) => {
     switch (status) {

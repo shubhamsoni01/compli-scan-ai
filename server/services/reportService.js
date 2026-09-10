@@ -263,30 +263,53 @@ export async function generateCompliancePDF(reportData) {
       const nutText = (extractedInfo['Nutritional Info'] || extractedInfo['Nutrition Facts'] || '') + ' ' + (extractedInfo['Ingredients'] || '') + ' ' + ocrText;
       const isLiquid = /ml|litre|liquid|beverage|drink|juice/i.test(extractedInfo['Net Quantity'] || '');
 
-      // Dynamic Extraction Helper
-      const extractNutrientValue = (patterns, defaultVal) => {
+      // Dynamic Extraction Helper with strict word boundaries and zero fallbacks
+      const extractNutrientValue = (patterns) => {
         for (const pat of patterns) {
           const m = nutText.match(pat);
           if (m && m[1]) {
-            const num = parseFloat(m[1].replace(/,/g, ''));
-            if (!isNaN(num)) return { text: `${num} ${m[2] || 'g'}`, num };
+            const num = parseFloat(m[1].replace(/,/g, '.'));
+            if (!isNaN(num) && num > 0) return { text: `${num} ${m[2] || 'g'}`, num };
           }
         }
-        return defaultVal !== null ? { text: `${defaultVal} g`, num: defaultVal } : { text: 'Not specified', num: null };
+        return { text: 'Not detected', num: null };
       };
 
-      const sodData = extractNutrientValue([/sodium[:\s]+(\d+(?:\.\d+)?)\s*(mg|g)/i, /salt[:\s]+(\d+(?:\.\d+)?)\s*(mg|g)/i], category.toLowerCase().includes('food') ? 680 : null);
+      const sodData = extractNutrientValue([
+        /\bsodium\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
+        /\bsodium\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)?/i,
+        /\bsalt\b[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(mg|g)\b/i,
+      ]);
       let sodNum = sodData.num;
       if (sodData.text.includes('g') && !sodData.text.includes('mg') && sodNum !== null && sodNum < 10) sodNum *= 1000;
       const sodLimit = isLiquid ? 300 : 600;
 
-      const sugData = extractNutrientValue([/added\s*sugars?[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i, /sugars?[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i], category.toLowerCase().includes('food') ? 4.2 : null);
+      let sugData = extractNutrientValue([
+        /\badded\s*sugars?[®™\s]*[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+        /\badded\s*sugars?[®™\s]*[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+      ]);
+      if (sugData.num === null) {
+        sugData = extractNutrientValue([
+          /\btotal\s*sugars?[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+          /\btotal\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+          /\bsugars?\b[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+        ]);
+      }
       const sugLimit = isLiquid ? 6 : 10;
 
-      const satData = extractNutrientValue([/saturated\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i, /sat\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i], category.toLowerCase().includes('food') ? 7.8 : null);
+      const satData = extractNutrientValue([
+        /\bsaturated\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+        /\bsaturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+        /\bsat\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)?/i,
+      ]);
       const satLimit = 6.0;
 
-      const traData = extractNutrientValue([/trans\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i], category.toLowerCase().includes('food') ? 0.1 : null);
+      let traData = extractNutrientValue([
+        /\btrans\s*fat\b[^\d\n]{0,20}?(?:<\s*)?(\d+(?:[.,]\d+)?)\s*(g|mg)\b/i,
+      ]);
+      if (traData.num === null && /trans\s*fat[^\n]{0,15}<\s*0?\.?1/i.test(nutText)) {
+        traData = { text: '<0.1 g', num: 0.09 };
+      }
       const traLimit = 0.2;
 
       const nutrientRows = [
