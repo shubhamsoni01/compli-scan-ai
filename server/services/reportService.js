@@ -675,12 +675,19 @@ export async function generateCompliancePDF(reportData) {
       for (let i = 0; i < totalPages; i++) {
         doc.switchToPage(i);
 
-        // Large official Ministry emblem watermark in center of page
+        // Prominent large official Ministry emblem watermark in center of page
         if (ministryLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.045);
-            doc.image(ministryLogoPath, (595.28 - 330) / 2, (841.89 - 330) / 2 - 20, { fit: [330, 330] });
+            doc.opacity(0.08); // Clearly visible watermark seal
+            doc.image(ministryLogoPath, (595.28 - 380) / 2, (841.89 - 380) / 2 - 10, { fit: [380, 380] });
+            doc.restore();
+          } catch (e) {}
+        } else if (sihLogoPath) {
+          try {
+            doc.save();
+            doc.opacity(0.08);
+            doc.image(sihLogoPath, (595.28 - 360) / 2, (841.89 - 360) / 2 - 10, { fit: [360, 360] });
             doc.restore();
           } catch (e) {}
         }
