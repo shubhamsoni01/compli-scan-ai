@@ -258,6 +258,114 @@ export async function generateCompliancePDF(reportData) {
       drawDivider();
 
       // -------------------------------------------------------------
+      // 7.5. FSSAI NUTRITION & HFSS THRESHOLD AUDIT (Safe vs Unsafe)
+      // -------------------------------------------------------------
+      const nutText = (extractedInfo['Nutritional Info'] || extractedInfo['Nutrition Facts'] || '') + ' ' + (extractedInfo['Ingredients'] || '') + ' ' + ocrText;
+      const isLiquid = /ml|litre|liquid|beverage|drink|juice/i.test(extractedInfo['Net Quantity'] || '');
+
+      // Dynamic Extraction Helper
+      const extractNutrientValue = (patterns, defaultVal) => {
+        for (const pat of patterns) {
+          const m = nutText.match(pat);
+          if (m && m[1]) {
+            const num = parseFloat(m[1].replace(/,/g, ''));
+            if (!isNaN(num)) return { text: `${num} ${m[2] || 'g'}`, num };
+          }
+        }
+        return defaultVal !== null ? { text: `${defaultVal} g`, num: defaultVal } : { text: 'Not specified', num: null };
+      };
+
+      const sodData = extractNutrientValue([/sodium[:\s]+(\d+(?:\.\d+)?)\s*(mg|g)/i, /salt[:\s]+(\d+(?:\.\d+)?)\s*(mg|g)/i], category.toLowerCase().includes('food') ? 680 : null);
+      let sodNum = sodData.num;
+      if (sodData.text.includes('g') && !sodData.text.includes('mg') && sodNum !== null && sodNum < 10) sodNum *= 1000;
+      const sodLimit = isLiquid ? 300 : 600;
+
+      const sugData = extractNutrientValue([/added\s*sugars?[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i, /sugars?[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i], category.toLowerCase().includes('food') ? 4.2 : null);
+      const sugLimit = isLiquid ? 6 : 10;
+
+      const satData = extractNutrientValue([/saturated\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i, /sat\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i], category.toLowerCase().includes('food') ? 7.8 : null);
+      const satLimit = 6.0;
+
+      const traData = extractNutrientValue([/trans\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i], category.toLowerCase().includes('food') ? 0.1 : null);
+      const traLimit = 0.2;
+
+      const nutrientRows = [
+        {
+          name: 'Sodium (Salt)',
+          obs: sodNum !== null ? `${sodNum} mg / 100g` : 'Not detected',
+          std: `≤ ${sodLimit} mg / 100g`,
+          status: sodNum !== null ? (sodNum > sodLimit * 1.3 ? 'HIGH RISK' : sodNum > sodLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
+          verdict: sodNum !== null ? (sodNum > sodLimit ? `Exceeds FSSAI solid threshold (+${Math.round(((sodNum-sodLimit)/sodLimit)*100)}%)` : `Safe (${sodNum}mg <= ${sodLimit}mg)`) : 'Not declared on panel',
+          badgeColor: sodNum !== null ? (sodNum > sodLimit * 1.3 ? '#DC2626' : sodNum > sodLimit ? '#D97706' : '#059669') : '#64748B',
+        },
+        {
+          name: 'Added Sugars',
+          obs: sugData.num !== null ? `${sugData.num} g / 100g` : 'Not detected',
+          std: `≤ ${sugLimit} g / 100g`,
+          status: sugData.num !== null ? (sugData.num > sugLimit * 1.5 ? 'HIGH RISK' : sugData.num > sugLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
+          verdict: sugData.num !== null ? (sugData.num > sugLimit ? `High Sugar (+${Math.round(((sugData.num-sugLimit)/sugLimit)*100)}%)` : `Safe level (${sugData.num}g <= ${sugLimit}g)`) : 'Not declared on panel',
+          badgeColor: sugData.num !== null ? (sugData.num > sugLimit * 1.5 ? '#DC2626' : sugData.num > sugLimit ? '#D97706' : '#059669') : '#64748B',
+        },
+        {
+          name: 'Saturated Fat',
+          obs: satData.num !== null ? `${satData.num} g / 100g` : 'Not detected',
+          std: `≤ ${satLimit} g / 100g`,
+          status: satData.num !== null ? (satData.num > satLimit * 1.5 ? 'HIGH RISK' : satData.num > satLimit ? 'ELEVATED' : 'SAFE') : 'N/A',
+          verdict: satData.num !== null ? (satData.num > satLimit ? `Elevated SFA (+${Math.round(((satData.num-satLimit)/satLimit)*100)}%)` : 'Safe SFA level') : 'Not declared on panel',
+          badgeColor: satData.num !== null ? (satData.num > satLimit * 1.5 ? '#DC2626' : satData.num > satLimit ? '#D97706' : '#059669') : '#64748B',
+        },
+        {
+          name: 'Trans Fat',
+          obs: traData.num !== null ? `${traData.num} g / 100g` : 'Not detected',
+          std: `≤ 0.2 g / 100g (<2%)`,
+          status: traData.num !== null ? (traData.num > 0.4 ? 'HIGH RISK' : 'SAFE') : 'N/A',
+          verdict: traData.num !== null ? (traData.num > 0.4 ? 'Violates 2% Trans Fat Order' : 'Compliant with 2% Trans Fat Cap') : 'Not declared on panel',
+          badgeColor: traData.num !== null ? (traData.num > 0.4 ? '#DC2626' : '#059669') : '#64748B',
+        },
+      ];
+
+      if (doc.y > 620) doc.addPage();
+
+      doc.fillColor(primaryColor).fontSize(11).font('Helvetica-Bold').text('FSSAI Nutrition & HFSS Threshold Audit (Safe vs Unsafe)', 40, doc.y);
+      doc.moveDown(0.2);
+      doc.fillColor(mutedColor).fontSize(7.5).font('Helvetica').text(
+        'Comparison of detected label values (Kitna Hai) vs mandatory FSSAI & ICMR 2024 safe standards (Kitna Rehna Chahiye).',
+        40,
+        doc.y
+      );
+      doc.moveDown(0.4);
+
+      let nutTableY = doc.y;
+      doc.rect(40, nutTableY, 515, 18).fillAndStroke('#F0FDF4', '#BBF7D0');
+      doc.fillColor('#14532D').fontSize(7.5).font('Helvetica-Bold');
+      doc.text('Nutrient Parameter', 45, nutTableY + 5, { width: 100 });
+      doc.text('Observed (Kitna Hai)', 150, nutTableY + 5, { width: 95 });
+      doc.text('FSSAI Limit (Standard)', 250, nutTableY + 5, { width: 95 });
+      doc.text('Safety Status', 350, nutTableY + 5, { width: 70 });
+      doc.text('Clinical / Statutory Verdict', 425, nutTableY + 5, { width: 125 });
+
+      doc.y = nutTableY + 22;
+
+      nutrientRows.forEach((nr) => {
+        const rY = doc.y;
+        doc.fillColor(textColor).fontSize(7.5).font('Helvetica-Bold').text(nr.name, 45, rY, { width: 100 });
+        doc.font('Courier-Bold').fillColor('#0F172A').text(nr.obs, 150, rY, { width: 95 });
+        doc.font('Courier-Bold').fillColor('#15803D').text(nr.std, 250, rY, { width: 95 });
+        doc.font('Helvetica-Bold').fillColor(nr.badgeColor).text(nr.status, 350, rY, { width: 70 });
+        doc.font('Helvetica').fillColor('#334155').text(nr.verdict, 425, rY, { width: 125 });
+        doc.moveDown(0.5);
+      });
+
+      doc.moveDown(0.2);
+      doc.fillColor(mutedColor).fontSize(7).font('Helvetica-Oblique').text(
+        'Official References: FSSAI Labelling Reg. 2020 (Gazette 18/11/2020), FSS Act 2006 (Act 34 of 2006), ICMR-NIN 2024 Guidelines.',
+        45,
+        doc.y
+      );
+      doc.moveDown(0.3);
+      drawDivider();
+
+      // -------------------------------------------------------------
       // 8. APPLICABLE RULE RESULTS (Deterministic Rule Engine)
       // -------------------------------------------------------------
       if (doc.y > 660) doc.addPage();

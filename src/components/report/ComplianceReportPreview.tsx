@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { formatDate } from '@/utils/formatters';
+import { calculateNutritionAudit, type NutritionAuditReport } from '@/data/complianceRules';
 
 interface ComplianceReportPreviewProps {
   isOpen: boolean;
@@ -44,6 +45,12 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
   const reportId = `CS-${dateStr}-${shortId}`;
 
   const score = Math.round(reportData.score ?? 80);
+
+  // Compute Nutrition & HFSS Audit (Safe vs Unsafe Table)
+  const nutritionAudit: NutritionAuditReport = reportData.nutritionAudit || calculateNutritionAudit(
+    reportData.extractedInfo || {},
+    reportData.category || 'food'
+  );
   const statusColor = score >= 80 ? 'text-emerald-600 dark:text-emerald-400' : score >= 50 ? 'text-amber-600 dark:text-amber-500' : 'text-red-600 dark:text-red-400';
   const statusBadgeVariant = score >= 80 ? 'success' : score >= 50 ? 'warning' : 'destructive';
 
@@ -266,10 +273,101 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
                 </div>
               </div>
 
-              {/* 3. Detailed Statutory Findings Table */}
+              {/* 3. FSSAI Nutrition & HFSS Threshold Audit (Safe vs Unsafe Comparison Table) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-1">
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-900 flex items-center gap-2">
+                    <span>3. FSSAI Nutrition & HFSS Threshold Audit</span>
+                    <span className="text-[10px] font-normal px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      Kitna Hai vs Kitna Rehna Chahiye
+                    </span>
+                  </h2>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                    nutritionAudit.hfssStatus === 'HIGH_HFSS_ALERT'
+                      ? 'bg-red-100 text-red-800 border border-red-300'
+                      : nutritionAudit.hfssStatus === 'MODERATE_HFSS'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  }`}>
+                    INR Health Grade {nutritionAudit.overallHealthGrade} ({nutritionAudit.hfssStatus.replace(/_/g, ' ')})
+                  </span>
+                </div>
+
+                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-100 text-slate-900 font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5 pl-3">Nutrient / Parameter</th>
+                        <th className="p-2.5">
+                          <span className="text-indigo-700 font-bold">Observed Value</span>
+                          <span className="block text-[9px] font-normal text-slate-500">(Kitna Hai)</span>
+                        </th>
+                        <th className="p-2.5">
+                          <span className="text-emerald-700 font-bold">FSSAI Standard Limit</span>
+                          <span className="block text-[9px] font-normal text-slate-500">(Kitna Rehna Chahiye)</span>
+                        </th>
+                        <th className="p-2.5">Safety Status</th>
+                        <th className="p-2.5 pr-3">Clinical / Regulatory Verdict</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {nutritionAudit.nutrients.map((n, i) => (
+                        <tr key={n.key} className={i % 2 === 1 ? 'bg-slate-50/60' : ''}>
+                          <td className="p-2.5 pl-3 font-semibold text-slate-800">
+                            {n.name}
+                            {n.deviationPercent && n.deviationPercent > 0 ? (
+                              <span className="ml-1 text-[9px] px-1 py-0.2 rounded font-mono bg-red-100 text-red-700">
+                                +{n.deviationPercent}%
+                              </span>
+                            ) : null}
+                          </td>
+                          <td className="p-2.5 font-mono font-medium text-slate-900">{n.observedValue}</td>
+                          <td className="p-2.5 font-mono text-emerald-700 font-semibold">{n.standardLimit}</td>
+                          <td className="p-2.5">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              n.safetyStatus === 'SAFE' ? 'bg-emerald-100 text-emerald-800' :
+                              n.safetyStatus === 'ELEVATED' ? 'bg-amber-100 text-amber-800' :
+                              n.safetyStatus === 'HIGH_RISK' ? 'bg-red-100 text-red-800' :
+                              'bg-slate-100 text-slate-600'
+                            }`}>
+                              {n.safetyStatus === 'SAFE' ? '✓ SAFE' : n.safetyStatus === 'ELEVATED' ? '🟡 ELEVATED' : n.safetyStatus === 'HIGH_RISK' ? '🔴 HIGH RISK (HFSS)' : 'N/A'}
+                            </span>
+                          </td>
+                          <td className="p-2.5 pr-3 text-slate-600 text-[11px] leading-tight">
+                            <div>{n.verdict}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">Ref: {n.legalBasis}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Detected Additives Strip if any */}
+                {nutritionAudit.additives && nutritionAudit.additives.length > 0 && (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1.5">
+                    <span className="font-bold text-slate-800 text-[11px] uppercase tracking-wider block">
+                      Detected Food Additives & Chemical Codes ({nutritionAudit.additives.length})
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {nutritionAudit.additives.map((add, aIdx) => (
+                        <span key={aIdx} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px]">
+                          <strong className="font-mono text-indigo-700">{add.code}</strong>
+                          <span className="text-slate-700">{add.name}</span>
+                          <span className={`text-[9px] px-1 rounded font-bold ${add.fssaiStatus === 'PERMITTED' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                            {add.fssaiStatus}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Detailed Statutory Findings Table */}
               <div className="space-y-3">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-900 border-b border-slate-100 pb-1">
-                  3. Official Statutory Rule Findings ({reportData.checks?.length || 0})
+                  4. Official Statutory Rule Findings ({reportData.checks?.length || 0})
                 </h2>
                 <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
                   <table className="w-full text-left">
