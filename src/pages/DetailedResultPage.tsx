@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ZoomIn, ZoomOut, RotateCw, Maximize2, Package, Loader2, AlertOctagon } from 'lucide-react';
+import { Loader2, AlertOctagon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Card } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
@@ -18,13 +18,13 @@ import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCa
 import { VoiceAudioAssistantCard } from '@/components/voice/VoiceAudioAssistantCard';
 import { LicenseBarcodeValidatorCard } from '@/components/scan/LicenseBarcodeValidatorCard';
 import { CompliBotWidget } from '@/components/chat/CompliBotWidget';
+import { HolographicBoundingBoxViewer } from '@/components/scan/HolographicBoundingBoxViewer';
+import { StatutoryPenaltyRiskMeter } from '@/components/scan/StatutoryPenaltyRiskMeter';
 
 export default function DetailedResultPage() {
   const navigate = useNavigate();
   const { scanId, id } = useParams<{ scanId?: string; id?: string }>();
   const activeId = scanId || id;
-  const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
 
   const cached = activeId ? getCachedScanResult(activeId) : null;
   const [dbResult, setDbResult] = useState<any | null>(null);
@@ -145,6 +145,20 @@ export default function DetailedResultPage() {
       )
     },
     {
+      id: 'penalty-risk',
+      label: '⚖️ Statutory Risk & Liability',
+      content: (
+        <div className="space-y-4">
+          <StatutoryPenaltyRiskMeter
+            score={currentResult.score}
+            failedCount={currentResult.checks?.filter((c: any) => c.status === 'failed').length ?? 0}
+            checks={currentResult.checks}
+            productName={currentResult.productName}
+          />
+        </div>
+      )
+    },
+    {
       id: 'voice-brief',
       label: '🎙️ AI Voice Brief',
       content: (
@@ -260,32 +274,15 @@ export default function DetailedResultPage() {
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col md:flex-row overflow-hidden bg-gray-50/50 dark:bg-[#0a0e1a]">
-      {/* Left Panel */}
-      <div className="w-full md:w-2/5 p-4 flex flex-col gap-4 border-r border-gray-200 dark:border-gray-800 h-[50vh] md:h-full">
-        <Card className="flex-1 bg-gray-100 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden relative shadow-inner">
-          <div 
-            className="transition-transform duration-200 ease-out flex items-center justify-center w-full h-full p-4"
-            style={{ transform: `scale(${zoom}) rotate(${rotation}deg)` }}
-          >
-            {(currentResult as any).uploadedImage ? (
-              <img 
-                src={(currentResult as any).uploadedImage} 
-                alt="Product label preview" 
-                className="max-h-full max-w-full object-contain rounded-lg shadow-md select-none pointer-events-none" 
-              />
-            ) : (
-              <Package size={120} className="text-gray-300 dark:text-gray-700" />
-            )}
-          </div>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={() => setZoom(z => Math.max(0.5, z - 0.25))}><ZoomOut size={16} /></Button>
-            <span className="text-xs font-medium w-8 text-center">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={() => setZoom(z => Math.min(3, z + 0.25))}><ZoomIn size={16} /></Button>
-            <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={() => setRotation(r => r + 90)}><RotateCw size={16} /></Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full"><Maximize2 size={16} /></Button>
-          </div>
-        </Card>
+      {/* Left Panel - Holographic Forensic AR Viewer */}
+      <div className="w-full md:w-5/12 p-4 flex flex-col gap-4 border-r border-gray-200 dark:border-gray-800 h-[50vh] md:h-full overflow-y-auto custom-scrollbar">
+        <HolographicBoundingBoxViewer
+          imageUrl={(currentResult as any).uploadedImage || (currentResult as any).originalImageUrl}
+          productName={currentResult.productName}
+          checks={currentResult.checks}
+          extractedInfo={currentResult.extractedInfo}
+          className="shadow-md"
+        />
         
         <Card className="p-4 shrink-0 shadow-sm border-gray-100 dark:border-gray-800">
           <div className="flex justify-between items-start mb-2">
@@ -300,7 +297,7 @@ export default function DetailedResultPage() {
       </div>
 
       {/* Right Panel */}
-      <div className="w-full md:w-3/5 h-[50vh] md:h-full overflow-y-auto custom-scrollbar p-4 md:p-6">
+      <div className="w-full md:w-7/12 h-[50vh] md:h-full overflow-y-auto custom-scrollbar p-4 md:p-6">
         <Tabs tabs={tabData} />
       </div>
 

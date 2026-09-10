@@ -25,6 +25,8 @@ import { EditReportModal } from '@/components/report/EditReportModal';
 import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
+import { HolographicBoundingBoxViewer } from '@/components/scan/HolographicBoundingBoxViewer';
+import { StatutoryPenaltyRiskMeter } from '@/components/scan/StatutoryPenaltyRiskMeter';
 
 export default function ComplianceResultPage() {
   const navigate = useNavigate();
@@ -322,6 +324,22 @@ export default function ComplianceResultPage() {
           </Button>
         </div>
       )}
+
+      {/* Statutory Penalty Risk Meter (3D Speedometer Gauge) */}
+      <StatutoryPenaltyRiskMeter
+        score={resolvedResult.score}
+        failedCount={resolvedResult.summary?.issues ?? 0}
+        checks={resolvedResult.checks}
+        productName={resolvedResult.productName}
+      />
+
+      {/* Holographic AR & X-Ray Bounding Box Inspector */}
+      <HolographicBoundingBoxViewer
+        imageUrl={(resolvedResult as any).uploadedImage || (resolvedResult as any).originalImageUrl}
+        productName={resolvedResult.productName}
+        checks={resolvedResult.checks}
+        extractedInfo={resolvedResult.extractedInfo}
+      />
 
       {/* Multilingual Voice Audio Assistant (Hindi, English, Hinglish readout with live audio waves) */}
       <VoiceAudioAssistantCard scanData={resolvedResult} className="shadow-sm" />
