@@ -112,7 +112,7 @@ export const ComplianceReportPreview: React.FC<ComplianceReportPreviewProps> = (
           <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 bg-slate-100/50 dark:bg-[#0b0f19]">
             <div className="bg-white text-slate-900 rounded-xl shadow-md border border-slate-200 p-8 sm:p-12 space-y-8 max-w-3xl mx-auto relative overflow-hidden">
               {/* Official Watermark in Background */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.14] select-none z-0">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.24] select-none z-0">
                 <div className="flex flex-col items-center gap-6 transform -rotate-12 scale-125">
                   <div className="flex items-center gap-10">
                     <img

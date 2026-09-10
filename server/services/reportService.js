@@ -679,16 +679,16 @@ export async function generateCompliancePDF(reportData) {
         if (ministryLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.18); // Darker, bold official watermark seal
-            doc.image(ministryLogoPath, (595.28 - 350) / 2, (841.89 - 350) / 2 - 40, { fit: [350, 350] });
+            doc.opacity(0.35); // Bold, high-contrast official watermark seal
+            doc.image(ministryLogoPath, (595.28 - 360) / 2, (841.89 - 360) / 2 - 40, { fit: [360, 360] });
             doc.restore();
           } catch (e) {}
         }
         if (sihLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.16); // Clearly visible SIH emblem
-            doc.image(sihLogoPath, (595.28 - 190) / 2, (841.89 - 190) / 2 + 130, { fit: [190, 190] });
+            doc.opacity(0.30); // Clearly visible, dark SIH emblem
+            doc.image(sihLogoPath, (595.28 - 200) / 2, (841.89 - 200) / 2 + 130, { fit: [200, 200] });
             doc.restore();
           } catch (e) {}
         }
