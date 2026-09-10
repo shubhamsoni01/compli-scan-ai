@@ -288,7 +288,11 @@ export default function ComplianceResultPage() {
 
       {/* FSSAI Nutrition & HFSS Threshold Audit (Safe vs Unsafe Comparison Table) */}
       <NutritionThresholdCard 
-        extractedInfo={resolvedResult.extractedInfo} 
+        extractedInfo={{
+          ...(resolvedResult.extractedInfo || {}),
+          rawText: resolvedResult.ocrText || (resolvedResult.extractedInfo && resolvedResult.extractedInfo['rawText']) || '',
+          ocrText: resolvedResult.ocrText || '',
+        }} 
         category={resolvedResult.category} 
         auditReport={resolvedResult.nutritionAudit}
       />

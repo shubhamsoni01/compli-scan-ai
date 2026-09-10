@@ -104,7 +104,11 @@ export default function DetailedResultPage() {
       content: (
         <div className="space-y-4">
           <NutritionThresholdCard 
-            extractedInfo={currentResult.extractedInfo} 
+            extractedInfo={{
+              ...(currentResult.extractedInfo || {}),
+              rawText: (currentResult as any).ocrText || (currentResult.extractedInfo && currentResult.extractedInfo['rawText']) || '',
+              ocrText: (currentResult as any).ocrText || '',
+            }} 
             category={currentResult.category} 
             auditReport={currentResult.nutritionAudit}
           />

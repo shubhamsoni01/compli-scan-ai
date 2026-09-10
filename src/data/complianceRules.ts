@@ -705,7 +705,9 @@ export function calculateNutritionAudit(
     (extractedInfo['Nutritional Info'] || '') + ' ' +
     (extractedInfo['Nutrition Facts'] || '') + ' ' +
     (extractedInfo['Ingredients'] || '') + ' ' +
-    (extractedInfo['rawText'] || '')
+    (extractedInfo['rawText'] || '') + ' ' +
+    ((extractedInfo as any).ocrText || '') + ' ' +
+    ((extractedInfo as any).rawOCRText || '')
   );
 
   const isLiquid = /ml|litre|liquid|beverage|drink|juice/i.test(extractedInfo['Net Quantity'] || '');
