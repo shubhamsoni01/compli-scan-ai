@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   Scan, FileText, CheckCircle, ShieldCheck, Cpu, 
   History, LayoutGrid, Clock, Apple, Droplet, Sparkles, 
-  Home, HelpCircle
+  Home, HelpCircle, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -23,6 +23,8 @@ import { KidScanningStoryAnimation } from '@/components/hero/KidScanningStoryAni
 import { CyberGridBackground } from '@/components/ui/CyberGridBackground';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { SIHLogo } from '@/components/ui/SIHLogo';
+import { VideoDemoModal } from '@/components/media/VideoDemoModal';
+import { VideoShowcaseCard } from '@/components/media/VideoShowcaseCard';
 
 // Framer motion variants
 const containerVariants = {
@@ -47,6 +49,7 @@ export default function LandingPage() {
     totalScans: 0,
     totalVisits: 0,
   });
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRealStats().then(data => {
@@ -107,8 +110,17 @@ export default function LandingPage() {
                     <Scan className="h-5 w-5 text-emerald-400 group-hover:rotate-12 transition-transform" />
                   </Button>
                 </Link>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setIsVideoModalOpen(true)}
+                  className="w-full sm:w-auto border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:border-amber-500 px-6 py-3.5 text-base font-bold flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Play className="h-4 w-4 fill-current text-amber-500" />
+                  <span>Watch SIH Demo Video</span>
+                </Button>
                 <Link to="/rules">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-300 dark:border-white/15 hover:border-amber-500/50 hover:bg-amber-500/5 dark:hover:bg-amber-500/10 px-6 py-3.5 text-base">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-300 dark:border-white/15 hover:border-emerald-500/50 hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 px-6 py-3.5 text-base">
                     Explore 22+ Rules
                   </Button>
                 </Link>
@@ -198,6 +210,11 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Dedicated SIH 2026 Walkthrough Video Showcase Card */}
+          <div className="mt-14 max-w-4xl mx-auto">
+            <VideoShowcaseCard onOpenModal={() => setIsVideoModalOpen(true)} />
+          </div>
         </div>
       </section>
 
@@ -350,6 +367,13 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Fullscreen Video Demo Theater Modal */}
+      <VideoDemoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        videoSrc="/sih.mp4"
+      />
     </div>
   );
 }

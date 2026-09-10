@@ -12,7 +12,8 @@ import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { SIHLogo } from '@/components/ui/SIHLogo';
 import { startRealScan, startRealMultiScan, type MultiAngleImages } from '@/services/scanService';
 import { createSampleLabelFile } from '@/utils/sampleImages';
-import { Layers, ScanLine, Check, UploadCloud } from 'lucide-react';
+import { Layers, ScanLine, Check, UploadCloud, Play } from 'lucide-react';
+import { VideoDemoModal } from '@/components/media/VideoDemoModal';
 
 const categories = ['Food', 'Edible Oil', 'Cosmetics', 'Household', 'Other'];
 
@@ -35,6 +36,7 @@ export default function ScanPage() {
   const navigate = useNavigate();
   const [category, setCategory] = useState<string>('Food');
   const [scanMode, setScanMode] = useState<'single' | 'multi'>('single');
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -196,6 +198,14 @@ export default function ScanPage() {
               <MinistryLogo size="sm" showText={true} className="bg-transparent border-0 p-0 shadow-none" />
             </div>
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsVideoModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all cursor-pointer shadow-sm"
+              >
+                <Play size={12} className="fill-current text-amber-400" />
+                <span>Watch SIH Demo Video</span>
+              </button>
               <div className="hidden sm:block h-8 w-px bg-white/10" />
               <div className="text-right">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -734,6 +744,13 @@ export default function ScanPage() {
           )}
         </motion.div>
       )}
+
+      {/* Fullscreen Video Demo Theater Modal */}
+      <VideoDemoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        videoSrc="/sih.mp4"
+      />
     </div>
   );
 }
