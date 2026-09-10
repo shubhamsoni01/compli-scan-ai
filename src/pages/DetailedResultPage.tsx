@@ -16,6 +16,8 @@ import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard';
 import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
 import { VoiceAudioAssistantCard } from '@/components/voice/VoiceAudioAssistantCard';
+import { LicenseBarcodeValidatorCard } from '@/components/scan/LicenseBarcodeValidatorCard';
+import { CompliBotWidget } from '@/components/chat/CompliBotWidget';
 
 export default function DetailedResultPage() {
   const navigate = useNavigate();
@@ -204,6 +206,19 @@ export default function DetailedResultPage() {
       )
     },
     {
+      id: 'license-barcode',
+      label: '🛡️ FSSAI & Barcode Verifier',
+      content: (
+        <div className="space-y-4">
+          <LicenseBarcodeValidatorCard
+            fssaiNumber={currentResult.extractedInfo?.['FSSAI / License Number'] || (currentResult.extractedInfo && currentResult.extractedInfo['licenseNumber']) || ''}
+            barcode={currentResult.extractedInfo?.['Barcode'] || (currentResult.extractedInfo && currentResult.extractedInfo['barcode']) || ''}
+            rawText={(currentResult as any).ocrText || (currentResult.extractedInfo && currentResult.extractedInfo['rawText']) || ''}
+          />
+        </div>
+      )
+    },
+    {
       id: 'gazettes',
       label: '🏛️ Official Acts & Gazettes',
       content: (
@@ -288,6 +303,9 @@ export default function DetailedResultPage() {
       <div className="w-full md:w-3/5 h-[50vh] md:h-full overflow-y-auto custom-scrollbar p-4 md:p-6">
         <Tabs tabs={tabData} />
       </div>
+
+      {/* Interactive AI Legal Copilot Chatbot */}
+      <CompliBotWidget scanData={currentResult} />
     </div>
   );
 }

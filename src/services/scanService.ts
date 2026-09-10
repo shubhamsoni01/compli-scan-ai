@@ -387,6 +387,207 @@ export async function startRealScan(
   return result;
 }
 
+export interface MultiAngleImages {
+  front?: File | null;
+  back?: File | null;
+  side?: File | null;
+}
+
+export async function startRealMultiScan(
+  angles: MultiAngleImages,
+  userSelectedCategory: string,
+  onStepChange: (stepId: number, status: 'pending' | 'active' | 'completed' | 'error', errorMsg?: string) => void
+): Promise<ScanResultData> {
+  const primaryFile = angles.front || angles.back || angles.side;
+  if (!primaryFile) {
+    throw new Error('Please provide at least one product label angle image.');
+  }
+
+  const scanId = typeof crypto !== 'undefined' && crypto.randomUUID ? `scan_${crypto.randomUUID()}` : `scan_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const uploadedImage = URL.createObjectURL(primaryFile);
+
+  // STEP 1: Image Processing
+  onStepChange(1, 'active');
+  await new Promise((res) => setTimeout(res, 300));
+  onStepChange(1, 'completed');
+
+  // STEP 2: Parallel Multi-Angle OCR
+  onStepChange(2, 'active');
+  let combinedOCRText = '';
+  let primaryOcrResponse: any = null;
+
+  try {
+    const ocrPromises: Promise<{ angle: string; text: string; rawResp?: any }>[] = [];
+
+    if (angles.front) {
+      ocrPromises.push(
+        sendImageToOCR(angles.front, `${scanId}_front`).then((r) => ({
+          angle: 'FRONT PANEL (Brand & Declarations)',
+          text: r.text || '',
+          rawResp: r,
+        }))
+      );
+    }
+    if (angles.back) {
+      ocrPromises.push(
+        sendImageToOCR(angles.back, `${scanId}_back`).then((r) => ({
+          angle: 'BACK PANEL (Nutrition & Ingredients)',
+          text: r.text || '',
+          rawResp: r,
+        }))
+      );
+    }
+    if (angles.side) {
+      ocrPromises.push(
+        sendImageToOCR(angles.side, `${scanId}_side`).then((r) => ({
+          angle: 'SIDE / FLAP PANEL (FSSAI, MRP & Manufacturer)',
+          text: r.text || '',
+          rawResp: r,
+        }))
+      );
+    }
+
+    const results = await Promise.all(ocrPromises);
+    primaryOcrResponse = results[0]?.rawResp || {};
+
+    const textSegments = results
+      .filter((r) => r.text.trim().length > 0)
+      .map((r) => `=== ${r.angle} ===\n${r.text}`);
+
+    combinedOCRText = textSegments.join('\n\n');
+
+    if (!combinedOCRText.trim()) {
+      throw new Error('Unable to extract text from the provided angles. Please ensure images are well-lit and clear.');
+    }
+
+    onStepChange(2, 'completed');
+  } catch (err: any) {
+    onStepChange(2, 'error', err.message || 'Multi-angle OCR extraction failed.');
+    throw err;
+  }
+
+  // STEP 3: Unified AI Structuring (Groq LLM)
+  onStepChange(3, 'active');
+  let groqResponse;
+  try {
+    groqResponse = await sendTextToGroq(combinedOCRText, scanId);
+    if (!groqResponse.data) {
+      throw new Error('Could not structure product details from multi-angle OCR text.');
+    }
+    onStepChange(3, 'completed');
+  } catch (err: any) {
+    onStepChange(3, 'error', err.message || 'Information analysis failed.');
+    throw err;
+  }
+
+  // STEP 4: Rule Compliance Check
+  onStepChange(4, 'active');
+  await new Promise((res) => setTimeout(res, 400));
+  onStepChange(4, 'completed');
+
+  // STEP 5: Report Generation
+  onStepChange(5, 'active');
+  await new Promise((res) => setTimeout(res, 300));
+  onStepChange(5, 'completed');
+
+  const p = groqResponse.data;
+  const comp = groqResponse.compliance;
+
+  const finalCategory =
+    p.category && p.category !== 'Unknown'
+      ? (p.category.toLowerCase().replace(' ', '-') as any)
+      : (userSelectedCategory.toLowerCase().replace(' ', '-') as any);
+
+  const extractedInfoMap: Record<string, string | null> = {
+    'Product Name': p.productName || 'Not detected',
+    'Brand': p.brand || 'Not detected',
+    'Category': p.category || userSelectedCategory,
+    'MRP': p.mrp || null,
+    'Net Quantity': p.netQuantity || null,
+    'Manufacturer': p.manufacturer || null,
+    'Manufacture Date': p.manufacturingDate || null,
+    'Best Before / Expiry': p.expiryDate || null,
+    'Batch Number': p.batchNumber || null,
+    'Consumer Care': p.consumerCare || null,
+    'FSSAI / License Number': p.licenseNumber || null,
+    'Country of Origin': p.countryOfOrigin || null,
+    'Ingredients': p.ingredients || combinedOCRText || null,
+    'Nutritional Info': combinedOCRText || null,
+    'rawText': combinedOCRText || null,
+  };
+
+  const checksList: ScanResultData['checks'] = (comp?.rules || []).map((r) => ({
+    ruleId: r.ruleId,
+    field: r.title,
+    requirement: r.requirement,
+    detectedValue: r.observedValue,
+    status:
+      r.status === 'PASS'
+        ? ('passed' as const)
+        : r.status === 'FAIL'
+        ? ('failed' as const)
+        : r.status === 'NEEDS_REVIEW'
+        ? ('review' as const)
+        : ('not-applicable' as const),
+    explanation: r.reason,
+    legalReference: `${r.officialSource} — ${r.regulation}`,
+  }));
+
+  const passedCount = comp?.summary?.passed ?? checksList.filter((c) => c.status === 'passed').length;
+  const issuesCount = comp?.summary?.issues ?? checksList.filter((c) => c.status === 'failed').length;
+  const reviewCount = comp?.summary?.review ?? checksList.filter((c) => c.status === 'review').length;
+  const naCount = comp?.summary?.notApplicable ?? checksList.filter((c) => c.status === 'not-applicable').length;
+
+  const computedScore = typeof comp?.score === 'number' ? comp.score : 80;
+  const overallStatus = comp?.overallStatus || (computedScore >= 80 ? 'COMPLIANT' : 'POTENTIAL NON-COMPLIANCE');
+
+  let readabilityResult: ReadabilityResult | undefined;
+  try {
+    readabilityResult = computeReadabilityAnalysis({
+      ocrText: combinedOCRText,
+      ocrData: primaryOcrResponse?.ocrData,
+      imageMetadata: primaryOcrResponse?.imageMetadata,
+      productData: p,
+    });
+  } catch {}
+
+  const nutritionAudit = calculateNutritionAudit(extractedInfoMap, finalCategory);
+
+  const result: ScanResultData = {
+    scanId,
+    productName: p.productName || 'Inspected Packaged Product',
+    productBrand: p.brand || 'Multi-Angle Scan',
+    category: finalCategory,
+    scanDate: new Date().toISOString(),
+    score: computedScore,
+    overallStatus,
+    statusDescription:
+      computedScore >= 80
+        ? 'All mandatory statutory declarations and multi-angle package disclosures satisfy Legal Metrology & FSSAI standards.'
+        : 'Some mandatory packaging declarations were missing or non-compliant across inspected angles.',
+    summary: {
+      passed: passedCount,
+      issues: issuesCount,
+      review: reviewCount,
+      notApplicable: naCount,
+    },
+    checks: checksList,
+    extractedInfo: extractedInfoMap,
+    structuredProduct: p,
+    ocrText: combinedOCRText,
+    ocrEngine: 'Multi-Angle OCR (Front + Back + Side Stitched)',
+    uploadedImage,
+    originalFilename: primaryFile.name,
+    evaluatedRules: comp?.rules || [],
+    readabilityResult,
+    nutritionAudit,
+  };
+
+  setCachedScanResult(scanId, result);
+
+  return result;
+}
+
 export async function getRecentScans(limit: number = 5): Promise<ScanRecord[]> {
   return mockScanHistory.slice(0, limit);
 }

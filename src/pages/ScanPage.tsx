@@ -10,8 +10,9 @@ import { DropZone } from '@/components/ui/DropZone';
 import { CameraCapture } from '@/components/ui/CameraCapture';
 import { MinistryLogo } from '@/components/ui/MinistryLogo';
 import { SIHLogo } from '@/components/ui/SIHLogo';
-import { startRealScan } from '@/services/scanService';
+import { startRealScan, startRealMultiScan, type MultiAngleImages } from '@/services/scanService';
 import { createSampleLabelFile } from '@/utils/sampleImages';
+import { Layers, ScanLine, Check, UploadCloud } from 'lucide-react';
 
 const categories = ['Food', 'Edible Oil', 'Cosmetics', 'Household', 'Other'];
 
@@ -33,8 +34,22 @@ const INITIAL_STEPS: StepState[] = [
 export default function ScanPage() {
   const navigate = useNavigate();
   const [category, setCategory] = useState<string>('Food');
+  const [scanMode, setScanMode] = useState<'single' | 'multi'>('single');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  // Multi-Angle 360° Scan states
+  const [multiAngles, setMultiAngles] = useState<{
+    front: File | null;
+    back: File | null;
+    side: File | null;
+  }>({ front: null, back: null, side: null });
+  const [multiPreviews, setMultiPreviews] = useState<{
+    front: string | null;
+    back: string | null;
+    side: string | null;
+  }>({ front: null, back: null, side: null });
+  const [activeCameraTarget, setActiveCameraTarget] = useState<'single' | 'front' | 'back' | 'side'>('single');
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanSteps, setScanSteps] = useState<StepState[]>(INITIAL_STEPS);
@@ -51,6 +66,22 @@ export default function ScanPage() {
     if (f.type.startsWith('image/')) {
       setPreview(URL.createObjectURL(f));
     }
+  };
+
+  const handleMultiFile = (angle: 'front' | 'back' | 'side', f: File) => {
+    setScanError(null);
+    setIsScanning(false);
+    setScanSteps(INITIAL_STEPS);
+    if (multiPreviews[angle]) URL.revokeObjectURL(multiPreviews[angle]!);
+
+    setMultiAngles((prev) => ({ ...prev, [angle]: f }));
+    setMultiPreviews((prev) => ({ ...prev, [angle]: URL.createObjectURL(f) }));
+  };
+
+  const handleClearMultiAngle = (angle: 'front' | 'back' | 'side') => {
+    if (multiPreviews[angle]) URL.revokeObjectURL(multiPreviews[angle]!);
+    setMultiAngles((prev) => ({ ...prev, [angle]: null }));
+    setMultiPreviews((prev) => ({ ...prev, [angle]: null }));
   };
 
   const handleClear = () => {
@@ -92,11 +123,46 @@ export default function ScanPage() {
         }
       );
 
-      // Successfully processed: navigate to compliance result page
       navigate(`/result/${result.scanId}`);
     } catch (error: any) {
       console.error('Scan workflow error:', error);
       setScanError(error.message || 'Unable to read the label. Please upload a clearer image.');
+    }
+  };
+
+  const handleStartMultiScan = async () => {
+    if (!multiAngles.front && !multiAngles.back && !multiAngles.side) return;
+    setIsScanning(true);
+    setScanError(null);
+
+    setScanSteps(INITIAL_STEPS.map((s) => ({ ...s, status: 'pending' })));
+
+    try {
+      const result = await startRealMultiScan(
+        multiAngles,
+        category,
+        (stepId: number, status: 'pending' | 'active' | 'completed' | 'error', errorMsg?: string) => {
+          setScanSteps((prev) =>
+            prev.map((step) => {
+              if (step.id === stepId) {
+                return { ...step, status };
+              }
+              if (step.id < stepId && step.status !== 'completed') {
+                return { ...step, status: 'completed' };
+              }
+              return step;
+            })
+          );
+          if (errorMsg) {
+            setScanError(errorMsg);
+          }
+        }
+      );
+
+      navigate(`/result/${result.scanId}`);
+    } catch (error: any) {
+      console.error('Multi-angle scan workflow error:', error);
+      setScanError(error.message || 'Unable to process multi-angle scan. Please try again.');
     }
   };
 
@@ -112,7 +178,11 @@ export default function ScanPage() {
         <CameraCapture
           onCapture={(file) => {
             setShowCamera(false);
-            handleFile(file);
+            if (scanMode === 'multi') {
+              handleMultiFile(activeCameraTarget === 'single' ? 'front' : activeCameraTarget, file);
+            } else {
+              handleFile(file);
+            }
           }}
           onClose={() => setShowCamera(false)}
         />
@@ -141,14 +211,249 @@ export default function ScanPage() {
             </div>
           </div>
 
+          {/* Mode Switcher Tabs */}
+          <div className="flex justify-center">
+            <div className="p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 inline-flex">
+              <button
+                type="button"
+                onClick={() => setScanMode('single')}
+                className={cn(
+                  'flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold transition-all',
+                  scanMode === 'single'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                )}
+              >
+                <ScanLine size={16} />
+                <span>Standard Single Label</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setScanMode('multi')}
+                className={cn(
+                  'flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold transition-all',
+                  scanMode === 'multi'
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                )}
+              >
+                <Layers size={16} />
+                <span>📸 360° Multi-Angle Scan (Front + Back + Side)</span>
+                <span className="text-[9px] font-bold bg-amber-400 text-slate-900 px-1.5 py-0.2 rounded uppercase">
+                  NEW
+                </span>
+              </button>
+            </div>
+          </div>
+
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-heading">Scan Product</h1>
-            <p className="text-gray-500 dark:text-gray-400">
-              Upload a packaged product label image or capture with your camera for real AI compliance audit.
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-heading">
+              {scanMode === 'multi' ? '360° Multi-Angle Label Scan' : 'Scan Product Label'}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-sm">
+              {scanMode === 'multi'
+                ? 'Upload or capture Front, Back, and Side panels simultaneously. Our AI stitches all angles together for 100% statutory coverage.'
+                : 'Upload a single packaged product label image or capture via camera for live legal audit.'}
             </p>
           </div>
 
-          {!selectedFile ? (
+          {scanMode === 'multi' ? (
+            /* Multi-Angle 360° Stitched Upload UI */
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 1. FRONT PANEL */}
+                <Card className="p-4 border-dashed border-2 border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/20 dark:bg-indigo-950/10 flex flex-col justify-between h-72">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+                        1. Front Panel
+                      </span>
+                      {multiAngles.front && <Check size={16} className="text-emerald-500" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mb-3">
+                      Brand Name, Veg/Non-Veg Logo, Net Quantity
+                    </p>
+                  </div>
+
+                  {multiPreviews.front ? (
+                    <div className="relative flex-1 flex items-center justify-center bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 p-1">
+                      <img src={multiPreviews.front} alt="Front" className="max-h-36 object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => handleClearMultiAngle('front')}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-[10px]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex-1 border border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all p-3">
+                      <UploadCloud size={24} className="text-indigo-600 mb-1" />
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Upload Front</span>
+                      <span className="text-[10px] text-slate-400">or drag image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleMultiFile('front', e.target.files[0])}
+                      />
+                    </label>
+                  )}
+
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs h-8"
+                      onClick={() => {
+                        setActiveCameraTarget('front');
+                        setShowCamera(true);
+                      }}
+                    >
+                      <Camera size={14} className="mr-1" /> Camera
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* 2. BACK PANEL */}
+                <Card className="p-4 border-dashed border-2 border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/20 dark:bg-emerald-950/10 flex flex-col justify-between h-72">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                        2. Back Panel
+                      </span>
+                      {multiAngles.back && <Check size={16} className="text-emerald-500" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mb-3">
+                      Nutrition Facts Table, Ingredients, HFSS
+                    </p>
+                  </div>
+
+                  {multiPreviews.back ? (
+                    <div className="relative flex-1 flex items-center justify-center bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 p-1">
+                      <img src={multiPreviews.back} alt="Back" className="max-h-36 object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => handleClearMultiAngle('back')}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-[10px]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex-1 border border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all p-3">
+                      <UploadCloud size={24} className="text-emerald-600 mb-1" />
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Upload Back</span>
+                      <span className="text-[10px] text-slate-400">or drag image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleMultiFile('back', e.target.files[0])}
+                      />
+                    </label>
+                  )}
+
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs h-8"
+                      onClick={() => {
+                        setActiveCameraTarget('back');
+                        setShowCamera(true);
+                      }}
+                    >
+                      <Camera size={14} className="mr-1" /> Camera
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* 3. SIDE / FLAP PANEL */}
+                <Card className="p-4 border-dashed border-2 border-amber-200 dark:border-amber-900/60 bg-amber-50/20 dark:bg-amber-950/10 flex flex-col justify-between h-72">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                        3. Side / Flap Panel
+                      </span>
+                      {multiAngles.side && <Check size={16} className="text-emerald-500" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mb-3">
+                      14-Digit FSSAI, MRP, Dates, Batch, Address
+                    </p>
+                  </div>
+
+                  {multiPreviews.side ? (
+                    <div className="relative flex-1 flex items-center justify-center bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 p-1">
+                      <img src={multiPreviews.side} alt="Side" className="max-h-36 object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => handleClearMultiAngle('side')}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-[10px]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex-1 border border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-amber-50/50 dark:hover:bg-amber-950/30 transition-all p-3">
+                      <UploadCloud size={24} className="text-amber-600 mb-1" />
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Upload Side</span>
+                      <span className="text-[10px] text-slate-400">or drag image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleMultiFile('side', e.target.files[0])}
+                      />
+                    </label>
+                  )}
+
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs h-8"
+                      onClick={() => {
+                        setActiveCameraTarget('side');
+                        setShowCamera(true);
+                      }}
+                    >
+                      <Camera size={14} className="mr-1" /> Camera
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Category selector & Start Multi-Angle Scan button */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                      Select Commodity Category
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((c) => (
+                        <Chip key={c} label={c} selected={category === c} onClick={() => setCategory(c)} />
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    size="lg"
+                    disabled={!multiAngles.front && !multiAngles.back && !multiAngles.side}
+                    onClick={handleStartMultiScan}
+                    className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold h-12 px-6 shadow-md"
+                  >
+                    Start 360° Stitched Audit
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ) : !selectedFile ? (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

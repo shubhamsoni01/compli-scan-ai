@@ -70,6 +70,7 @@ import analyzeRouter from './routes/analyze.js';
 import reportRouter from './routes/report.js';
 import scansRouter from './routes/scans.js';
 import statsRouter from './routes/stats.js';
+import chatRouter from './routes/chat.js';
 
 app.use('/api/auth', authRouter);
 app.use('/api/ocr', ocrRouter);
@@ -77,6 +78,7 @@ app.use('/api/analyze', analyzeRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/scans', scansRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/chat', chatRouter);
 
 // Global Error Handler
 app.use((err, _req, res, _next) => {

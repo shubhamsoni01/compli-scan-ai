@@ -19,6 +19,8 @@ import { ReadabilityCard } from '@/components/scan/ReadabilityCard';
 import { NutritionThresholdCard } from '@/components/scan/NutritionThresholdCard';
 import { OfficialGazetteDocsCard } from '@/components/scan/OfficialGazetteDocsCard';
 import { VoiceAudioAssistantCard } from '@/components/voice/VoiceAudioAssistantCard';
+import { LicenseBarcodeValidatorCard } from '@/components/scan/LicenseBarcodeValidatorCard';
+import { CompliBotWidget } from '@/components/chat/CompliBotWidget';
 import { EditReportModal } from '@/components/report/EditReportModal';
 import { FileText, Loader2, Edit3, AlertOctagon, CheckCircle2 } from 'lucide-react';
 import { SIHLogo } from '@/components/ui/SIHLogo';
@@ -442,6 +444,13 @@ export default function ComplianceResultPage() {
         ocrEngine={(resolvedResult as any).ocrEngine}
       />
 
+      {/* FSSAI 14-Digit License & GS1 Barcode Fraud & Checksum Verifier */}
+      <LicenseBarcodeValidatorCard
+        fssaiNumber={resolvedResult.extractedInfo?.['FSSAI / License Number'] || (resolvedResult.extractedInfo && resolvedResult.extractedInfo['licenseNumber']) || ''}
+        barcode={resolvedResult.extractedInfo?.['Barcode'] || (resolvedResult.extractedInfo && resolvedResult.extractedInfo['barcode']) || ''}
+        rawText={resolvedResult.ocrText || (resolvedResult.extractedInfo && resolvedResult.extractedInfo['rawText']) || ''}
+      />
+
       {/* Premium Compliance Report Preview Modal */}
       <ComplianceReportPreview
         isOpen={isPreviewOpen}
@@ -459,6 +468,9 @@ export default function ComplianceResultPage() {
         onClose={() => setIsEditModalOpen(false)}
         reportData={resolvedResult}
       />
+
+      {/* Interactive AI Legal Copilot Chatbot */}
+      <CompliBotWidget scanData={resolvedResult} />
     </div>
   );
 }
