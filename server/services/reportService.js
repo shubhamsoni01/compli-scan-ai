@@ -679,16 +679,16 @@ export async function generateCompliancePDF(reportData) {
         if (ministryLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.095); // High clarity official government watermark seal
-            doc.image(ministryLogoPath, (595.28 - 340) / 2, (841.89 - 340) / 2 - 40, { fit: [340, 340] });
+            doc.opacity(0.18); // Darker, bold official watermark seal
+            doc.image(ministryLogoPath, (595.28 - 350) / 2, (841.89 - 350) / 2 - 40, { fit: [350, 350] });
             doc.restore();
           } catch (e) {}
         }
         if (sihLogoPath) {
           try {
             doc.save();
-            doc.opacity(0.085); // Clearly visible SIH emblem
-            doc.image(sihLogoPath, (595.28 - 180) / 2, (841.89 - 180) / 2 + 130, { fit: [180, 180] });
+            doc.opacity(0.16); // Clearly visible SIH emblem
+            doc.image(sihLogoPath, (595.28 - 190) / 2, (841.89 - 190) / 2 + 130, { fit: [190, 190] });
             doc.restore();
           } catch (e) {}
         }
