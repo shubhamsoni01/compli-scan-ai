@@ -1,5 +1,5 @@
 import { mockScanHistory, dashboardStats, type ScanRecord } from '@/data/scanHistory';
-import { mockComplianceResult, type ComplianceResult } from '@/data/complianceRules';
+import { mockComplianceResult, type ComplianceResult, calculateNutritionAudit } from '@/data/complianceRules';
 import { 
   sendImageToOCR, 
   sendTextToGroq, 
@@ -87,8 +87,16 @@ export async function getScanResultAsync(scanId: string): Promise<ScanResultData
           'Consumer Care': dbDoc.consumerCare,
           'FSSAI / License Number': dbDoc.licenseNumber,
           'Country of Origin': dbDoc.countryOfOrigin,
-          'Ingredients': dbDoc.ingredients,
+          'Ingredients': dbDoc.ingredients || dbDoc.rawOCRText,
+          'Nutritional Info': dbDoc.rawOCRText,
+          'rawText': dbDoc.rawOCRText,
         },
+        nutritionAudit: dbDoc.nutritionAudit || calculateNutritionAudit({
+          'Ingredients': dbDoc.ingredients || dbDoc.rawOCRText,
+          'Nutritional Info': dbDoc.rawOCRText,
+          'rawText': dbDoc.rawOCRText,
+          'Net Quantity': dbDoc.netQuantity,
+        }, (dbDoc.category?.toLowerCase().replace(' ', '-') || 'food') as any),
         structuredProduct: dbDoc.groqStructuredJSON,
         ocrText: dbDoc.rawOCRText,
         ocrEngine: 'OCR.Space',
@@ -197,7 +205,9 @@ export async function startRealScan(
     'Consumer Care': p.consumerCare || null,
     'FSSAI / License Number': p.licenseNumber || null,
     'Country of Origin': p.countryOfOrigin || null,
-    'Ingredients': p.ingredients || null,
+    'Ingredients': p.ingredients || ocrResponse.text || null,
+    'Nutritional Info': ocrResponse.text || null,
+    'rawText': ocrResponse.text || null,
   };
 
   // Convert deterministic rules into existing UI checks list format
@@ -252,6 +262,9 @@ export async function startRealScan(
     console.warn(`[CompliScan Client] Readability analysis warning (non-fatal):`, readErr.message);
   }
 
+  // Calculate Dynamic FSSAI & ICMR Nutritional & HFSS Threshold Audit Report
+  const nutritionAudit = calculateNutritionAudit(extractedInfoMap, finalCategory);
+
   // Construct Result data conforming to existing result pages
   const result: ScanResultData = {
     scanId,
@@ -265,6 +278,7 @@ export async function startRealScan(
     summary,
     checks: checksList,
     extractedInfo: extractedInfoMap,
+    nutritionAudit,
     structuredProduct: p,
     ocrText: ocrResponse.text,
     ocrEngine: ocrResponse.ocrEngine,
