@@ -133,6 +133,18 @@ EXPECTED JSON OUTPUT STRUCTURE:
   "components": string or null,
   "ingredientsConfidence": "HIGH" | "MEDIUM" | "LOW" | null,
 
+  "nutritionalInfo": {
+    "sodium": string or null,
+    "addedSugars": string or null,
+    "totalSugars": string or null,
+    "saturatedFat": string or null,
+    "transFat": string or null,
+    "energy": string or null,
+    "protein": string or null,
+    "rawText": string or null
+  } or null,
+  "additives": Array<{ "code": string, "name": string }> or null,
+
   "vegNonVegDeclaration": "VEG" | "NON_VEG" | null,
   "productDescription": string or null,
   "otherMandatoryDeclarations": string or null,

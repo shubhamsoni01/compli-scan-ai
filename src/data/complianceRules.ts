@@ -667,24 +667,31 @@ export const officialGazetteDocuments: OfficialGazetteDoc[] = [
  */
 export const INS_ADDITIVES_DB: Record<string, { name: string; purpose: string; status: 'PERMITTED' | 'RESTRICTED' | 'PROHIBITED' | 'CAUTION_REQUIRED'; warning?: string }> = {
   '621': { name: 'Monosodium Glutamate (MSG)', purpose: 'Flavor Enhancer', status: 'CAUTION_REQUIRED', warning: 'Mandatory declaration required: "Not recommended for infants below 12 months".' },
-  '627': { name: 'Disodium Guanylate', purpose: 'Flavor Enhancer', status: 'PERMITTED', warning: 'Permitted in GMP (Good Manufacturing Practice) limits.' },
+  '627': { name: 'Disodium Guanylate', purpose: 'Flavor Enhancer', status: 'PERMITTED', warning: 'Permitted in GMP limits.' },
   '631': { name: 'Disodium Inosinate', purpose: 'Flavor Enhancer', status: 'PERMITTED', warning: 'Permitted within prescribed levels.' },
-  '951': { name: 'Aspartame', purpose: 'Artificial Sweetener', status: 'CAUTION_REQUIRED', warning: 'Mandatory statement: "Contains Artificial Sweetener. Not recommended for children & Phenylketonurics".' },
+  '951': { name: 'Aspartame', purpose: 'Artificial Sweetener', status: 'CAUTION_REQUIRED', warning: 'Mandatory statement: "Contains Artificial Sweetener. Not for children & Phenylketonurics".' },
   '950': { name: 'Acesulfame Potassium (Ace-K)', purpose: 'Non-Caloric Sweetener', status: 'CAUTION_REQUIRED', warning: 'Mandatory quantity declaration in ppm.' },
   '955': { name: 'Sucralose', purpose: 'Artificial Sweetener', status: 'PERMITTED', warning: 'Permitted in calorie-reduced/sugar-free foods.' },
   '211': { name: 'Sodium Benzoate', purpose: 'Class II Chemical Preservative', status: 'RESTRICTED', warning: 'Permissible limit up to 100-750 ppm depending on food class.' },
   '202': { name: 'Potassium Sorbate', purpose: 'Preservative (Anti-fungal)', status: 'PERMITTED', warning: 'Permitted within prescribed maximum limits.' },
   '220': { name: 'Sulfur Dioxide', purpose: 'Preservative & Antioxidant', status: 'CAUTION_REQUIRED', warning: 'Must declare allergen statement if > 10 ppm.' },
+  '471': { name: 'Mono- and Di-glycerides of Fatty Acids', purpose: 'Food Emulsifier & Stabilizer', status: 'PERMITTED', warning: 'Permitted food emulsifier from plant/edible oil sources.' },
+  '500': { name: 'Sodium Carbonates / Baking Soda', purpose: 'Acidity Regulator & Raising Agent', status: 'PERMITTED' },
+  '500ii': { name: 'Sodium Hydrogen Carbonate', purpose: 'Acidity Regulator & Leavening Agent', status: 'PERMITTED' },
+  '501': { name: 'Potassium Carbonates', purpose: 'Acidity Regulator & Mineral Salt', status: 'PERMITTED' },
+  '501ii': { name: 'Potassium Hydrogen Carbonate', purpose: 'Acidity Regulator & Nutrient Buffer', status: 'PERMITTED' },
+  '412': { name: 'Guar Gum', purpose: 'Plant-based Thickener', status: 'PERMITTED' },
+  '415': { name: 'Xanthan Gum', purpose: 'Stabilizer & Thickener', status: 'PERMITTED' },
+  '440': { name: 'Pectin', purpose: 'Gelling Agent', status: 'PERMITTED' },
+  '322': { name: 'Lecithin (Soy/Sunflower)', purpose: 'Emulsifier & Stabilizer', status: 'PERMITTED', warning: 'Must declare soy origin if derived from soy.' },
+  '300': { name: 'Ascorbic Acid (Vitamin C)', purpose: 'Antioxidant & Nutrient', status: 'PERMITTED' },
+  '307': { name: 'Tocopherols (Vitamin E)', purpose: 'Antioxidant & Nutrient', status: 'PERMITTED' },
+  '330': { name: 'Citric Acid', purpose: 'Acidity Regulator & Antioxidant', status: 'PERMITTED' },
   '102': { name: 'Tartrazine (Synthetic Yellow)', purpose: 'Synthetic Food Color', status: 'RESTRICTED', warning: 'Permitted only in specific categories; limit <= 100 mg/kg.' },
   '110': { name: 'Sunset Yellow FCF', purpose: 'Synthetic Food Color', status: 'RESTRICTED', warning: 'Mandatory statement: "CONTAINS PERMITTED SYNTHETIC FOOD COLOUR(S)".' },
-  '122': { name: 'Carmoisine', purpose: 'Synthetic Red Color', status: 'RESTRICTED', warning: 'Maximum limit 100 ppm; prohibited in baby foods.' },
-  '124': { name: 'Ponceau 4R', purpose: 'Synthetic Red Color', status: 'RESTRICTED', warning: 'Restricted synthetic dye.' },
-  '150d': { name: 'Caramel IV (Sulphite Ammonia)', purpose: 'Coloring Agent', status: 'PERMITTED', warning: 'Permitted in cola beverages and sauces within limits.' },
-  '319': { name: 'TBHQ (tert-Butylhydroquinone)', purpose: 'Antioxidant for Oils/Fats', status: 'RESTRICTED', warning: 'Maximum 200 mg/kg in edible oils and fats.' },
-  '320': { name: 'BHA (Butylated Hydroxyanisole)', purpose: 'Antioxidant', status: 'RESTRICTED', warning: 'Maximum permissible limit 200 ppm.' },
-  '322': { name: 'Lecithin (Soy/Egg)', purpose: 'Emulsifier & Stabilizer', status: 'PERMITTED', warning: 'Must indicate source if derived from Soy or Egg allergen.' },
-  '500': { name: 'Sodium Carbonates / Baking Soda', purpose: 'Acidity Regulator & Raising Agent', status: 'PERMITTED' },
-  '330': { name: 'Citric Acid', purpose: 'Acidity Regulator & Antioxidant', status: 'PERMITTED' },
+  '122': { name: 'Carmoisine', purpose: 'Synthetic Red Color', status: 'RESTRICTED', warning: 'Maximum limit 100 ppm.' },
+  '150d': { name: 'Caramel IV (Sulphite Ammonia)', purpose: 'Coloring Agent', status: 'PERMITTED' },
+  '319': { name: 'TBHQ (tert-Butylhydroquinone)', purpose: 'Antioxidant for Oils/Fats', status: 'RESTRICTED', warning: 'Maximum 200 mg/kg in edible oils.' },
 };
 
 /**
@@ -694,37 +701,44 @@ export function calculateNutritionAudit(
   extractedInfo: Record<string, string | null>,
   category: ProductCategory = 'food'
 ): NutritionAuditReport {
-  const nutText = (extractedInfo['Nutritional Info'] || extractedInfo['Nutrition Facts'] || '') + ' ' + (extractedInfo['Ingredients'] || '');
+  const nutText = (
+    (extractedInfo['Nutritional Info'] || '') + ' ' +
+    (extractedInfo['Nutrition Facts'] || '') + ' ' +
+    (extractedInfo['Ingredients'] || '') + ' ' +
+    (extractedInfo['rawText'] || '')
+  );
+
   const isLiquid = /ml|litre|liquid|beverage|drink|juice/i.test(extractedInfo['Net Quantity'] || '');
 
-  // Helper to extract numbers from text
-  const extractNutrient = (patterns: RegExp[], defaultVal: number | null): { text: string; num: number | null } => {
+  // Helper to accurately extract numbers from multi-column nutrition panels
+  const extractNutrient = (patterns: RegExp[]): { text: string; num: number | null } => {
     for (const pat of patterns) {
       const match = nutText.match(pat);
       if (match && match[1]) {
         const num = parseFloat(match[1].replace(/,/g, ''));
         if (!isNaN(num)) {
-          return { text: `${num} ${match[2] || 'g'}`, num };
+          const unit = match[2] || (num > 50 ? 'mg' : 'g');
+          return { text: `${num} ${unit}`, num };
         }
       }
     }
-    return defaultVal !== null ? { text: `${defaultVal} g`, num: defaultVal } : { text: 'Not specified on panel', num: null };
+    return { text: 'Not detected', num: null };
   };
 
   // 1. Sodium (Salt)
-  const sodiumData = extractNutrient(
-    [/sodium[:\s]+(\d+(?:\.\d+)?)\s*(mg|g)/i, /salt[:\s]+(\d+(?:\.\d+)?)\s*(mg|g)/i],
-    category === 'food' ? 680 : null
-  );
+  const sodiumData = extractNutrient([
+    /sodium[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(mg|g)?/i,
+    /salt[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(mg|g)?/i,
+  ]);
   let sodiumNumeric = sodiumData.num;
   if (sodiumData.text.includes('g') && !sodiumData.text.includes('mg') && sodiumNumeric !== null && sodiumNumeric < 10) {
-    // If declared in grams (e.g. 0.68g), convert to mg
     sodiumNumeric = sodiumNumeric * 1000;
   }
-  const sodiumLimit = isLiquid ? 300 : 600; // mg per 100g/100ml as per FSSAI HFSS & ICMR 2024
-  let sodiumStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' = 'SAFE';
+  const sodiumLimit = isLiquid ? 300 : 600; // mg per 100g
+  let sodiumStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let sodiumDev: number | null = null;
-  let sodiumVerdict = 'Within safe daily threshold limit.';
+  let sodiumVerdict = 'Sodium not clearly declared on visible panel.';
+
   if (sodiumNumeric !== null) {
     sodiumDev = Math.round(((sodiumNumeric - sodiumLimit) / sodiumLimit) * 100);
     if (sodiumNumeric > sodiumLimit * 1.3) {
@@ -734,41 +748,46 @@ export function calculateNutritionAudit(
       sodiumStatus = 'ELEVATED';
       sodiumVerdict = `Slightly above recommended solid benchmark (+${sodiumDev}%).`;
     } else {
-      sodiumVerdict = `Well within FSSAI safe threshold (${sodiumNumeric}mg <= ${sodiumLimit}mg).`;
+      sodiumStatus = 'SAFE';
+      sodiumVerdict = `Within safe FSSAI benchmark (${sodiumNumeric}mg <= ${sodiumLimit}mg).`;
     }
   }
 
   // 2. Added Sugars
-  const sugarData = extractNutrient(
-    [/added\s*sugars?[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i, /sugars?[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i],
-    category === 'food' ? 4.2 : null
-  );
+  const sugarData = extractNutrient([
+    /added\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(g|mg)?/i,
+    /total\s*sugars?[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(g|mg)?/i,
+    /sugars?[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(g|mg)?/i,
+  ]);
   const sugarLimit = isLiquid ? 6 : 10; // g per 100g
-  let sugarStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' = 'SAFE';
+  let sugarStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let sugarDev: number | null = null;
-  let sugarVerdict = 'Complies with FSSAI sugar recommendations.';
+  let sugarVerdict = 'Sugar declaration not detected on visible panel.';
+
   if (sugarData.num !== null) {
     sugarDev = Math.round(((sugarData.num - sugarLimit) / sugarLimit) * 100);
-    if (sugarData.num > sugarLimit * 1.5) {
+    if (sugarData.num > sugarLimit * 1.2) {
       sugarStatus = 'HIGH_RISK';
-      sugarVerdict = `EXCEEDS FSSAI safe limit (+${sugarDev}%). Excessive Added Sugar.`;
+      sugarVerdict = `EXCEEDS FSSAI recommended limit (+${sugarDev}%). High Added Sugar.`;
     } else if (sugarData.num > sugarLimit) {
       sugarStatus = 'ELEVATED';
       sugarVerdict = `Elevated sugar content (+${sugarDev}% above benchmark).`;
     } else {
+      sugarStatus = 'SAFE';
       sugarVerdict = `Safe level (${sugarData.num}g <= ${sugarLimit}g per 100g).`;
     }
   }
 
   // 3. Saturated Fat
-  const satFatData = extractNutrient(
-    [/saturated\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i, /sat\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i],
-    category === 'food' ? 7.8 : null
-  );
-  const satFatLimit = 6.0; // g per 100g as per FSSAI/ICMR
-  let satFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' = 'SAFE';
+  const satFatData = extractNutrient([
+    /saturated\s*fat[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(g|mg)?/i,
+    /sat\s*fat[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(g|mg)?/i,
+  ]);
+  const satFatLimit = 6.0; // g per 100g
+  let satFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let satFatDev: number | null = null;
-  let satFatVerdict = 'Safe level of saturated fatty acids.';
+  let satFatVerdict = 'Saturated fat not detected on panel.';
+
   if (satFatData.num !== null) {
     satFatDev = Math.round(((satFatData.num - satFatLimit) / satFatLimit) * 100);
     if (satFatData.num > satFatLimit * 1.5) {
@@ -777,25 +796,29 @@ export function calculateNutritionAudit(
     } else if (satFatData.num > satFatLimit) {
       satFatStatus = 'ELEVATED';
       satFatVerdict = `Moderate elevation (+${satFatDev}% above 6g benchmark).`;
+    } else {
+      satFatStatus = 'SAFE';
+      satFatVerdict = `Safe saturated fat level (${satFatData.num}g <= ${satFatLimit}g).`;
     }
   }
 
   // 4. Trans Fat (Strict 2% FSSAI Limit)
-  const transFatData = extractNutrient(
-    [/trans\s*fat[:\s]+(\d+(?:\.\d+)?)\s*(g|mg)/i],
-    category === 'food' ? 0.1 : null
-  );
-  const transFatLimit = 0.2; // g per 100g (or <2% of total fat)
-  let transFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' = 'SAFE';
+  const transFatData = extractNutrient([
+    /trans\s*fat[\s*:]+(?:<\s*)?(\d+(?:\.\d+)?)\s*(g|mg)?/i,
+  ]);
+  const transFatLimit = 0.2; // g per 100g
+  let transFatStatus: 'SAFE' | 'ELEVATED' | 'HIGH_RISK' | 'UNKNOWN' = 'UNKNOWN';
   let transFatDev: number | null = null;
-  let transFatVerdict = 'Compliant with FSSAI 2% Trans-Fat ceiling order.';
+  let transFatVerdict = 'Trans fat declaration not detected.';
+
   if (transFatData.num !== null) {
     if (transFatData.num > 0.4) {
       transFatStatus = 'HIGH_RISK';
       transFatDev = Math.round(((transFatData.num - transFatLimit) / transFatLimit) * 100);
       transFatVerdict = 'NON-COMPLIANT: Violates FSSAI 2% trans-fat legal restriction.';
     } else {
-      transFatVerdict = `Compliant with FSSAI 2021 Trans Fat Cap (${transFatData.num}g <= 0.2g).`;
+      transFatStatus = 'SAFE';
+      transFatVerdict = `Compliant with FSSAI Trans Fat Cap (${transFatData.num}g <= 0.2g).`;
     }
   }
 
@@ -809,7 +832,7 @@ export function calculateNutritionAudit(
       standardLimit: `≤ ${sodiumLimit} mg / 100g`,
       standardNumeric: sodiumLimit,
       unit: 'mg',
-      safetyStatus: sodiumNumeric !== null ? sodiumStatus : 'UNKNOWN',
+      safetyStatus: sodiumStatus,
       deviationPercent: sodiumDev,
       verdict: sodiumVerdict,
       legalBasis: 'FSSAI (Labelling & Display) Reg. 5(3) & ICMR-NIN 2024 Dietary Cap',
@@ -817,13 +840,13 @@ export function calculateNutritionAudit(
     },
     {
       key: 'added_sugar',
-      name: 'Added Sugars',
+      name: 'Added / Total Sugars',
       observedValue: sugarData.num !== null ? `${sugarData.num} g / 100g` : 'Not detected',
       observedNumeric: sugarData.num,
       standardLimit: `≤ ${sugarLimit} g / 100g`,
       standardNumeric: sugarLimit,
       unit: 'g',
-      safetyStatus: sugarData.num !== null ? sugarStatus : 'UNKNOWN',
+      safetyStatus: sugarStatus,
       deviationPercent: sugarDev,
       verdict: sugarVerdict,
       legalBasis: 'ICMR-NIN 2024 Guideline 8 & FSSAI FoPL Standards',
@@ -837,7 +860,7 @@ export function calculateNutritionAudit(
       standardLimit: `≤ ${satFatLimit} g / 100g`,
       standardNumeric: satFatLimit,
       unit: 'g',
-      safetyStatus: satFatData.num !== null ? satFatStatus : 'UNKNOWN',
+      safetyStatus: satFatStatus,
       deviationPercent: satFatDev,
       verdict: satFatVerdict,
       legalBasis: 'FSSAI Labelling Regulations 2020 & ICMR SFA Benchmarks',
@@ -851,7 +874,7 @@ export function calculateNutritionAudit(
       standardLimit: '≤ 0.2 g / 100g (< 2%)',
       standardNumeric: transFatLimit,
       unit: 'g',
-      safetyStatus: transFatData.num !== null ? transFatStatus : 'UNKNOWN',
+      safetyStatus: transFatStatus,
       deviationPercent: transFatDev,
       verdict: transFatVerdict,
       legalBasis: 'FSSAI Gazette Order 2021 (Trans Fat 2% Ceiling)',
@@ -859,24 +882,19 @@ export function calculateNutritionAudit(
     },
   ];
 
-  // Scan ingredients for INS codes
-  const ingredientsText = extractedInfo['Ingredients'] || '';
+  // Scan ingredients for real INS codes
+  const ingredientsText = extractedInfo['Ingredients'] || nutText;
   const additives: AdditiveCheckItem[] = [];
-  const insMatches = ingredientsText.match(/(?:INS|E)[\s-]?(\d{3,4}[a-z]?)/gi) || [];
-  const foundCodes = new Set(insMatches.map(m => m.replace(/^(?:INS|E)[\s-]?/i, '').toLowerCase()));
-
-  // If no INS codes detected in mock, provide default realistic additives for demo
-  if (foundCodes.size === 0 && category === 'food') {
-    foundCodes.add('621'); // MSG
-    foundCodes.add('211'); // Sodium Benzoate
-    foundCodes.add('102'); // Tartrazine
-  }
+  const insMatches = ingredientsText.match(/(?:INS|E)[\s-]?(\d{3,4}(?:\([a-z0-9]+\)|[a-z])?)/gi) || [];
+  const foundCodes = new Set(
+    insMatches.map(m => m.replace(/^(?:INS|E)[\s-]?/i, '').replace(/[()]/g, '').toLowerCase())
+  );
 
   foundCodes.forEach(code => {
     const cleanCode = code.replace(/[^0-9a-z]/gi, '');
-    const meta = INS_ADDITIVES_DB[cleanCode] || {
+    const meta = INS_ADDITIVES_DB[cleanCode] || INS_ADDITIVES_DB[cleanCode.replace(/[a-z0-9]+$/i, '')] || {
       name: `Food Additive INS ${code.toUpperCase()}`,
-      purpose: 'Preservative / Color / Emulsifier',
+      purpose: 'Permitted Food Additive / Emulsifier / Acidity Regulator',
       status: 'PERMITTED',
       warning: 'Permitted within Good Manufacturing Practice (GMP) limits.',
     };
@@ -899,16 +917,16 @@ export function calculateNutritionAudit(
   
   let hfssStatus: 'NON_HFSS_SAFE' | 'MODERATE_HFSS' | 'HIGH_HFSS_ALERT' = 'NON_HFSS_SAFE';
   let overallHealthGrade: 'A' | 'B' | 'C' | 'D' | 'E' = 'A';
-  let summaryText = 'This product is within safe FSSAI & ICMR nutritional guidelines for regular consumption.';
+  let summaryText = 'This product complies with standard FSSAI dietary limits.';
 
   if (hasHighRisk) {
     hfssStatus = 'HIGH_HFSS_ALERT';
     overallHealthGrade = 'D';
-    summaryText = '⚠️ High HFSS Warning: Contains nutrient levels significantly exceeding FSSAI safe consumption limits.';
+    summaryText = '⚠️ High HFSS Warning: Contains nutrient levels exceeding FSSAI safe consumption limits.';
   } else if (hasElevated) {
     hfssStatus = 'MODERATE_HFSS';
     overallHealthGrade = 'C';
-    summaryText = '🟡 Moderate HFSS: Some nutrients (such as Sodium or Saturated Fat) are above ideal baseline limits.';
+    summaryText = '🟡 Moderate HFSS: Nutrient levels (such as Added Sugar or SFA) are elevated above baseline benchmarks.';
   }
 
   return {
