@@ -8,15 +8,7 @@ import { CommandPalette } from '@/components/ui/CommandPalette';
 import { cn } from '@/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
-
-// Mock hook
-const useTheme = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  return {
-    theme,
-    toggleTheme: () => setTheme(theme === 'light' ? 'dark' : 'light')
-  };
-};
+import { useTheme } from '@/hooks/useTheme';
 
 export const LandingLayout: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);

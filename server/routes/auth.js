@@ -491,6 +491,73 @@ async function handlePhotoUpload(req, res) {
 }
 
 /**
+ * POST /api/auth/change-password
+ * Allows authenticated users to change their account password securely
+ */
+router.post('/change-password', requireAuth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
+
+    if (user.authProvider === 'google') {
+      return res.status(400).json({
+        success: false,
+        error: 'Google-authenticated accounts do not use a standard password.',
+      });
+    }
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'Current password and new password are required.',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password must be at least 6 characters long.',
+      });
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password and confirmation do not match.',
+      });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        error: 'Incorrect current password.',
+      });
+    }
+
+    // Hash and save new password
+    const salt = await bcrypt.genSalt(12);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    console.log(`[Password Changed]: User ${user.email} changed password`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully! Please use your new password next time you sign in.',
+    });
+  } catch (error) {
+    console.error('[Change Password Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to change password.' });
+  }
+});
+
+/**
  * DELETE /api/auth/profile/photo
  * Remove custom profile photo and revert to initials avatar
  */

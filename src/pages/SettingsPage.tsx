@@ -1,7 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Camera, Trash2, Moon, Sun, Monitor, Bell, Globe, Shield, Download, LogOut, Check, AlertCircle } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
+import { 
+  Camera, 
+  Trash2, 
+  Moon, 
+  Sun, 
+  Monitor, 
+  Bell, 
+  Globe, 
+  Shield, 
+  Download, 
+  LogOut, 
+  Check, 
+  AlertCircle, 
+  KeyRound, 
+  CheckCircle2 
+} from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -11,16 +27,27 @@ import { API_BASE_URL } from '@/services/api';
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, logout, refreshUser, updateUser } = useAuth();
-  
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
-  const [notifications, setNotifications] = useState(true);
-  const [analytics, setAnalytics] = useState(false);
+  const { theme, setTheme } = useTheme();
 
+  // Preferences State
+  const [notifications, setNotifications] = useState(() => {
+    return localStorage.getItem('compliscan_notifications_enabled') !== 'false';
+  });
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('compliscan_language') || 'en';
+  });
+  const [analytics, setAnalytics] = useState(() => {
+    return localStorage.getItem('compliscan_analytics_enabled') === 'true';
+  });
+  const [prefSuccess, setPrefSuccess] = useState<string | null>(null);
+
+  // Profile Name State
   const [name, setName] = useState(user?.name || '');
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameError, setNameError] = useState('');
   const [nameSuccess, setNameSuccess] = useState(false);
 
+  // Profile Photo State
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,6 +58,19 @@ export default function SettingsPage() {
   // Delete Photo Modal State
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
+
+  // Password Change State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
+  // Clear History Modal State
+  const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
+  const [isClearingHistory, setIsClearingHistory] = useState(false);
+  const [historySuccess, setHistorySuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -205,6 +245,143 @@ export default function SettingsPage() {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess(null);
+
+    if (!currentPassword) {
+      setPasswordError('Current password is required.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const token = localStorage.getItem('compliscan_jwt');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update password.');
+      }
+
+      setPasswordSuccess('Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordSuccess(null), 5000);
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to change password.');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleNotificationToggle = () => {
+    const nextVal = !notifications;
+    setNotifications(nextVal);
+    localStorage.setItem('compliscan_notifications_enabled', String(nextVal));
+    setPrefSuccess(nextVal ? 'Notifications enabled' : 'Notifications muted');
+    setTimeout(() => setPrefSuccess(null), 2500);
+  };
+
+  const handleLanguageChange = (newLang: string) => {
+    setLanguage(newLang);
+    localStorage.setItem('compliscan_language', newLang);
+    setPrefSuccess(`Language set to ${newLang === 'hi' ? 'Hindi (हिंदी)' : 'English'}`);
+    setTimeout(() => setPrefSuccess(null), 2500);
+  };
+
+  const handleAnalyticsToggle = () => {
+    const nextVal = !analytics;
+    setAnalytics(nextVal);
+    localStorage.setItem('compliscan_analytics_enabled', String(nextVal));
+    setPrefSuccess(nextVal ? 'Anonymous analytics enabled' : 'Analytics disabled');
+    setTimeout(() => setPrefSuccess(null), 2500);
+  };
+
+  const handleExportData = () => {
+    try {
+      const scanCache = localStorage.getItem('compliscan_scan_cache') || '[]';
+      let parsedScans: any[] = [];
+      try { parsedScans = JSON.parse(scanCache); } catch {}
+
+      const exportDossier = {
+        title: 'CompliScan AI User Data & Audit History',
+        exportTimestamp: new Date().toISOString(),
+        user: {
+          id: user?.id,
+          name: user?.name,
+          email: user?.email,
+          role: user?.role,
+          organization: user?.organization,
+          authProvider: user?.authProvider,
+          createdAt: user?.createdAt,
+        },
+        preferences: {
+          theme,
+          notifications,
+          language,
+          analytics,
+        },
+        scanRecordsCount: parsedScans.length,
+        scanHistory: parsedScans,
+      };
+
+      const jsonStr = JSON.stringify(exportDossier, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `compliscan_account_dossier_${user?.name?.replace(/\s+/g, '_') || 'user'}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setPrefSuccess('Your data dossier was downloaded successfully!');
+      setTimeout(() => setPrefSuccess(null), 3000);
+    } catch (err: any) {
+      alert('Failed to export data: ' + err.message);
+    }
+  };
+
+  const handleConfirmClearHistory = () => {
+    setIsClearingHistory(true);
+    try {
+      localStorage.removeItem('compliscan_scan_cache');
+      setIsClearHistoryOpen(false);
+      setHistorySuccess('Scan history and cached inspection dossiers deleted successfully.');
+      setTimeout(() => setHistorySuccess(null), 4000);
+    } catch (e: any) {
+      alert('Failed to clear history: ' + e.message);
+    } finally {
+      setIsClearingHistory(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/');
@@ -218,13 +395,27 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-heading text-slate-900 dark:text-white mb-2">Settings</h1>
-        <p className="text-slate-600 dark:text-slate-400">Manage your account preferences and application settings.</p>
+        <h1 className="text-3xl font-bold font-heading text-slate-900 dark:text-white mb-2">Settings & Profile</h1>
+        <p className="text-slate-600 dark:text-slate-400">Manage your official inspector profile, statutory credentials, and platform preferences.</p>
       </div>
+
+      {prefSuccess && (
+        <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300 rounded-xl text-xs flex items-center gap-2">
+          <CheckCircle2 size={16} />
+          <span>{prefSuccess}</span>
+        </div>
+      )}
+
+      {historySuccess && (
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs flex items-center gap-2">
+          <CheckCircle2 size={16} />
+          <span>{historySuccess}</span>
+        </div>
+      )}
 
       {/* Profile Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Profile</h2>
+        <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Profile & Identity</h2>
         <Card className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
             <div className="relative group flex-shrink-0">
@@ -349,97 +540,175 @@ export default function SettingsPage() {
         </Card>
       </section>
 
+      {/* Security & Password Section (for Email Accounts) */}
+      {user?.authProvider !== 'google' && (
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Security & Password</h2>
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-indigo-50 dark:bg-indigo-950/50 rounded-lg text-indigo-600 dark:text-indigo-400">
+                <KeyRound size={20} />
+              </div>
+              <div>
+                <h3 className="font-medium text-slate-900 dark:text-white">Change Password</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Update your account password to ensure maximum security.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-lg">
+              <Input
+                label="Current Password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                required
+              />
+              <Input
+                label="New Password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                required
+              />
+              <Input
+                label="Confirm New Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                required
+              />
+
+              {passwordError && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle size={13} /> {passwordError}
+                </p>
+              )}
+
+              {passwordSuccess && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 size={13} /> {passwordSuccess}
+                </p>
+              )}
+
+              <Button type="submit" isLoading={isChangingPassword} className="mt-2">
+                Update Password
+              </Button>
+            </form>
+          </Card>
+        </section>
+      )}
+
       {/* Preferences Section */}
       <section>
         <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Preferences</h2>
         <Card className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Theme</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Theme Mode</label>
             <div className="flex space-x-3">
               <button 
                 onClick={() => setTheme('light')}
-                className={`flex items-center px-4 py-2 rounded-lg border ${theme === 'light' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-300' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'}`}
+                type="button"
+                className={`flex items-center px-4 py-2 rounded-lg border cursor-pointer transition-all ${theme === 'light' ? 'bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-300 shadow-sm font-semibold' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:border-slate-300'}`}
               >
                 <Sun className="h-4 w-4 mr-2" /> Light
               </button>
               <button 
                 onClick={() => setTheme('dark')}
-                className={`flex items-center px-4 py-2 rounded-lg border ${theme === 'dark' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-300' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'}`}
+                type="button"
+                className={`flex items-center px-4 py-2 rounded-lg border cursor-pointer transition-all ${theme === 'dark' ? 'bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-300 shadow-sm font-semibold' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:border-slate-300'}`}
               >
                 <Moon className="h-4 w-4 mr-2" /> Dark
               </button>
               <button 
                 onClick={() => setTheme('system')}
-                className={`flex items-center px-4 py-2 rounded-lg border ${theme === 'system' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-300' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'}`}
+                type="button"
+                className={`flex items-center px-4 py-2 rounded-lg border cursor-pointer transition-all ${theme === 'system' ? 'bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-300 shadow-sm font-semibold' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:border-slate-300'}`}
               >
                 <Monitor className="h-4 w-4 mr-2" /> System
               </button>
             </div>
           </div>
           
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-slate-800 pt-4">
             <div className="flex items-center">
               <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg mr-4">
                 <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               </div>
               <div>
-                <h3 className="font-medium">Notifications</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Receive alerts for completed scans</p>
+                <h3 className="font-medium">Scan Completion Notifications</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Receive audio chime & visual notifications for completed label audits</p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" checked={notifications} onChange={() => setNotifications(!notifications)} />
+              <input type="checkbox" className="sr-only peer" checked={notifications} onChange={handleNotificationToggle} />
               <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-indigo-600"></div>
             </label>
           </div>
           
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-slate-800 pt-4">
             <div className="flex items-center">
               <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg mr-4">
                 <Globe className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               </div>
               <div>
-                <h3 className="font-medium">Language</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Select application language</p>
+                <h3 className="font-medium">Assistant Language</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Select default voice & interface translation language</p>
               </div>
             </div>
-            <select className="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500">
-              <option value="en">English</option>
-              <option value="hi">Hindi</option>
+            <select 
+              value={language} 
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500 cursor-pointer"
+            >
+              <option value="en">English (India)</option>
+              <option value="hi">Hindi (हिंदी - राजभाषा)</option>
             </select>
           </div>
         </Card>
       </section>
 
-      {/* Privacy Section */}
+      {/* Privacy & Data Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Privacy & Data</h2>
+        <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Privacy & Data Management</h2>
         <Card className="p-6 space-y-6">
           <div className="flex items-start">
             <Shield className="h-5 w-5 text-indigo-500 mt-0.5 mr-3" />
             <div>
-              <h3 className="font-medium text-slate-900 dark:text-white">Privacy Assurance</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Personal scan history is visible only to you. Your data is encrypted at rest.</p>
+              <h3 className="font-medium text-slate-900 dark:text-white">Statutory Privacy Assurance</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Your uploaded commodity images and compliance dossiers are private to your session. Data is encrypted at rest using AES-256 standards.
+              </p>
             </div>
           </div>
           
           <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-slate-800 pt-4">
             <div>
-              <h3 className="font-medium">Anonymous Analytics</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Allow anonymous usage analytics to improve our service</p>
+              <h3 className="font-medium">Anonymous AI Model Diagnostics</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Help improve OCR accuracy by contributing de-identified label detections</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" checked={analytics} onChange={() => setAnalytics(!analytics)} />
+              <input type="checkbox" className="sr-only peer" checked={analytics} onChange={handleAnalyticsToggle} />
               <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-indigo-600"></div>
             </label>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="outline" className="flex items-center justify-center">
-              <Download className="h-4 w-4 mr-2" /> Export My Data
+            <Button 
+              variant="outline" 
+              onClick={handleExportData}
+              className="flex items-center justify-center font-medium"
+            >
+              <Download className="h-4 w-4 mr-2" /> Export My Data (.JSON)
             </Button>
-            <Button variant="danger" className="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white">
-              <Trash2 className="h-4 w-4 mr-2" /> Delete Scan History
+            <Button 
+              variant="danger" 
+              onClick={() => setIsClearHistoryOpen(true)}
+              className="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-medium"
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> Clear Scan History
             </Button>
           </div>
         </Card>
@@ -450,10 +719,10 @@ export default function SettingsPage() {
         <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Account</h2>
         <Card className="p-6">
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-            Logging out will end your current session and require you to sign in again.
+            Signing out will end your current session and require you to authenticate again.
           </p>
           <Button onClick={handleLogout} variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:text-red-400 dark:hover:bg-red-900/20 dark:border-red-900/50">
-            <LogOut className="h-4 w-4 mr-2" /> Logout
+            <LogOut className="h-4 w-4 mr-2" /> Sign Out
           </Button>
         </Card>
       </section>
@@ -469,6 +738,19 @@ export default function SettingsPage() {
         cancelLabel="Cancel"
         isDanger={true}
         isLoading={isDeletingPhoto}
+      />
+
+      {/* Clear Scan History Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isClearHistoryOpen}
+        onClose={() => setIsClearHistoryOpen(false)}
+        onConfirm={handleConfirmClearHistory}
+        title="Clear Scan History"
+        message="Are you sure you want to delete your stored scan results and cached inspection dossiers? This action cannot be undone."
+        confirmLabel="Clear History"
+        cancelLabel="Cancel"
+        isDanger={true}
+        isLoading={isClearingHistory}
       />
     </div>
   );

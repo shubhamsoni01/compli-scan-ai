@@ -4,15 +4,7 @@ import { Sun, Moon, Bell, Search, ChevronRight } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/utils/cn';
 
-// Mock hook and data for now
-const useTheme = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  return {
-    theme,
-    toggleTheme: () => setTheme(theme === 'light' ? 'dark' : 'light')
-  };
-};
-
+import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, History, FileText, LogOut } from 'lucide-react';
