@@ -86,6 +86,9 @@ const ScanSchema = new mongoose.Schema({
 
   // Optional complaint structure for future readiness
   complaintData: { type: mongoose.Schema.Types.Mixed, default: null },
+
+  // Enforcement tracking (Show-Cause Notices, Case Status, Compounding)
+  enforcementData: { type: mongoose.Schema.Types.Mixed, default: null },
 }, {
   timestamps: true, // adds createdAt & updatedAt
   collection: 'scans',
