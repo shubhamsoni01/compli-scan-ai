@@ -11,6 +11,8 @@ from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.dml.color import RGBColor
+from pptx.oxml import parse_xml
+from pptx.oxml.ns import nsdecls
 
 def ensure_assets():
     """Ensure subtle watermark exists with ~3.5% opacity."""
@@ -22,6 +24,21 @@ def ensure_assets():
         a = a.point(lambda p: int(p * 0.035))
         watermark = Image.merge("RGBA", (r, g, b, a))
         watermark.save(out_wm)
+
+def apply_slide_transition(slide, transition_type="push"):
+    """Inject OpenXML slide transition for smooth animated transitions on click."""
+    if transition_type == "push":
+        xml_str = f'<p:transition {nsdecls("p")} spd="med" advClick="1"><p:push dir="r"/></p:transition>'
+    elif transition_type == "fade":
+        xml_str = f'<p:transition {nsdecls("p")} spd="med" advClick="1"><p:fade/></p:transition>'
+    elif transition_type == "morph":
+        xml_str = f'<p:transition {nsdecls("p")} spd="med" advClick="1"><p:morph/></p:transition>'
+    else:
+        xml_str = f'<p:transition {nsdecls("p")} spd="med" advClick="1"><p:push dir="r"/></p:transition>'
+    try:
+        slide._element.append(parse_xml(xml_str))
+    except Exception:
+        pass
 
 def create_deck():
     ensure_assets()
@@ -191,34 +208,35 @@ def create_deck():
             except Exception:
                 pass
 
+        # Apply Smooth Slide Push Transition Animation
+        apply_slide_transition(slide, "push")
+
         # Bottom Footer Bar
-        add_card(slide, Inches(0.5), Inches(6.85), Inches(12.333), Inches(0.45), C_CARD_BG, C_CARD_BORDER)
+        add_card(slide, Inches(0.5), Inches(6.85), Inches(12.333), Inches(0.48), C_CARD_BG, C_CARD_BORDER)
         
         # Footer text with official attribution
-        ftb = slide.shapes.add_textbox(Inches(0.7), Inches(6.92), Inches(8.0), Inches(0.35))
+        ftb = slide.shapes.add_textbox(Inches(0.65), Inches(6.92), Inches(5.2), Inches(0.35))
         fp = ftb.text_frame.paragraphs[0]
         fr1 = fp.add_run()
-        fr1.text = "🇮🇳 Smart India Hackathon 2026 • PS ID: SIH26034 • Ministry of Consumer Affairs, Food & Public Distribution • UCET VBU"
+        fr1.text = "🇮🇳 SIH 2026 • SIH26034 • Ministry of Consumer Affairs • UCET VBU"
         fr1.font.name = 'Segoe UI'
         fr1.font.size = Pt(8.5)
         fr1.font.color.rgb = C_TEXT_MUTED
 
-        # Slide Number Indicator
-        sntb = slide.shapes.add_textbox(Inches(9.2), Inches(6.92), Inches(1.5), Inches(0.35))
-        snp = sntb.text_frame.paragraphs[0]
-        snp.alignment = PP_ALIGN.RIGHT
-        snr = snp.add_run()
-        snr.text = f"Slide {slide_index + 1} of 11"
-        snr.font.name = 'Segoe UI'
-        snr.font.size = Pt(8.5)
-        snr.font.bold = True
-        snr.font.color.rgb = C_TEXT_MUTED
+        # Clickable Slide Number Quick-Jump Buttons (1 to 11)
+        dot_x = Inches(6.1)
+        for i in range(11):
+            is_cur = (i == slide_index)
+            num_bg = C_PRIMARY if is_cur else C_PRIMARY_LIGHT
+            num_tc = RGBColor(255, 255, 255) if is_cur else C_PRIMARY
+            add_button(slide, dot_x, Inches(6.92), Inches(0.32), Inches(0.32), str(i+1), num_bg, num_tc, slides[i], font_size=8, bold=is_cur)
+            dot_x += Inches(0.36)
 
-        # Prev / Next Action Buttons
+        # Prev / Next Action Buttons (Interactive Animated Navigation)
         prev_idx = max(0, slide_index - 1)
         next_idx = min(10, slide_index + 1)
-        add_button(slide, Inches(10.85), Inches(6.90), Inches(0.85), Inches(0.32), "◀ Prev", C_CARD_BG, C_TEXT_MAIN, slides[prev_idx], font_size=8.5, bold=True, border_color=C_CARD_BORDER)
-        add_button(slide, Inches(11.8), Inches(6.90), Inches(0.85), Inches(0.32), "Next ▶", C_PRIMARY, RGBColor(255, 255, 255), slides[next_idx], font_size=8.5, bold=True)
+        add_button(slide, Inches(10.35), Inches(6.91), Inches(1.1), Inches(0.34), "◀ Prev Slide", C_CARD_BG, C_TEXT_MAIN, slides[prev_idx], font_size=8.5, bold=True, border_color=C_CARD_BORDER)
+        add_button(slide, Inches(11.55), Inches(6.91), Inches(1.15), Inches(0.34), "Next Slide ▶", C_PRIMARY, RGBColor(255, 255, 255), slides[next_idx], font_size=8.5, bold=True)
 
     # =========================================================================
     # SLIDE 1: INTERACTIVE LANDING PAGE (COVER SLIDE)
@@ -1401,9 +1419,16 @@ def create_deck():
     r.font.color.rgb = C_PRIMARY
 
     # Save presentation
-    output_filename = "CompliScan_AI_SIH2026_PitchDeck.pptx"
-    prs.save(output_filename)
-    print(f"Presentation successfully saved to {output_filename}")
+    target_files = [
+        "CompliScan_AI_SIH2026_Interactive.pptx",
+        "CompliScan_AI_SIH2026_PitchDeck.pptx"
+    ]
+    for fn in target_files:
+        try:
+            prs.save(fn)
+            print(f"Presentation successfully saved to {fn}")
+        except Exception as e:
+            print(f"Could not save to {fn} (file might be currently open): {e}")
 
 if __name__ == "__main__":
     create_deck()
