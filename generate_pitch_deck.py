@@ -1,19 +1,31 @@
 """
 CompliScan AI — Premium Interactive SIH 2026 Pitch Deck Generator
-Generates an interactive, modern SaaS-styled PowerPoint presentation (16:9 widescreen)
-with hyperlinked navigation, visual cards, architecture diagrams, dashboard mockups,
-and team slides.
+Updated with Official SIH 2026 & Ministry of Consumer Affairs Branding,
+Subtle Background Watermarks, and Persistent Interactive Navigation.
 """
 
-import sys
 import os
+from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.dml.color import RGBColor
 
+def ensure_assets():
+    """Ensure subtle watermark exists with ~3.5% opacity."""
+    src_sih = "public/assets/sih-transparent-bulb.png"
+    out_wm = "public/assets/sih-watermark-subtle.png"
+    if os.path.exists(src_sih):
+        im = Image.open(src_sih).convert("RGBA")
+        r, g, b, a = im.split()
+        a = a.point(lambda p: int(p * 0.035))
+        watermark = Image.merge("RGBA", (r, g, b, a))
+        watermark.save(out_wm)
+
 def create_deck():
+    ensure_assets()
+
     prs = Presentation()
     # 16:9 Widescreen dimensions
     prs.slide_width = Inches(13.333)
@@ -35,17 +47,31 @@ def create_deck():
     C_RED = RGBColor(239, 68, 68)              # Red 500
     C_RED_LIGHT = RGBColor(254, 226, 226)      # Red 50
     C_DARK_PANEL = RGBColor(15, 23, 42)        # Slate 900
-    C_NAVY_ACCENT = RGBColor(30, 41, 59)       # Slate 800
 
-    # First pass: instantiate all 11 slides
+    # Official Logo Asset Paths
+    IMG_SIH_LOGO = "public/assets/sih-transparent-bulb.png"
+    IMG_MINISTRY_LOGO = "public/assets/ministry-emblem-transparent.png"
+    IMG_COMPLISCAN_LOGO = "public/compliscan-logo.jpg"
+    IMG_SHUBHAM = "public/assets/shubham-kumar.png"
+    IMG_UCET = "public/assets/ucet-hazaribagh.jpg"
+    IMG_WATERMARK = "public/assets/sih-watermark-subtle.png"
+
+    # Instantiate all 11 slides
     slides = [prs.slides.add_slide(blank_layout) for _ in range(11)]
 
-    # Helper: Base background styling
-    def set_slide_background(slide):
+    # Helper: Base background styling with subtle watermark
+    def set_slide_background(slide, with_watermark=True):
         bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(13.333), Inches(7.5))
         bg.fill.solid()
         bg.fill.fore_color.rgb = C_BG_PAGE
         bg.line.fill.background()
+
+        # Place subtle SIH background watermark behind content
+        if with_watermark and os.path.exists(IMG_WATERMARK):
+            try:
+                slide.shapes.add_picture(IMG_WATERMARK, Inches(3.666), Inches(1.5), Inches(6.0), Inches(4.5))
+            except Exception:
+                pass
         return bg
 
     # Helper: Create styled card shape
@@ -73,10 +99,10 @@ def create_deck():
 
         tf = btn.text_frame
         tf.word_wrap = True
-        tf.margin_left = Inches(0.1)
-        tf.margin_right = Inches(0.1)
-        tf.margin_top = Inches(0.05)
-        tf.margin_bottom = Inches(0.05)
+        tf.margin_left = Inches(0.08)
+        tf.margin_right = Inches(0.08)
+        tf.margin_top = Inches(0.04)
+        tf.margin_bottom = Inches(0.04)
         p = tf.paragraphs[0]
         p.alignment = PP_ALIGN.CENTER
         run = p.add_run()
@@ -90,34 +116,42 @@ def create_deck():
             btn.click_action.target_slide = target_slide
         return btn
 
-    # Helper: Persistent Top Navigation Header & Bottom Footer
+    # Helper: Persistent Top Navigation Header & Bottom Footer with SIH + Ministry Branding
     def add_navigation_chrome(slide, slide_index, title_text, category_tag):
         # Top Header Bar Card
-        header_bg = add_card(slide, Inches(0.5), Inches(0.3), Inches(12.333), Inches(0.65), C_CARD_BG, C_CARD_BORDER)
+        header_bg = add_card(slide, Inches(0.5), Inches(0.25), Inches(12.333), Inches(0.72), C_CARD_BG, C_CARD_BORDER)
         
-        # Logo & App Title
-        tb = slide.shapes.add_textbox(Inches(0.7), Inches(0.38), Inches(3.2), Inches(0.5))
+        # CompliScan Logo Icon
+        if os.path.exists(IMG_COMPLISCAN_LOGO):
+            try:
+                slide.shapes.add_picture(IMG_COMPLISCAN_LOGO, Inches(0.65), Inches(0.32), Inches(0.55), Inches(0.55))
+            except Exception:
+                pass
+
+        # App Title Text
+        tb = slide.shapes.add_textbox(Inches(1.25), Inches(0.32), Inches(2.5), Inches(0.55))
         tf = tb.text_frame
         tf.word_wrap = False
         p = tf.paragraphs[0]
         r1 = p.add_run()
-        r1.text = "🛡️ CompliScan "
+        r1.text = "CompliScan "
         r1.font.name = 'Segoe UI'
         r1.font.bold = True
-        r1.font.size = Pt(14)
+        r1.font.size = Pt(13)
         r1.font.color.rgb = C_PRIMARY
 
         r2 = p.add_run()
         r2.text = "AI"
         r2.font.name = 'Segoe UI'
         r2.font.bold = True
-        r2.font.size = Pt(14)
+        r2.font.size = Pt(13)
         r2.font.color.rgb = C_EMERALD
 
-        r3 = p.add_run()
-        r3.text = f"  |  {category_tag}"
+        p2 = tf.add_paragraph()
+        r3 = p2.add_run()
+        r3.text = f"{category_tag}"
         r3.font.name = 'Segoe UI'
-        r3.font.size = Pt(10)
+        r3.font.size = Pt(8.5)
         r3.font.color.rgb = C_TEXT_MUTED
 
         # Persistent Interactive Navigation Links
@@ -131,25 +165,42 @@ def create_deck():
             ("👥 Team", slides[9]),
         ]
 
-        nav_x = Inches(4.3)
-        btn_w = Inches(1.05)
+        nav_x = Inches(3.6)
+        btn_w = Inches(0.98)
         for label, tgt_slide in nav_items:
             is_active = (tgt_slide == slides[slide_index])
             bg = C_PRIMARY if is_active else C_PRIMARY_LIGHT
             tc = RGBColor(255, 255, 255) if is_active else C_PRIMARY
-            add_button(slide, nav_x, Inches(0.42), btn_w, Inches(0.4), label, bg, tc, tgt_slide, font_size=9, bold=is_active)
-            nav_x += Inches(1.12)
+            add_button(slide, nav_x, Inches(0.36), btn_w, Inches(0.44), label, bg, tc, tgt_slide, font_size=8.5, bold=is_active)
+            nav_x += Inches(1.04)
+
+        # Top-Right: Official Ministry & SIH Branding Container
+        add_card(slide, Inches(10.9), Inches(0.32), Inches(1.85), Inches(0.55), C_PRIMARY_LIGHT, C_CARD_BORDER)
+        
+        # Ministry Emblem
+        if os.path.exists(IMG_MINISTRY_LOGO):
+            try:
+                slide.shapes.add_picture(IMG_MINISTRY_LOGO, Inches(10.95), Inches(0.35), Inches(0.85), Inches(0.48))
+            except Exception:
+                pass
+
+        # SIH Logo
+        if os.path.exists(IMG_SIH_LOGO):
+            try:
+                slide.shapes.add_picture(IMG_SIH_LOGO, Inches(11.85), Inches(0.35), Inches(0.85), Inches(0.48))
+            except Exception:
+                pass
 
         # Bottom Footer Bar
         add_card(slide, Inches(0.5), Inches(6.85), Inches(12.333), Inches(0.45), C_CARD_BG, C_CARD_BORDER)
         
-        # Footer text
-        ftb = slide.shapes.add_textbox(Inches(0.7), Inches(6.92), Inches(7.5), Inches(0.35))
+        # Footer text with official attribution
+        ftb = slide.shapes.add_textbox(Inches(0.7), Inches(6.92), Inches(8.0), Inches(0.35))
         fp = ftb.text_frame.paragraphs[0]
         fr1 = fp.add_run()
-        fr1.text = "Smart India Hackathon 2026 • Problem ID: SIH26034 • Ministry of Consumer Affairs • UCET Hazaribagh"
+        fr1.text = "🇮🇳 Smart India Hackathon 2026 • PS ID: SIH26034 • Ministry of Consumer Affairs, Food & Public Distribution • UCET VBU"
         fr1.font.name = 'Segoe UI'
-        fr1.font.size = Pt(9)
+        fr1.font.size = Pt(8.5)
         fr1.font.color.rgb = C_TEXT_MUTED
 
         # Slide Number Indicator
@@ -159,7 +210,7 @@ def create_deck():
         snr = snp.add_run()
         snr.text = f"Slide {slide_index + 1} of 11"
         snr.font.name = 'Segoe UI'
-        snr.font.size = Pt(9)
+        snr.font.size = Pt(8.5)
         snr.font.bold = True
         snr.font.color.rgb = C_TEXT_MUTED
 
@@ -170,60 +221,84 @@ def create_deck():
         add_button(slide, Inches(11.8), Inches(6.90), Inches(0.85), Inches(0.32), "Next ▶", C_PRIMARY, RGBColor(255, 255, 255), slides[next_idx], font_size=8.5, bold=True)
 
     # =========================================================================
-    # SLIDE 1: INTERACTIVE LANDING PAGE
+    # SLIDE 1: INTERACTIVE LANDING PAGE (COVER SLIDE)
     # =========================================================================
     s1 = slides[0]
-    set_slide_background(s1)
+    set_slide_background(s1, with_watermark=True)
     add_navigation_chrome(s1, 0, "Interactive Landing Page", "National AI Compliance Portal")
 
     # Hero Card (Left 60%)
     add_card(s1, Inches(0.5), Inches(1.15), Inches(7.6), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
 
-    # Authority Tag Pill
-    add_card(s1, Inches(0.9), Inches(1.45), Inches(4.5), Inches(0.35), C_EMERALD_LIGHT, C_EMERALD)
-    tb_pill = s1.shapes.add_textbox(Inches(0.95), Inches(1.48), Inches(4.4), Inches(0.3))
-    p = tb_pill.text_frame.paragraphs[0]
+    # Prominent SIH 2026 & Ministry of Consumer Affairs Cover Banner
+    add_card(s1, Inches(0.9), Inches(1.35), Inches(6.8), Inches(0.65), C_EMERALD_LIGHT, C_EMERALD)
+    
+    # Embed Ministry Logo on Cover Pill
+    if os.path.exists(IMG_MINISTRY_LOGO):
+        try:
+            s1.shapes.add_picture(IMG_MINISTRY_LOGO, Inches(1.0), Inches(1.40), Inches(0.95), Inches(0.52))
+        except Exception:
+            pass
+
+    # Embed SIH Official Logo on Cover Pill
+    if os.path.exists(IMG_SIH_LOGO):
+        try:
+            s1.shapes.add_picture(IMG_SIH_LOGO, Inches(2.05), Inches(1.40), Inches(0.95), Inches(0.52))
+        except Exception:
+            pass
+
+    tb_cover_tag = s1.shapes.add_textbox(Inches(3.1), Inches(1.42), Inches(4.5), Inches(0.5))
+    tf_c = tb_cover_tag.text_frame
+    p = tf_c.paragraphs[0]
     r = p.add_run()
-    r.text = "🇮🇳 SMART INDIA HACKATHON 2026 • PS ID: SIH26034"
+    r.text = "SMART INDIA HACKATHON 2026\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(9.5)
+    r.font.size = Pt(10)
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
+    p2 = tf_c.add_paragraph()
+    r2 = p2.add_run()
+    r2.text = "Problem ID: SIH26034 • Ministry of Consumer Affairs"
+    r2.font.name = 'Segoe UI'
+    r2.font.size = Pt(8.5)
+    r2.font.bold = True
+    r2.font.color.rgb = C_TEXT_MAIN
+
     # Main Headline
-    tb_head = s1.shapes.add_textbox(Inches(0.9), Inches(1.95), Inches(6.8), Inches(1.2))
+    tb_head = s1.shapes.add_textbox(Inches(0.9), Inches(2.15), Inches(6.8), Inches(1.1))
     tf_head = tb_head.text_frame
     tf_head.word_wrap = True
     p = tf_head.paragraphs[0]
     r = p.add_run()
     r.text = "Scan. Verify. Comply.\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(28)
+    r.font.size = Pt(26)
     r.font.bold = True
     r.font.color.rgb = C_TEXT_MAIN
 
     r2 = p.add_run()
     r2.text = "AI-Powered Product Label Compliance & Consumer Protection"
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(16)
+    r2.font.size = Pt(15)
     r2.font.bold = True
     r2.font.color.rgb = C_PRIMARY
 
     # Subtitle Paragraph
-    tb_sub = s1.shapes.add_textbox(Inches(0.9), Inches(3.25), Inches(6.8), Inches(1.2))
+    tb_sub = s1.shapes.add_textbox(Inches(0.9), Inches(3.35), Inches(6.8), Inches(1.1))
     tf_sub = tb_sub.text_frame
     tf_sub.word_wrap = True
     p = tf_sub.paragraphs[0]
     r = p.add_run()
-    r.text = "Empowering Indian citizens and enforcement authorities with sub-second OCR extraction and deterministic regulatory validation against Legal Metrology Rules 2011 and FSSAI 2020 frameworks."
+    r.text = "Empowering Indian citizens and regulatory enforcement officers with sub-second OCR extraction and deterministic regulatory validation against Legal Metrology Rules 2011 and FSSAI 2020 frameworks."
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(11.5)
+    r.font.size = Pt(11)
     r.font.color.rgb = C_TEXT_MUTED
 
     # Hero Action Buttons
-    add_button(s1, Inches(0.9), Inches(4.55), Inches(2.1), Inches(0.55), "🚀 Start Live Demo", C_PRIMARY, RGBColor(255, 255, 255), slides[3], font_size=12, bold=True)
-    add_button(s1, Inches(3.15), Inches(4.55), Inches(2.1), Inches(0.55), "📖 Explore Solution", C_CARD_BG, C_PRIMARY, slides[2], font_size=12, bold=True, border_color=C_PRIMARY)
-    add_button(s1, Inches(5.4), Inches(4.55), Inches(2.1), Inches(0.55), "🏛️ View Architecture", C_CARD_BG, C_TEXT_MAIN, slides[4], font_size=12, bold=True, border_color=C_CARD_BORDER)
+    add_button(s1, Inches(0.9), Inches(4.55), Inches(2.1), Inches(0.55), "🚀 Start Live Demo", C_PRIMARY, RGBColor(255, 255, 255), slides[3], font_size=11.5, bold=True)
+    add_button(s1, Inches(3.15), Inches(4.55), Inches(2.1), Inches(0.55), "📖 Explore Solution", C_CARD_BG, C_PRIMARY, slides[2], font_size=11.5, bold=True, border_color=C_PRIMARY)
+    add_button(s1, Inches(5.4), Inches(4.55), Inches(2.1), Inches(0.55), "🏛️ View Architecture", C_CARD_BG, C_TEXT_MAIN, slides[4], font_size=11.5, bold=True, border_color=C_CARD_BORDER)
 
     # Metrics Highlights Pill Row
     m_x = Inches(0.9)
@@ -240,7 +315,7 @@ def create_deck():
         r = p1.add_run()
         r.text = m_val + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(16)
+        r.font.size = Pt(15)
         r.font.bold = True
         r.font.color.rgb = C_PRIMARY
 
@@ -273,7 +348,7 @@ def create_deck():
     r2 = p.add_run()
     r2.text = "• Target: Packaged Food Commodity\n• OCR Bounding Boxes: 6 Detected\n• MRP & Net Qty: Isolated ✓\n• FSSAI Lic Number: Verified ✓\n• Expiry / Mfg Date: Flagged ⚠️\n\nLive Reticle Coordinates: X: 420, Y: 680"
     r2.font.name = 'Consolas'
-    r2.font.size = Pt(9)
+    r2.font.size = Pt(8.5)
     r2.font.color.rgb = RGBColor(226, 232, 240)
 
     # Bottom score highlight inside dark panel
@@ -284,21 +359,21 @@ def create_deck():
     r = p.add_run()
     r.text = "Statutory Score: 82% (High Compliance)\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(12)
+    r.font.size = Pt(11.5)
     r.font.bold = True
     r.font.color.rgb = C_AMBER
 
     r2 = p.add_run()
     r2.text = "Evaluation: Passed 12 of 14 mandatory labelling checks. Minor manufacturing date ambiguity flagged for inspection review."
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(9)
+    r2.font.size = Pt(8.5)
     r2.font.color.rgb = RGBColor(203, 213, 225)
 
     # =========================================================================
     # SLIDE 2: THE PROBLEM (WHY LABEL COMPLIANCE IS BROKEN)
     # =========================================================================
     s2 = slides[1]
-    set_slide_background(s2)
+    set_slide_background(s2, with_watermark=True)
     add_navigation_chrome(s2, 1, "The Problem Statement", "Problem Context")
 
     # Section Title Card
@@ -309,14 +384,14 @@ def create_deck():
     r = p.add_run()
     r.text = "⚠️ THE PROBLEM: Why Packaged Product Label Verification Fails at Scale\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.font.bold = True
     r.font.color.rgb = C_RED
 
     r2 = p.add_run()
     r2.text = "Millions of consumer commodities hit retail shelves daily with missing, deceptive, or non-compliant statutory declarations."
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(11)
+    r2.font.size = Pt(10.5)
     r2.font.color.rgb = C_TEXT_MUTED
 
     # 4 Problem Cards Grid (2x2)
@@ -360,7 +435,7 @@ def create_deck():
         r = p.add_run()
         r.text = title + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(13)
+        r.font.size = Pt(12.5)
         r.font.bold = True
         r.font.color.rgb = color
 
@@ -368,14 +443,14 @@ def create_deck():
         r2 = p2.add_run()
         r2.text = desc + "\n"
         r2.font.name = 'Segoe UI'
-        r2.font.size = Pt(10)
+        r2.font.size = Pt(9.5)
         r2.font.color.rgb = C_TEXT_MAIN
 
         p3 = tf_pc.add_paragraph()
         r3 = p3.add_run()
         r3.text = stat
         r3.font.name = 'Segoe UI'
-        r3.font.size = Pt(9.5)
+        r3.font.size = Pt(9)
         r3.font.bold = True
         r3.font.color.rgb = color
 
@@ -386,7 +461,7 @@ def create_deck():
     # SLIDE 3: OUR SOLUTION (COMPLISCAN AI PLATFORM OVERVIEW)
     # =========================================================================
     s3 = slides[2]
-    set_slide_background(s3)
+    set_slide_background(s3, with_watermark=True)
     add_navigation_chrome(s3, 2, "Our Solution", "Platform Capabilities")
 
     # Workflow 3-Step Banner
@@ -397,7 +472,7 @@ def create_deck():
     r = p.add_run()
     r.text = "THE COMPLISCAN AI SOLUTION: 3-Step Automated Verification Pipeline\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(14)
+    r.font.size = Pt(13.5)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
@@ -416,7 +491,7 @@ def create_deck():
         r1 = p1.add_run()
         r1.text = st_title + "\n"
         r1.font.name = 'Segoe UI'
-        r1.font.size = Pt(11)
+        r1.font.size = Pt(10.5)
         r1.font.bold = True
         r1.font.color.rgb = C_TEXT_MAIN
 
@@ -445,7 +520,6 @@ def create_deck():
         py = pill_y_coords[idx // 3]
         add_card(s3, px, py, Inches(4.033), Inches(1.85), C_CARD_BG, C_CARD_BORDER)
         
-        # Header inside pillar card
         tb_p = s3.shapes.add_textbox(px + Inches(0.2), py + Inches(0.15), Inches(3.633), Inches(1.55))
         tf_p = tb_p.text_frame
         tf_p.word_wrap = True
@@ -453,7 +527,7 @@ def create_deck():
         r = p.add_run()
         r.text = p_title + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(12)
+        r.font.size = Pt(11.5)
         r.font.bold = True
         r.font.color.rgb = p_col
 
@@ -461,23 +535,22 @@ def create_deck():
         r2 = p2.add_run()
         r2.text = p_desc
         r2.font.name = 'Segoe UI'
-        r2.font.size = Pt(9.5)
+        r2.font.size = Pt(9)
         r2.font.color.rgb = C_TEXT_MUTED
 
     # CTA Button
     add_button(s3, Inches(9.8), Inches(6.35), Inches(3.033), Inches(0.4), "▶ Try Live Scan Simulation", C_EMERALD, RGBColor(255, 255, 255), slides[3], font_size=10.5, bold=True)
 
     # =========================================================================
-    # SLIDE 4: LIVE SCAN SIMULATION (REALISTIC SCANNER HUD)
+    # SLIDE 4: LIVE SCAN SIMULATION
     # =========================================================================
     s4 = slides[3]
-    set_slide_background(s4)
+    set_slide_background(s4, with_watermark=True)
     add_navigation_chrome(s4, 3, "Live Scan Simulation", "Scanning Interface")
 
     # Left Panel: Product Package Preview with Holographic Reticle
     add_card(s4, Inches(0.5), Inches(1.15), Inches(5.0), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
     
-    # Title
     tb_sp = s4.shapes.add_textbox(Inches(0.7), Inches(1.25), Inches(4.6), Inches(0.4))
     p = tb_sp.text_frame.paragraphs[0]
     r = p.add_run()
@@ -491,7 +564,6 @@ def create_deck():
     add_card(s4, Inches(0.8), Inches(1.75), Inches(4.4), Inches(4.0), RGBColor(241, 245, 249), RGBColor(203, 213, 225))
     
     # Bounding Box Overlays
-    # Box 1: Brand & Name
     add_card(s4, Inches(1.0), Inches(2.0), Inches(3.2), Inches(0.7), RGBColor(236, 253, 245), C_EMERALD, border_width=1.5)
     tb_b1 = s4.shapes.add_textbox(Inches(1.05), Inches(2.05), Inches(3.1), Inches(0.6))
     p = tb_b1.text_frame.paragraphs[0]
@@ -502,7 +574,6 @@ def create_deck():
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
-    # Box 2: Net Quantity
     add_card(s4, Inches(1.0), Inches(2.85), Inches(2.0), Inches(0.6), RGBColor(236, 253, 245), C_EMERALD, border_width=1.5)
     tb_b2 = s4.shapes.add_textbox(Inches(1.05), Inches(2.9), Inches(1.9), Inches(0.5))
     p = tb_b2.text_frame.paragraphs[0]
@@ -513,7 +584,6 @@ def create_deck():
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
-    # Box 3: MRP & Taxes
     add_card(s4, Inches(3.1), Inches(2.85), Inches(1.9), Inches(0.6), RGBColor(236, 253, 245), C_EMERALD, border_width=1.5)
     tb_b3 = s4.shapes.add_textbox(Inches(3.15), Inches(2.9), Inches(1.8), Inches(0.5))
     p = tb_b3.text_frame.paragraphs[0]
@@ -524,7 +594,6 @@ def create_deck():
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
-    # Box 4: Manufacturing Date (Ambiguity Flag)
     add_card(s4, Inches(1.0), Inches(3.6), Inches(3.9), Inches(0.65), RGBColor(254, 226, 226), C_RED, border_width=1.5)
     tb_b4 = s4.shapes.add_textbox(Inches(1.05), Inches(3.65), Inches(3.8), Inches(0.55))
     p = tb_b4.text_frame.paragraphs[0]
@@ -535,7 +604,6 @@ def create_deck():
     r.font.bold = True
     r.font.color.rgb = C_RED
 
-    # Box 5: FSSAI License
     add_card(s4, Inches(1.0), Inches(4.4), Inches(3.9), Inches(0.65), RGBColor(254, 243, 199), C_AMBER, border_width=1.5)
     tb_b5 = s4.shapes.add_textbox(Inches(1.05), Inches(4.45), Inches(3.8), Inches(0.55))
     p = tb_b5.text_frame.paragraphs[0]
@@ -546,13 +614,11 @@ def create_deck():
     r.font.bold = True
     r.font.color.rgb = C_AMBER
 
-    # Status summary footer
-    add_button(s4, Inches(0.8), Inches(5.9), Inches(4.4), Inches(0.55), "🔍 Holographic AR Reticle Active (X: 380, Y: 520)", C_DARK_PANEL, RGBColor(255, 255, 255), None, font_size=9.5)
+    add_button(s4, Inches(0.8), Inches(5.9), Inches(4.4), Inches(0.55), "🔍 Holographic AR Reticle Active (X: 380, Y: 520)", C_DARK_PANEL, RGBColor(255, 255, 255), None, font_size=9)
 
-    # Right Panel: Progressive Pipeline Stages (OCR -> Groq JSON -> Validation)
+    # Right Panel: Stages
     add_card(s4, Inches(5.7), Inches(1.15), Inches(7.133), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
 
-    # Stage 1: Raw OCR Extraction Box
     add_card(s4, Inches(5.9), Inches(1.35), Inches(6.733), Inches(1.65), RGBColor(248, 250, 252), C_CARD_BORDER)
     tb_st1 = s4.shapes.add_textbox(Inches(6.05), Inches(1.42), Inches(6.4), Inches(1.5))
     tf_st1 = tb_st1.text_frame
@@ -571,7 +637,6 @@ def create_deck():
     r2.font.size = Pt(8.5)
     r2.font.color.rgb = C_TEXT_MUTED
 
-    # Stage 2: AI Structured JSON Representation
     add_card(s4, Inches(5.9), Inches(3.15), Inches(6.733), Inches(1.95), RGBColor(15, 23, 42), None)
     tb_st2 = s4.shapes.add_textbox(Inches(6.05), Inches(3.22), Inches(6.4), Inches(1.8))
     tf_st2 = tb_st2.text_frame
@@ -590,17 +655,15 @@ def create_deck():
     r2.font.size = Pt(8)
     r2.font.color.rgb = RGBColor(226, 232, 240)
 
-    # Stage 3: Ready for Deterministic Evaluation CTA
-    add_button(s4, Inches(5.9), Inches(5.35), Inches(6.733), Inches(0.6), "⚖️ Analyze Compliance (Run Deterministic Rule Engine) ➔", C_PRIMARY, RGBColor(255, 255, 255), slides[4], font_size=12, bold=True)
+    add_button(s4, Inches(5.9), Inches(5.35), Inches(6.733), Inches(0.6), "⚖️ Analyze Compliance (Run Deterministic Rule Engine) ➔", C_PRIMARY, RGBColor(255, 255, 255), slides[4], font_size=11.5, bold=True)
 
     # =========================================================================
     # SLIDE 5: AI + DETERMINISTIC RULE ENGINE ARCHITECTURE
     # =========================================================================
     s5 = slides[4]
-    set_slide_background(s5)
+    set_slide_background(s5, with_watermark=True)
     add_navigation_chrome(s5, 4, "System Architecture", "AI vs Law Separation")
 
-    # Important Distinction Banner
     add_card(s5, Inches(0.5), Inches(1.15), Inches(12.333), Inches(0.75), C_EMERALD_LIGHT, C_EMERALD)
     tb_arch_b = s5.shapes.add_textbox(Inches(0.7), Inches(1.22), Inches(11.9), Inches(0.6))
     tf = tb_arch_b.text_frame
@@ -608,17 +671,16 @@ def create_deck():
     r = p.add_run()
     r.text = "CORE ARCHITECTURAL PRINCIPLE: AI Extracts Text • Manually Defined Rule Engine Decides Legality\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(13)
+    r.font.size = Pt(12.5)
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
     r2 = p.add_run()
     r2.text = "Groq is strictly an NLP extraction accelerator. Final legal compliance is computed 100% deterministically against official Gazette rules."
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(10)
+    r2.font.size = Pt(9.5)
     r2.font.color.rgb = C_TEXT_MUTED
 
-    # Flow Diagram Cards (Horizontal Sequence)
     flow_steps = [
         ("1. Input Image", "Packaging capture / upload", C_PRIMARY_LIGHT, C_PRIMARY),
         ("2. Dual OCR", "Tesseract & Gemini Vision", C_PRIMARY_LIGHT, C_PRIMARY),
@@ -640,7 +702,7 @@ def create_deck():
         r = p.add_run()
         r.text = title + "\n\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(10.5)
+        r.font.size = Pt(10)
         r.font.bold = True
         r.font.color.rgb = col
 
@@ -652,8 +714,6 @@ def create_deck():
         r2.font.color.rgb = C_TEXT_MAIN
         fx += Inches(1.79)
 
-    # Detailed Architecture Comparison (Left: AI Scope | Right: Deterministic Law Scope)
-    # Left Card: AI Layer Scope
     add_card(s5, Inches(0.5), Inches(3.85), Inches(5.95), Inches(2.4), C_CARD_BG, C_CARD_BORDER)
     tb_ai = s5.shapes.add_textbox(Inches(0.7), Inches(3.95), Inches(5.5), Inches(2.2))
     tf_ai = tb_ai.text_frame
@@ -662,7 +722,7 @@ def create_deck():
     r = p.add_run()
     r.text = "🤖 AI Extraction Layer (OCR.Space + Groq Llama-3)\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(12)
+    r.font.size = Pt(11.5)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
@@ -670,10 +730,9 @@ def create_deck():
     r2 = p2.add_run()
     r2.text = "• OCR.Space / Gemini Vision: Handles multi-font image text extraction in Hindi & English.\n• Groq Fast Inference: Parses noisy OCR lines into standard JSON fields without inventing facts.\n• Failover Resilience: Deterministic regex fallback if Groq API hits rate limit (429-immunity)."
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(9.5)
+    r2.font.size = Pt(9)
     r2.font.color.rgb = C_TEXT_MAIN
 
-    # Right Card: Deterministic Law Scope
     add_card(s5, Inches(6.85), Inches(3.85), Inches(5.95), Inches(2.4), C_CARD_BG, C_CARD_BORDER)
     tb_law = s5.shapes.add_textbox(Inches(7.05), Inches(3.95), Inches(5.5), Inches(2.2))
     tf_law = tb_law.text_frame
@@ -682,7 +741,7 @@ def create_deck():
     r = p.add_run()
     r.text = "⚖️ Deterministic Legal Rule Engine (Official Standards)\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(12)
+    r.font.size = Pt(11.5)
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
@@ -690,23 +749,20 @@ def create_deck():
     r2 = p2.add_run()
     r2.text = "• Legal Metrology (Packaged Commodities) Rules 2011 (Rule 6(1) a-g declarations).\n• FSSAI Labelling & Display Regulations 2020 (Veg/Non-veg logo, 14-digit license, nutrients).\n• 100% Objective Scoring: Rules evaluate through strict Boolean and regex formulas.\n• Zero Legal Hallucinations: No AI guesswork in statutory penalization."
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(9.5)
+    r2.font.size = Pt(9)
     r2.font.color.rgb = C_TEXT_MAIN
 
-    # Next CTA
-    add_button(s5, Inches(9.8), Inches(6.4), Inches(3.033), Inches(0.4), "📊 View Compliance Dashboard", C_PRIMARY, RGBColor(255, 255, 255), slides[5], font_size=10.5, bold=True)
+    add_button(s5, Inches(9.8), Inches(6.4), Inches(3.033), Inches(0.4), "📊 View Compliance Dashboard", C_PRIMARY, RGBColor(255, 255, 255), slides[5], font_size=10, bold=True)
 
     # =========================================================================
-    # SLIDE 6: COMPLIANCE DASHBOARD (AUDIT REPORT & SCORING)
+    # SLIDE 6: COMPLIANCE DASHBOARD
     # =========================================================================
     s6 = slides[5]
-    set_slide_background(s6)
+    set_slide_background(s6, with_watermark=True)
     add_navigation_chrome(s6, 5, "Compliance Dashboard", "Audit Results")
 
-    # Left Column: Score Card & Status Gauges (Width 4.2 Inches)
     add_card(s6, Inches(0.5), Inches(1.15), Inches(4.2), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
     
-    # Score Metric Box
     add_card(s6, Inches(0.8), Inches(1.35), Inches(3.6), Inches(1.6), C_AMBER_LIGHT, C_AMBER)
     tb_sc_box = s6.shapes.add_textbox(Inches(0.9), Inches(1.45), Inches(3.4), Inches(1.4))
     tf = tb_sc_box.text_frame
@@ -715,7 +771,7 @@ def create_deck():
     r = p.add_run()
     r.text = "82%\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(36)
+    r.font.size = Pt(34)
     r.font.bold = True
     r.font.color.rgb = C_AMBER
 
@@ -724,11 +780,10 @@ def create_deck():
     r2 = p2.add_run()
     r2.text = "POTENTIAL NON-COMPLIANCE"
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(11)
+    r2.font.size = Pt(10.5)
     r2.font.bold = True
     r2.font.color.rgb = C_AMBER
 
-    # Summary Badges Grid
     summary_items = [
         ("12", "Passed", C_EMERALD, C_EMERALD_LIGHT),
         ("2", "Violations", C_RED, C_RED_LIGHT),
@@ -747,7 +802,7 @@ def create_deck():
         r = p.add_run()
         r.text = cnt + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(16)
+        r.font.size = Pt(15)
         r.font.bold = True
         r.font.color.rgb = col
 
@@ -755,10 +810,9 @@ def create_deck():
         r2 = p2.add_run()
         r2.text = lbl
         r2.font.name = 'Segoe UI'
-        r2.font.size = Pt(8.5)
+        r2.font.size = Pt(8)
         r2.font.color.rgb = C_TEXT_MAIN
 
-    # Statutory Liability Note
     add_card(s6, Inches(0.8), Inches(5.15), Inches(3.6), Inches(1.3), C_RED_LIGHT, C_RED)
     tb_liab = s6.shapes.add_textbox(Inches(0.9), Inches(5.2), Inches(3.4), Inches(1.2))
     tf_liab = tb_liab.text_frame
@@ -777,10 +831,8 @@ def create_deck():
     r2.font.size = Pt(8.5)
     r2.font.color.rgb = C_TEXT_MAIN
 
-    # Right Column: Rule-by-Rule Audit Checklist
     add_card(s6, Inches(4.9), Inches(1.15), Inches(7.933), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
     
-    # Checklist Table Header
     add_card(s6, Inches(5.1), Inches(1.3), Inches(7.533), Inches(0.4), C_BG_PAGE, C_CARD_BORDER)
     tb_th = s6.shapes.add_textbox(Inches(5.2), Inches(1.35), Inches(7.3), Inches(0.35))
     p = tb_th.text_frame.paragraphs[0]
@@ -791,7 +843,6 @@ def create_deck():
     r.font.bold = True
     r.font.color.rgb = C_TEXT_MAIN
 
-    # Checklist Row Cards
     checks = [
         ("LM-001", "Name & Description of Commodity", "Annapurna Pure Wheat Atta", "✓ PASS", C_EMERALD_LIGHT, C_EMERALD),
         ("LM-002", "Net Quantity & Units Declaration", "5 kg (Metric Units Compliant)", "✓ PASS", C_EMERALD_LIGHT, C_EMERALD),
@@ -823,45 +874,48 @@ def create_deck():
         r2.font.color.rgb = col
         cy += Inches(0.62)
 
-    # Next Action Button
     add_button(s6, Inches(9.8), Inches(6.35), Inches(3.033), Inches(0.4), "📑 View Violation & Complaint Report", C_PRIMARY, RGBColor(255, 255, 255), slides[6], font_size=10, bold=True)
 
     # =========================================================================
     # SLIDE 7: VIOLATION + COMPLAINT REPORT
     # =========================================================================
     s7 = slides[6]
-    set_slide_background(s7)
+    set_slide_background(s7, with_watermark=True)
     add_navigation_chrome(s7, 6, "Violation & Complaint Dossier", "Enforcement Report")
 
-    # Left Card: Generated Official PDF Dossier Preview
     add_card(s7, Inches(0.5), Inches(1.15), Inches(6.0), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
     
-    # Official Report Header Box
     add_card(s7, Inches(0.7), Inches(1.35), Inches(5.6), Inches(1.2), C_PRIMARY_LIGHT, C_PRIMARY)
-    tb_rep_h = s7.shapes.add_textbox(Inches(0.85), Inches(1.4), Inches(5.3), Inches(1.1))
+    
+    if os.path.exists(IMG_MINISTRY_LOGO):
+        try:
+            s7.shapes.add_picture(IMG_MINISTRY_LOGO, Inches(0.8), Inches(1.4), Inches(0.85), Inches(0.48))
+        except Exception:
+            pass
+
+    tb_rep_h = s7.shapes.add_textbox(Inches(1.7), Inches(1.4), Inches(4.5), Inches(1.1))
     tf = tb_rep_h.text_frame
     p = tf.paragraphs[0]
     r = p.add_run()
-    r.text = "🏛️ GOVERNMENT OF INDIA • MINISTRY OF CONSUMER AFFAIRS\n"
+    r.text = "🏛️ MINISTRY OF CONSUMER AFFAIRS\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(10)
+    r.font.size = Pt(9.5)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
     r2 = p.add_run()
-    r2.text = "STATUTORY LABELLING COMPLIANCE INSPECTION DOSSIER\n"
+    r2.text = "STATUTORY LABELLING INSPECTION DOSSIER\n"
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(11.5)
+    r2.font.size = Pt(11)
     r2.font.bold = True
     r2.font.color.rgb = C_TEXT_MAIN
 
     r3 = p.add_run()
-    r3.text = "Dossier ID: #SIH26-CMP-84920 • Date: 12-Sept-2026 • Verified by CompliScan AI"
+    r3.text = "Dossier ID: #SIH26-CMP-84920 • Verified by CompliScan AI"
     r3.font.name = 'Segoe UI'
-    r3.font.size = Pt(8.5)
+    r3.font.size = Pt(8)
     r3.font.color.rgb = C_TEXT_MUTED
 
-    # Report Body Breakdown
     tb_rep_body = s7.shapes.add_textbox(Inches(0.7), Inches(2.7), Inches(5.6), Inches(3.7))
     tf_rb = tb_rep_body.text_frame
     tf_rb.word_wrap = True
@@ -892,7 +946,6 @@ def create_deck():
     r4.font.size = Pt(9.5)
     r4.font.color.rgb = C_TEXT_MAIN
 
-    # Right Card: 1-Click Complaint Workflow & Enforcement Dispatch
     add_card(s7, Inches(6.8), Inches(1.15), Inches(6.033), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
 
     tb_flow_h = s7.shapes.add_textbox(Inches(7.0), Inches(1.35), Inches(5.6), Inches(0.6))
@@ -900,11 +953,10 @@ def create_deck():
     r = p.add_run()
     r.text = "🚨 1-Click Regulatory Enforcement Dispatch Workflow"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(13)
+    r.font.size = Pt(12.5)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
-    # Step cards for complaint workflow
     c_steps = [
         ("1. Evidence Auto-Packaging", "Original packaging image, OCR bounding boxes, and timestamped audit logs are hashed for court admissibility.", C_PRIMARY_LIGHT),
         ("2. Multi-Agency Forwarding", "Direct API integration forwards dossier to National Consumer Helpline (1915), INGRAM, and State Metrology Controllers.", C_EMERALD_LIGHT),
@@ -921,7 +973,7 @@ def create_deck():
         r = p.add_run()
         r.text = st_title + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(11)
+        r.font.size = Pt(10.5)
         r.font.bold = True
         r.font.color.rgb = C_TEXT_MAIN
 
@@ -929,21 +981,19 @@ def create_deck():
         r2 = p2.add_run()
         r2.text = st_desc
         r2.font.name = 'Segoe UI'
-        r2.font.size = Pt(9)
+        r2.font.size = Pt(8.5)
         r2.font.color.rgb = C_TEXT_MUTED
         cs_y += Inches(1.3)
 
-    # 1-Click Action Button
-    add_button(s7, Inches(7.0), Inches(5.95), Inches(5.6), Inches(0.55), "🚀 Submit Complaint to Enforcement Portal", C_RED, RGBColor(255, 255, 255), slides[7], font_size=12, bold=True)
+    add_button(s7, Inches(7.0), Inches(5.95), Inches(5.6), Inches(0.55), "🚀 Submit Complaint to Enforcement Portal", C_RED, RGBColor(255, 255, 255), slides[7], font_size=11.5, bold=True)
 
     # =========================================================================
-    # SLIDE 8: ENFORCEMENT OFFICIAL DASHBOARD (MINISTRY ADMIN PORTAL)
+    # SLIDE 8: ENFORCEMENT OFFICIAL DASHBOARD
     # =========================================================================
     s8 = slides[7]
-    set_slide_background(s8)
+    set_slide_background(s8, with_watermark=True)
     add_navigation_chrome(s8, 7, "Enforcement Official Dashboard", "Ministry Admin Command")
 
-    # 4 Executive Metric Cards Row
     m_cards = [
         ("1,248", "Total Audits Filed", "+14% MoM", C_PRIMARY, C_PRIMARY_LIGHT),
         ("241", "Critical Violations", "Seizure Alerts", C_RED, C_RED_LIGHT),
@@ -960,7 +1010,7 @@ def create_deck():
         r = p.add_run()
         r.text = val + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(20)
+        r.font.size = Pt(19)
         r.font.bold = True
         r.font.color.rgb = col
 
@@ -973,18 +1023,16 @@ def create_deck():
         r2.font.color.rgb = C_TEXT_MAIN
         mx += Inches(3.15)
 
-    # Left Bottom Card: Category-wise Violation Breakdown Chart Mockup
     add_card(s8, Inches(0.5), Inches(2.45), Inches(5.95), Inches(4.2), C_CARD_BG, C_CARD_BORDER)
     tb_cb_h = s8.shapes.add_textbox(Inches(0.7), Inches(2.55), Inches(5.5), Inches(0.5))
     p = tb_cb_h.text_frame.paragraphs[0]
     r = p.add_run()
     r.text = "📊 Category-wise Violation Distribution (Live Telemetry)"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(12)
+    r.font.size = Pt(11.5)
     r.font.bold = True
     r.font.color.rgb = C_TEXT_MAIN
 
-    # Horizontal bars for categories
     cat_bars = [
         ("Packaged Food & Snacks", "42% Violations", Inches(4.5), C_RED),
         ("Edible Oils & Fats", "28% Violations", Inches(3.1), C_AMBER),
@@ -1002,23 +1050,20 @@ def create_deck():
         r.font.bold = True
         r.font.color.rgb = C_TEXT_MAIN
 
-        # Bar background & fill
         add_card(s8, Inches(0.7), by + Inches(0.32), Inches(5.5), Inches(0.2), C_BG_PAGE, None)
         add_card(s8, Inches(0.7), by + Inches(0.32), b_w, Inches(0.2), b_col, None)
         by += Inches(0.75)
 
-    # Right Bottom Card: Live Enforcement Registry Table
     add_card(s8, Inches(6.85), Inches(2.45), Inches(5.95), Inches(4.2), C_CARD_BG, C_CARD_BORDER)
     tb_reg_h = s8.shapes.add_textbox(Inches(7.05), Inches(2.55), Inches(5.5), Inches(0.5))
     p = tb_reg_h.text_frame.paragraphs[0]
     r = p.add_run()
     r.text = "📑 Live Enforcement Registry (Recent Notices)"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(12)
+    r.font.size = Pt(11.5)
     r.font.bold = True
     r.font.color.rgb = C_TEXT_MAIN
 
-    # Table rows
     reg_rows = [
         ("#CMP-8492", "Annapurna Atta", "Missing Mfg Date", "High (Notice)", C_RED),
         ("#CMP-8488", "Kisan Sunflower Oil", "No Net Wt @ 30°C", "High (Notice)", C_RED),
@@ -1034,46 +1079,42 @@ def create_deck():
         r1 = p.add_run()
         r1.text = f"{cid} | {cprod}\n"
         r1.font.name = 'Segoe UI'
-        r1.font.size = Pt(9.5)
+        r1.font.size = Pt(9)
         r1.font.bold = True
         r1.font.color.rgb = C_TEXT_MAIN
 
         r2 = p.add_run()
         r2.text = f"Issue: {cissue}  •  Action: "
         r2.font.name = 'Segoe UI'
-        r2.font.size = Pt(8.5)
+        r2.font.size = Pt(8)
         r2.font.color.rgb = C_TEXT_MUTED
 
         r3 = p.add_run()
         r3.text = cstatus
         r3.font.name = 'Segoe UI'
-        r3.font.size = Pt(8.5)
+        r3.font.size = Pt(8)
         r3.font.bold = True
         r3.font.color.rgb = col
         ry += Inches(0.78)
 
-    # Next CTA
     add_button(s8, Inches(9.8), Inches(6.35), Inches(3.033), Inches(0.4), "🚀 Impact & Future Roadmap ➔", C_PRIMARY, RGBColor(255, 255, 255), slides[8], font_size=10.5, bold=True)
 
     # =========================================================================
     # SLIDE 9: IMPACT + FUTURE SCOPE
     # =========================================================================
     s9 = slides[8]
-    set_slide_background(s9)
+    set_slide_background(s9, with_watermark=True)
     add_navigation_chrome(s9, 8, "Impact & Future Roadmap", "Scalability & Roadmap")
 
-    # Two Main Columns: Current MVP Impact (Left) vs Future Scope (Right)
-    # Left Column: Current Impact
     add_card(s9, Inches(0.5), Inches(1.15), Inches(5.95), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
     
-    # Header Pill
     add_card(s9, Inches(0.8), Inches(1.35), Inches(5.35), Inches(0.5), C_EMERALD_LIGHT, C_EMERALD)
     tb_imp_h = s9.shapes.add_textbox(Inches(0.9), Inches(1.4), Inches(5.1), Inches(0.4))
     p = tb_imp_h.text_frame.paragraphs[0]
     r = p.add_run()
     r.text = "✅ CURRENT MVP IMPACT (Delivered for SIH 2026)"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(11)
+    r.font.size = Pt(10.5)
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
@@ -1093,7 +1134,7 @@ def create_deck():
         r = p.add_run()
         r.text = ititle + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(10.5)
+        r.font.size = Pt(10)
         r.font.bold = True
         r.font.color.rgb = C_TEXT_MAIN
 
@@ -1105,17 +1146,15 @@ def create_deck():
         r2.font.color.rgb = C_TEXT_MUTED
         iy += Inches(1.08)
 
-    # Right Column: Future Scope & Scaling
     add_card(s9, Inches(6.85), Inches(1.15), Inches(5.95), Inches(5.5), C_CARD_BG, C_CARD_BORDER)
     
-    # Header Pill
     add_card(s9, Inches(7.15), Inches(1.35), Inches(5.35), Inches(0.5), C_PRIMARY_LIGHT, C_PRIMARY)
     tb_fut_h = s9.shapes.add_textbox(Inches(7.25), Inches(1.4), Inches(5.1), Inches(0.4))
     p = tb_fut_h.text_frame.paragraphs[0]
     r = p.add_run()
     r.text = "🔮 FUTURE SCOPE & NATIONAL SCALING ROADMAP"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(11)
+    r.font.size = Pt(10.5)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
@@ -1135,7 +1174,7 @@ def create_deck():
         r = p.add_run()
         r.text = ftitle + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(10.5)
+        r.font.size = Pt(10)
         r.font.bold = True
         r.font.color.rgb = C_PRIMARY
 
@@ -1147,48 +1186,61 @@ def create_deck():
         r2.font.color.rgb = C_TEXT_MUTED
         fy += Inches(1.08)
 
-    # Next CTA
     add_button(s9, Inches(9.8), Inches(6.35), Inches(3.033), Inches(0.4), "👥 Meet the Development Team ➔", C_PRIMARY, RGBColor(255, 255, 255), slides[9], font_size=10.5, bold=True)
 
     # =========================================================================
-    # SLIDE 10: TEAM / DEVELOPMENT (UCET HAZARIBAGH)
+    # SLIDE 10: TEAM / DEVELOPMENT (WITH EMBEDDED LOGOS & PHOTO)
     # =========================================================================
     s10 = slides[9]
-    set_slide_background(s10)
+    set_slide_background(s10, with_watermark=True)
     add_navigation_chrome(s10, 9, "Team & Development", "UCET Hazaribagh")
 
     # Team Institution Banner
     add_card(s10, Inches(0.5), Inches(1.15), Inches(12.333), Inches(0.75), C_PRIMARY_LIGHT, C_PRIMARY)
-    tb_inst = s10.shapes.add_textbox(Inches(0.7), Inches(1.22), Inches(11.9), Inches(0.6))
+    
+    # Embed UCET Logo on banner
+    if os.path.exists(IMG_UCET):
+        try:
+            s10.shapes.add_picture(IMG_UCET, Inches(0.7), Inches(1.2), Inches(1.2), Inches(0.6))
+        except Exception:
+            pass
+
+    tb_inst = s10.shapes.add_textbox(Inches(2.05), Inches(1.20), Inches(8.5), Inches(0.6))
     tf = tb_inst.text_frame
     p = tf.paragraphs[0]
     r = p.add_run()
     r.text = "🏛️ University College of Engineering & Technology (UCET), VBU, Hazaribagh\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(13)
+    r.font.size = Pt(12)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
     r2 = p.add_run()
     r2.text = "Smart India Hackathon 2026 • Problem Statement ID: SIH26034 • Ministry of Consumer Affairs, Food & Public Distribution"
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(9.5)
+    r2.font.size = Pt(9)
     r2.font.color.rgb = C_TEXT_MUTED
 
-    # 6 Member Cards Grid (2 rows x 3 cols)
+    # Embed SIH Logo on right of banner
+    if os.path.exists(IMG_SIH_LOGO):
+        try:
+            s10.shapes.add_picture(IMG_SIH_LOGO, Inches(11.45), Inches(1.2), Inches(1.1), Inches(0.6))
+        except Exception:
+            pass
+
     team_members = [
-        ("Shubham Kumar", "Team Lead & Full-Stack / AI Architect", "B.Tech Information Technology", "Session: 2024–27 (D2D)", "Lead Developer", C_PRIMARY, True),
-        ("Team Member 2", "AI / ML & Computer Vision Specialist", "B.Tech Engineering", "Session: 2024–27", "OCR & NLP Pipeline", C_TEXT_MUTED, False),
-        ("Team Member 3", "Backend & Regulatory Rules Lead", "B.Tech Engineering", "Session: 2024–27", "Rule Engine & DB", C_TEXT_MUTED, False),
-        ("Team Member 4", "Frontend & UI/UX Specialist", "B.Tech Engineering", "Session: 2024–27", "React & 3D Web UI", C_TEXT_MUTED, False),
-        ("Team Member 5", "Legal Research & Verification Analyst", "B.Tech Engineering", "Session: 2024–27", "Statutory Compliance", C_TEXT_MUTED, False),
-        ("Team Member 6", "QA, Testing & Cloud DevOps", "B.Tech Engineering", "Session: 2024–27", "Testing & Security", C_TEXT_MUTED, False),
+        ("Shubham Kumar", "Team Lead & Full-Stack / AI Architect", "B.Tech Information Technology", "Session: 2024–27 (D2D)", "Lead Developer", C_PRIMARY, True, IMG_SHUBHAM),
+        ("Team Member 2", "AI / ML & Computer Vision Specialist", "B.Tech Engineering", "Session: 2024–27", "OCR & NLP Pipeline", C_TEXT_MUTED, False, None),
+        ("Team Member 3", "Backend & Regulatory Rules Lead", "B.Tech Engineering", "Session: 2024–27", "Rule Engine & DB", C_TEXT_MUTED, False, None),
+        ("Team Member 4", "Frontend & UI/UX Specialist", "B.Tech Engineering", "Session: 2024–27", "React & 3D Web UI", C_TEXT_MUTED, False, None),
+        ("Team Member 5", "Legal Research & Verification Analyst", "B.Tech Engineering", "Session: 2024–27", "Statutory Compliance", C_TEXT_MUTED, False, None),
+        ("Team Member 6", "QA, Testing & Cloud DevOps", "B.Tech Engineering", "Session: 2024–27", "Testing & Security", C_TEXT_MUTED, False, None),
     ]
 
     t_x_coords = [Inches(0.5), Inches(4.65), Inches(8.8)]
     t_y_coords = [Inches(2.05), Inches(4.35)]
 
-    for idx, (m_name, m_role, m_deg, m_sess, m_badge, m_col, is_lead) in enumerate(team_members):
+    for idx, (m_name, m_role, m_deg, m_sess, m_badge, m_col, is_lead, img_path) in enumerate(team_members):
         tx = t_x_coords[idx % 3]
         ty = t_y_coords[idx // 3]
         
@@ -1196,20 +1248,24 @@ def create_deck():
         card_border = C_PRIMARY if is_lead else C_CARD_BORDER
         add_card(s10, tx, ty, Inches(4.033), Inches(2.1), card_bg, card_border, border_width=1.5 if is_lead else 1)
         
-        # Avatar placeholder circle
-        avatar_bg = C_PRIMARY_LIGHT if is_lead else C_BG_PAGE
-        add_card(s10, tx + Inches(0.2), ty + Inches(0.2), Inches(0.9), Inches(0.9), avatar_bg, card_border)
-        
-        # Initials in avatar
-        tb_av = s10.shapes.add_textbox(tx + Inches(0.2), ty + Inches(0.35), Inches(0.9), Inches(0.6))
-        p = tb_av.text_frame.paragraphs[0]
-        p.alignment = PP_ALIGN.CENTER
-        r = p.add_run()
-        r.text = "SK" if is_lead else f"M{idx+1}"
-        r.font.name = 'Segoe UI'
-        r.font.size = Pt(14)
-        r.font.bold = True
-        r.font.color.rgb = m_col
+        # Avatar slot: Real photo for Shubham Kumar if present, else initials circle
+        if img_path and os.path.exists(img_path):
+            try:
+                s10.shapes.add_picture(img_path, tx + Inches(0.2), ty + Inches(0.2), Inches(0.9), Inches(1.05))
+            except Exception:
+                add_card(s10, tx + Inches(0.2), ty + Inches(0.2), Inches(0.9), Inches(0.9), C_PRIMARY_LIGHT, card_border)
+        else:
+            avatar_bg = C_PRIMARY_LIGHT if is_lead else C_BG_PAGE
+            add_card(s10, tx + Inches(0.2), ty + Inches(0.2), Inches(0.9), Inches(0.9), avatar_bg, card_border)
+            tb_av = s10.shapes.add_textbox(tx + Inches(0.2), ty + Inches(0.35), Inches(0.9), Inches(0.6))
+            p = tb_av.text_frame.paragraphs[0]
+            p.alignment = PP_ALIGN.CENTER
+            r = p.add_run()
+            r.text = f"M{idx+1}"
+            r.font.name = 'Segoe UI'
+            r.font.size = Pt(14)
+            r.font.bold = True
+            r.font.color.rgb = m_col
 
         # Member Details
         tb_md = s10.shapes.add_textbox(tx + Inches(1.2), ty + Inches(0.15), Inches(2.7), Inches(1.8))
@@ -1220,7 +1276,7 @@ def create_deck():
         r = p.add_run()
         r.text = m_name + "\n"
         r.font.name = 'Segoe UI'
-        r.font.size = Pt(12)
+        r.font.size = Pt(11.5)
         r.font.bold = True
         r.font.color.rgb = C_TEXT_MAIN
 
@@ -1228,7 +1284,7 @@ def create_deck():
         r2 = p2.add_run()
         r2.text = m_role + "\n"
         r2.font.name = 'Segoe UI'
-        r2.font.size = Pt(9)
+        r2.font.size = Pt(8.5)
         r2.font.bold = True
         r2.font.color.rgb = m_col
 
@@ -1236,36 +1292,56 @@ def create_deck():
         r3 = p3.add_run()
         r3.text = f"{m_deg}\n{m_sess}"
         r3.font.name = 'Segoe UI'
-        r3.font.size = Pt(8.5)
+        r3.font.size = Pt(8)
         r3.font.color.rgb = C_TEXT_MUTED
 
-    # Next CTA
     add_button(s10, Inches(9.8), Inches(6.45), Inches(3.033), Inches(0.35), "🎯 Summary & Product Hub ➔", C_PRIMARY, RGBColor(255, 255, 255), slides[10], font_size=10, bold=True)
 
     # =========================================================================
     # SLIDE 11: FINAL SLIDE / THANK YOU & PRODUCT CTA
     # =========================================================================
     s11 = slides[10]
-    set_slide_background(s11)
+    set_slide_background(s11, with_watermark=True)
     add_navigation_chrome(s11, 10, "Summary & Interactive Hub", "Thank You")
 
     # Central Hero Thank You Card
     add_card(s11, Inches(1.5), Inches(1.25), Inches(10.333), Inches(5.3), C_CARD_BG, C_CARD_BORDER)
 
-    # Authority Tag
-    add_card(s11, Inches(3.666), Inches(1.55), Inches(6.0), Inches(0.4), C_EMERALD_LIGHT, C_EMERALD)
-    tb_ty_pill = s11.shapes.add_textbox(Inches(3.7), Inches(1.6), Inches(5.9), Inches(0.35))
+    # Authority Tag Banner with Ministry & SIH Logos
+    add_card(s11, Inches(3.166), Inches(1.5), Inches(7.0), Inches(0.55), C_EMERALD_LIGHT, C_EMERALD)
+    
+    # Embed Ministry Logo
+    if os.path.exists(IMG_MINISTRY_LOGO):
+        try:
+            s11.shapes.add_picture(IMG_MINISTRY_LOGO, Inches(3.25), Inches(1.54), Inches(0.85), Inches(0.46))
+        except Exception:
+            pass
+
+    # Embed SIH Logo
+    if os.path.exists(IMG_SIH_LOGO):
+        try:
+            s11.shapes.add_picture(IMG_SIH_LOGO, Inches(4.18), Inches(1.54), Inches(0.85), Inches(0.46))
+        except Exception:
+            pass
+
+    tb_ty_pill = s11.shapes.add_textbox(Inches(5.1), Inches(1.55), Inches(4.9), Inches(0.45))
     p = tb_ty_pill.text_frame.paragraphs[0]
-    p.alignment = PP_ALIGN.CENTER
     r = p.add_run()
-    r.text = "🇮🇳 SMART INDIA HACKATHON 2026 • FINAL PRESENTATION"
+    r.text = "SMART INDIA HACKATHON 2026 • FINAL PRESENTATION\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(10)
+    r.font.size = Pt(9.5)
     r.font.bold = True
     r.font.color.rgb = C_EMERALD
 
+    p2 = tb_ty_pill.text_frame.add_paragraph()
+    r2 = p2.add_run()
+    r2.text = "Problem Statement: SIH26034 • Ministry of Consumer Affairs"
+    r2.font.name = 'Segoe UI'
+    r2.font.size = Pt(8)
+    r2.font.color.rgb = C_TEXT_MUTED
+
     # Big Title
-    tb_ty_title = s11.shapes.add_textbox(Inches(2.0), Inches(2.1), Inches(9.333), Inches(1.4))
+    tb_ty_title = s11.shapes.add_textbox(Inches(2.0), Inches(2.2), Inches(9.333), Inches(1.2))
     tf_ty = tb_ty_title.text_frame
     tf_ty.word_wrap = True
     p = tf_ty.paragraphs[0]
@@ -1273,19 +1349,19 @@ def create_deck():
     r = p.add_run()
     r.text = "CompliScan AI\n"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(36)
+    r.font.size = Pt(32)
     r.font.bold = True
     r.font.color.rgb = C_TEXT_MAIN
 
     r2 = p.add_run()
     r2.text = "Making Product Label Compliance Smarter, Faster & Consumer-First"
     r2.font.name = 'Segoe UI'
-    r2.font.size = Pt(16)
+    r2.font.size = Pt(15)
     r2.font.bold = True
     r2.font.color.rgb = C_PRIMARY
 
     # Core Value Tagline
-    tb_tag = s11.shapes.add_textbox(Inches(2.0), Inches(3.5), Inches(9.333), Inches(0.8))
+    tb_tag = s11.shapes.add_textbox(Inches(2.0), Inches(3.45), Inches(9.333), Inches(0.7))
     tf_tag = tb_tag.text_frame
     tf_tag.word_wrap = True
     p = tf_tag.paragraphs[0]
@@ -1293,7 +1369,7 @@ def create_deck():
     r = p.add_run()
     r.text = "Empowering 1.4B Indian Citizens • Accelerating Regulatory Enforcement • Eradicating Packaging Fraud"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(12)
+    r.font.size = Pt(11)
     r.font.bold = True
     r.font.color.rgb = C_TEXT_MUTED
 
@@ -1309,18 +1385,18 @@ def create_deck():
     hx = Inches(1.9)
     hw = Inches(1.8)
     for label, tgt_slide, bg, tc, bc in hub_buttons:
-        add_button(s11, hx, Inches(4.5), hw, Inches(0.6), label, bg, tc, tgt_slide, font_size=10, bold=True, border_color=bc)
+        add_button(s11, hx, Inches(4.35), hw, Inches(0.6), label, bg, tc, tgt_slide, font_size=9.5, bold=True, border_color=bc)
         hx += Inches(1.95)
 
     # University Footer
-    tb_ufoot = s11.shapes.add_textbox(Inches(2.0), Inches(5.4), Inches(9.333), Inches(0.6))
+    tb_ufoot = s11.shapes.add_textbox(Inches(2.0), Inches(5.25), Inches(9.333), Inches(0.6))
     tf_uf = tb_ufoot.text_frame
     p = tf_uf.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
     r = p.add_run()
-    r.text = "University College of Engineering & Technology (UCET), Hazaribagh • Problem ID: SIH26034\nThank You Judges & Mentors for your valuable time!"
+    r.text = "University College of Engineering & Technology (UCET), VBU, Hazaribagh • Problem ID: SIH26034\nThank You Judges & Mentors for your valuable time!"
     r.font.name = 'Segoe UI'
-    r.font.size = Pt(10)
+    r.font.size = Pt(9.5)
     r.font.bold = True
     r.font.color.rgb = C_PRIMARY
 
