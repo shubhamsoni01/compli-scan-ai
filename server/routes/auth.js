@@ -617,7 +617,12 @@ router.delete('/profile/photo', requireAuth, async (req, res) => {
  */
 export async function seedSuperAdmin() {
   try {
-    if (!isDbConnected()) return;
+    console.log('[Super Admin Seeder]: Function called.');
+
+    if (!isDbConnected()) {
+      console.warn('[Super Admin Seeder]: Database is NOT connected.');
+      return;
+    }
     const SUPER_EMAIL = 'sih@gmail.com';
     const SUPER_PASS = '822115';
     const salt = await bcrypt.genSalt(12);

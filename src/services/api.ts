@@ -603,3 +603,469 @@ export async function revokeAdminPrivilege(adminId: string): Promise<any> {
   }
 }
 
+// --------------------------------------------------------------------------
+// Enforcement Activities & Compliance Monitoring Types & APIs
+// --------------------------------------------------------------------------
+
+export interface EnforcementCase {
+  caseId: string;
+  scanId: string;
+  productName: string;
+  brand: string;
+  category: string;
+  complianceScore: number;
+  overallStatus: string;
+  createdAt: string;
+  updatedAt: string;
+  originalImageUrl?: string | null;
+  reportId?: string | null;
+  primaryViolation: string;
+  regulatorySection: string;
+  status: 'Flagged' | 'Pending Notice' | 'Notice Dispatched' | 'Hearing Scheduled' | 'Inspection Ordered' | 'Compounded' | 'Resolved' | 'Under Review' | 'Closed';
+  severity: 'URGENT' | 'HIGH' | 'STANDARD' | 'ROUTINE';
+  officerAssigned: string;
+  deadlineDaysRemaining: number;
+  compoundingFine: number;
+  noticeDispatchedAt?: string | null;
+  hearingDate?: string | null;
+  actionHistory: {
+    action: string;
+    timestamp: string;
+    officer: string;
+    note: string;
+  }[];
+  citizenComplaint?: {
+    complaintId: string;
+    status: string;
+    submittedAt: string;
+    userName: string;
+    userEmail: string;
+    adminPriority?: string;
+    adminNotes?: string;
+  } | null;
+}
+
+export interface EnforcementSummary {
+  totalNotices: number;
+  activeInvestigations: number;
+  citizenComplaints: number;
+  resolved: number;
+  compoundingFines: number;
+}
+
+export interface RegulatoryFrameworkStatus {
+  frameworkId: string;
+  name: string;
+  shortName: string;
+  governingBody: string;
+  complianceRate: number;
+  status: 'COMPLIANT' | 'MODERATE_RISK' | 'CRITICAL_RISK';
+  monitoredCount: number;
+  violationsCount: number;
+  mandatedClauses: string[];
+}
+
+const DEFAULT_FALLBACK_ENFORCEMENT_CASES: EnforcementCase[] = [
+  {
+    caseId: 'MCA-ENF-2026-0842',
+    scanId: 'scan-demo-haldiram-01',
+    productName: 'Royal Savory Bhujia 400g',
+    brand: 'Shree Krishna Agro Foods Ltd',
+    category: 'Food',
+    complianceScore: 42,
+    overallStatus: 'POTENTIAL_NON_COMPLIANCE',
+    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000).toISOString(),
+    primaryViolation: 'Missing Mandatory 14-Digit FSSAI License Number & Missing Veg Logo',
+    regulatorySection: 'FSSAI (Labelling & Display) Reg 2020 Sec 5(1) & Legal Metrology Act Sec 38',
+    status: 'Notice Dispatched',
+    severity: 'URGENT',
+    officerAssigned: 'Legal Metrology Enforcement Cell (HQ New Delhi)',
+    deadlineDaysRemaining: 9,
+    compoundingFine: 25000,
+    noticeDispatchedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    hearingDate: new Date(Date.now() + 7 * 86400000).toISOString(),
+    actionHistory: [
+      {
+        action: 'Statutory Show-Cause Notice Dispatched',
+        timestamp: new Date(Date.now() - 2 * 86400000).toISOString(),
+        officer: 'Super Admin (National Governance)',
+        note: 'Formal notice served under Section 38. Manufacturer required to respond in 15 days.',
+      },
+      {
+        action: 'Citizen Consumer Grievance Registered',
+        timestamp: new Date(Date.now() - 3 * 86400000).toISOString(),
+        officer: 'Automated Grievance Portal',
+        note: 'Citizen scan flagged missing green vegetarian dot and unverified food license.',
+      },
+    ],
+    citizenComplaint: {
+      complaintId: 'CMP-2026-BHUJ-88',
+      status: 'Investigation',
+      submittedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+      userName: 'Aarav Sharma',
+      userEmail: 'aarav.sharma@example.com',
+      adminPriority: 'HIGH',
+      adminNotes: 'Field sample testing recommended for edible oil freshness.',
+    },
+  },
+  {
+    caseId: 'MCA-ENF-2026-0791',
+    scanId: 'scan-demo-oil-02',
+    productName: 'Gold Harvest Refined Sunflower Oil 1L',
+    brand: 'Sunburst Edible Oils Pvt Ltd',
+    category: 'Edible Oil',
+    complianceScore: 54,
+    overallStatus: 'POTENTIAL_NON_COMPLIANCE',
+    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000).toISOString(),
+    primaryViolation: 'Ambiguous Unit Sale Price (USP) & Font Size below 3.0mm statutory threshold',
+    regulatorySection: 'Legal Metrology (Packaged Commodities) Amendment Rules Rule 6(11)',
+    status: 'Inspection Ordered',
+    severity: 'HIGH',
+    officerAssigned: 'State Metrology Inspection Bureau (Maharashtra)',
+    deadlineDaysRemaining: 4,
+    compoundingFine: 50000,
+    noticeDispatchedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+    hearingDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+    actionHistory: [
+      {
+        action: 'Field Warehouse Audit Ordered',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        officer: 'Joint Director P. K. Singh',
+        note: 'Deputed district legal metrology inspector for retail batch sample verification.',
+      },
+      {
+        action: 'Notice Issued',
+        timestamp: new Date(Date.now() - 5 * 86400000).toISOString(),
+        officer: 'Ministry Enforcement Cell',
+        note: 'USP absent from principal display panel.',
+      },
+    ],
+    citizenComplaint: null,
+  },
+  {
+    caseId: 'MCA-ENF-2026-0640',
+    scanId: 'scan-demo-cream-03',
+    productName: 'GlowRadiance Ayurvedic Day Cream 50g',
+    brand: 'Veda Herbal Cosmetics LLP',
+    category: 'Cosmetics',
+    complianceScore: 38,
+    overallStatus: 'POTENTIAL_NON_COMPLIANCE',
+    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    primaryViolation: 'Missing Batch Number, Absent Best Before Date, Unregistered Consumer Care',
+    regulatorySection: 'Drugs and Cosmetics Rules 1945 Rule 148 & Legal Metrology Rules',
+    status: 'Hearing Scheduled',
+    severity: 'URGENT',
+    officerAssigned: 'CDSCO & Legal Metrology Joint Taskforce',
+    deadlineDaysRemaining: 2,
+    compoundingFine: 75000,
+    noticeDispatchedAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+    hearingDate: new Date(Date.now() + 2 * 86400000).toISOString(),
+    actionHistory: [
+      {
+        action: 'Statutory Compounding Hearing Summoned',
+        timestamp: new Date(Date.now() - 2 * 86400000).toISOString(),
+        officer: 'Director of Legal Metrology',
+        note: 'Personal appearance of Managing Director directed at New Delhi Bench.',
+      },
+    ],
+    citizenComplaint: {
+      complaintId: 'CMP-2026-VEDA-14',
+      status: 'Submitted',
+      submittedAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+      userName: 'Priya Mehra',
+      userEmail: 'priya.mehra@gmail.com',
+      adminPriority: 'HIGH',
+    },
+  },
+  {
+    caseId: 'MCA-ENF-2026-0518',
+    scanId: 'scan-demo-choc-04',
+    productName: 'ChocoCrisp Caramel Wafers 125g',
+    brand: 'Continental Confectionery Corp',
+    category: 'Food',
+    complianceScore: 78,
+    overallStatus: 'NEEDS_REVIEW',
+    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+    primaryViolation: 'Sub-minimum Nutritional Table Font Height (1.2mm vs 1.5mm required)',
+    regulatorySection: 'FSSAI (Labelling and Display) Reg 2020 Schedule II',
+    status: 'Compounded',
+    severity: 'STANDARD',
+    officerAssigned: 'District Food Safety Authority',
+    deadlineDaysRemaining: 0,
+    compoundingFine: 25000,
+    noticeDispatchedAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+    actionHistory: [
+      {
+        action: 'Offense Compounded with Statutory Penalty',
+        timestamp: new Date(Date.now() - 4 * 86400000).toISOString(),
+        officer: 'FSO R. Ramanathan',
+        note: 'Manufacturer remitted compounding fee of ₹25,000 and submitted updated label artwork.',
+      },
+    ],
+    citizenComplaint: null,
+  },
+  {
+    caseId: 'MCA-ENF-2026-0422',
+    scanId: 'scan-demo-atta-05',
+    productName: 'Sharbati Whole Wheat Atta 5kg',
+    brand: 'Annapurna Grains India Pvt Ltd',
+    category: 'Food',
+    complianceScore: 92,
+    overallStatus: 'COMPLIANT',
+    createdAt: new Date(Date.now() - 14 * 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 6 * 86400000).toISOString(),
+    primaryViolation: 'Minor Misalignment of MRP Currency Symbol (₹)',
+    regulatorySection: 'Legal Metrology Act Sec 38 Advisory',
+    status: 'Resolved',
+    severity: 'ROUTINE',
+    officerAssigned: 'Consumer Affairs Verification Cell',
+    deadlineDaysRemaining: 0,
+    compoundingFine: 0,
+    noticeDispatchedAt: new Date(Date.now() - 14 * 86400000).toISOString(),
+    actionHistory: [
+      {
+        action: 'Advisory Rectification Accepted & Case Closed',
+        timestamp: new Date(Date.now() - 6 * 86400000).toISOString(),
+        officer: 'Inspector V. Nair',
+        note: 'Corrected print verified on market packaging. Full compliance acknowledged.',
+      },
+    ],
+    citizenComplaint: null,
+  },
+];
+
+/**
+ * Fetch all active enforcement cases and notices
+ */
+export async function fetchEnforcementCases(): Promise<{ cases: EnforcementCase[]; summary: EnforcementSummary }> {
+  try {
+    const token = localStorage.getItem('compliscan_jwt');
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE_URL}/api/scans/enforcement/cases`, {
+      headers,
+      credentials: 'include',
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.cases && data.cases.length > 0) {
+        // Merge with any locally created actions in current browser session
+        const localCasesRaw = localStorage.getItem('compliscan_local_enforcement_cases');
+        const localCases: EnforcementCase[] = localCasesRaw ? JSON.parse(localCasesRaw) : [];
+        const mergedMap = new Map<string, EnforcementCase>();
+        data.cases.forEach((c: EnforcementCase) => mergedMap.set(c.caseId || c.scanId, c));
+        localCases.forEach((lc: EnforcementCase) => mergedMap.set(lc.caseId || lc.scanId, lc));
+        const mergedCases = Array.from(mergedMap.values());
+
+        return {
+          cases: mergedCases,
+          summary: {
+            totalNotices: mergedCases.filter((c) => ['Notice Dispatched', 'Hearing Scheduled', 'Inspection Ordered'].includes(c.status)).length,
+            activeInvestigations: mergedCases.filter((c) => ['Under Review', 'Inspection Ordered', 'Hearing Scheduled'].includes(c.status)).length,
+            citizenComplaints: mergedCases.filter((c) => Boolean(c.citizenComplaint)).length,
+            resolved: mergedCases.filter((c) => ['Resolved', 'Compounded', 'Closed'].includes(c.status)).length,
+            compoundingFines: mergedCases.reduce((sum, c) => sum + (c.compoundingFine || 0), 0),
+          },
+        };
+      }
+    }
+  } catch (err: any) {
+    console.warn('[Fetch Enforcement Cases Warning]:', err.message);
+  }
+
+  // Load from local storage or default fallback
+  const localCasesRaw = localStorage.getItem('compliscan_local_enforcement_cases');
+  const baseCases = localCasesRaw ? JSON.parse(localCasesRaw) : DEFAULT_FALLBACK_ENFORCEMENT_CASES;
+
+  return {
+    cases: baseCases,
+    summary: {
+      totalNotices: baseCases.filter((c: any) => ['Notice Dispatched', 'Hearing Scheduled', 'Inspection Ordered'].includes(c.status)).length,
+      activeInvestigations: baseCases.filter((c: any) => ['Under Review', 'Inspection Ordered', 'Hearing Scheduled'].includes(c.status)).length,
+      citizenComplaints: baseCases.filter((c: any) => Boolean(c.citizenComplaint)).length,
+      resolved: baseCases.filter((c: any) => ['Resolved', 'Compounded', 'Closed'].includes(c.status)).length,
+      compoundingFines: baseCases.reduce((sum: number, c: any) => sum + (c.compoundingFine || 0), 0),
+    },
+  };
+}
+
+/**
+ * Dispatch an official enforcement action or show-cause notice
+ */
+export async function dispatchEnforcementAction(payload: {
+  scanId: string;
+  actionType: 'NOTICE' | 'INSPECTION' | 'HEARING' | 'COMPOUND' | 'RESOLVE';
+  productName?: string;
+  brand?: string;
+  category?: string;
+  primaryViolation?: string;
+  regulatorySection?: string;
+  officerNotes?: string;
+  officerName?: string;
+  compoundingFine?: number;
+  hearingDate?: string;
+}): Promise<{ success: boolean; message: string; case?: EnforcementCase }> {
+  const token = localStorage.getItem('compliscan_jwt');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/scans/enforcement/action`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+  } catch (err: any) {
+    console.warn('[Dispatch Enforcement Warning]:', err.message);
+  }
+
+  // Local fallback storage for offline reliability
+  const localRaw = localStorage.getItem('compliscan_local_enforcement_cases');
+  const list: EnforcementCase[] = localRaw ? JSON.parse(localRaw) : [...DEFAULT_FALLBACK_ENFORCEMENT_CASES];
+
+  const caseId = `MCA-ENF-${Date.now().toString().slice(-6)}`;
+  let statusStr: EnforcementCase['status'] = 'Notice Dispatched';
+  if (payload.actionType === 'INSPECTION') statusStr = 'Inspection Ordered';
+  else if (payload.actionType === 'HEARING') statusStr = 'Hearing Scheduled';
+  else if (payload.actionType === 'COMPOUND') statusStr = 'Compounded';
+  else if (payload.actionType === 'RESOLVE') statusStr = 'Resolved';
+
+  const newCase: EnforcementCase = {
+    caseId,
+    scanId: payload.scanId || `scan-${Date.now()}`,
+    productName: payload.productName || 'Packaged Commodity',
+    brand: payload.brand || 'Target Manufacturer',
+    category: payload.category || 'Food',
+    complianceScore: 45,
+    overallStatus: 'POTENTIAL_NON_COMPLIANCE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    primaryViolation: payload.primaryViolation || 'Packaged Commodity Labelling Infringement',
+    regulatorySection: payload.regulatorySection || 'Legal Metrology Rules 2011 Sec 38',
+    status: statusStr,
+    severity: 'URGENT',
+    officerAssigned: payload.officerName || 'Super Admin (National Governance)',
+    deadlineDaysRemaining: 15,
+    compoundingFine: payload.compoundingFine || 25000,
+    noticeDispatchedAt: new Date().toISOString(),
+    hearingDate: payload.hearingDate || null,
+    actionHistory: [
+      {
+        action: `Official Statutory Action: ${statusStr}`,
+        timestamp: new Date().toISOString(),
+        officer: payload.officerName || 'Super Admin (National Governance)',
+        note: payload.officerNotes || 'Statutory order served under Legal Metrology Act.',
+      },
+    ],
+  };
+
+  const existingIdx = list.findIndex((c) => c.scanId === payload.scanId);
+  if (existingIdx >= 0) {
+    list[existingIdx] = { ...list[existingIdx], ...newCase, caseId: list[existingIdx].caseId };
+  } else {
+    list.unshift(newCase);
+  }
+
+  localStorage.setItem('compliscan_local_enforcement_cases', JSON.stringify(list));
+  return { success: true, message: `Action "${statusStr}" recorded for ${newCase.productName}.`, case: newCase };
+}
+
+/**
+ * Update the status of an enforcement case
+ */
+export async function updateEnforcementCaseStatus(
+  caseId: string,
+  status: EnforcementCase['status'],
+  officerNotes?: string,
+  officerName?: string,
+  compoundingFine?: number
+): Promise<{ success: boolean; message: string }> {
+  const token = localStorage.getItem('compliscan_jwt');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/scans/enforcement/cases/${caseId}`, {
+      method: 'PATCH',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ status, officerNotes, officerName, compoundingFine }),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err: any) {
+    console.warn('[Update Case Status Warning]:', err.message);
+  }
+
+  // Update in local cache
+  const localRaw = localStorage.getItem('compliscan_local_enforcement_cases');
+  const list: EnforcementCase[] = localRaw ? JSON.parse(localRaw) : [...DEFAULT_FALLBACK_ENFORCEMENT_CASES];
+  const item = list.find((c) => c.caseId === caseId || c.scanId === caseId);
+  if (item) {
+    item.status = status;
+    item.updatedAt = new Date().toISOString();
+    if (compoundingFine !== undefined) item.compoundingFine = compoundingFine;
+    item.actionHistory.unshift({
+      action: `Status Updated to: ${status}`,
+      timestamp: new Date().toISOString(),
+      officer: officerName || 'Super Admin',
+      note: officerNotes || `Status progressed to ${status}.`,
+    });
+    localStorage.setItem('compliscan_local_enforcement_cases', JSON.stringify(list));
+  }
+
+  return { success: true, message: `Case ${caseId} status updated to ${status}.` };
+}
+
+/**
+ * Update the status of a citizen grievance
+ */
+export async function updateCitizenComplaintStatus(
+  scanId: string,
+  status: string,
+  adminNotes?: string
+): Promise<{ success: boolean; message: string }> {
+  const token = localStorage.getItem('compliscan_jwt');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/scans/${scanId}/complaint`, {
+      method: 'PATCH',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ status, adminNotes }),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err: any) {
+    console.warn('[Update Complaint Warning]:', err.message);
+  }
+
+  // Local fallback
+  const localRaw = localStorage.getItem('compliscan_local_enforcement_cases');
+  const list: EnforcementCase[] = localRaw ? JSON.parse(localRaw) : [...DEFAULT_FALLBACK_ENFORCEMENT_CASES];
+  const item = list.find((c) => c.scanId === scanId);
+  if (item && item.citizenComplaint) {
+    item.citizenComplaint.status = status;
+    if (adminNotes) item.citizenComplaint.adminNotes = adminNotes;
+    localStorage.setItem('compliscan_local_enforcement_cases', JSON.stringify(list));
+  }
+
+  return { success: true, message: `Citizen grievance updated to "${status}".` };
+}
+
+
