@@ -17,6 +17,10 @@ import { LiveCompliancePreviewSection } from '@/components/sections/LiveComplian
 import { FakeVsRealComparisonSection } from '@/components/sections/FakeVsRealComparisonSection';
 import { NationalMetricsBar } from '@/components/sections/NationalMetricsBar';
 import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
+import { ProblemStatementDetailedSection } from '@/components/sections/ProblemStatementDetailedSection';
+import { InteractiveFeaturesShowcase } from '@/components/sections/InteractiveFeaturesShowcase';
+import { PitchDeckSlideViewer } from '@/components/sections/PitchDeckSlideViewer';
+import { FutureVisionAndChallengesSection } from '@/components/sections/FutureVisionAndChallengesSection';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
 import { KidScanningStoryAnimation } from '@/components/hero/KidScanningStoryAnimation';
@@ -156,6 +160,20 @@ export default function LandingPage() {
       {/* National Compliance Impact Metrics Bar */}
       <NationalMetricsBar />
 
+      {/* Comprehensive Official Problem Statement Section (ID: SIH26034) */}
+      <ProblemStatementDetailedSection />
+
+      {/* Interactive Feature Catalog (Click any card for live video/simulation demo) */}
+      <div id="features">
+        <InteractiveFeaturesShowcase />
+      </div>
+
+      {/* Embedded Slide-by-Slide Pitch Deck Presentation Carousel */}
+      <PitchDeckSlideViewer />
+
+      {/* Key Industry Challenges & Future Vision Roadmap */}
+      <FutureVisionAndChallengesSection />
+
       {/* How It Works */}
       <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5 relative overflow-hidden">
         {/* Subtle Cyber Tiranga ambient lighting in background */}
@@ -257,45 +275,6 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Key Features */}
-      <section className="py-20 bg-white dark:bg-[#070b12] border-t border-slate-100 dark:border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4 text-slate-900 dark:text-white">Key Features</h2>
-            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Everything you need to ensure product compliance in one powerful platform.</p>
-          </div>
-          
-          <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {[
-              { icon: Scan, title: "AI-Powered OCR", desc: "Advanced text and symbol extraction from label images." },
-              { icon: ShieldCheck, title: "Smart Rule Engine", desc: "Automated compliance checks against latest FSSAI & standard rules." },
-              { icon: FileText, title: "Detailed Reports", desc: "Downloadable PDF reports highlighting compliant and non-compliant areas." },
-              { icon: History, title: "Scan History", desc: "Securely track and review all your previous compliance scans." },
-              { icon: LayoutGrid, title: "Multi-Category Support", desc: "Analyzes food, cosmetics, household items and more." },
-              { icon: Clock, title: "Real-time Analysis", desc: "Get comprehensive results within seconds, not days." }
-            ].map((feature, i) => (
-              <motion.div key={i} variants={itemVariants}>
-                <TiltCard tiltFactor={7} className="h-full">
-                  <Card className="h-full p-6 bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all duration-300 group">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-emerald-100 dark:border-emerald-800/40">
-                      <feature.icon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
-                  </Card>
-                </TiltCard>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
       </section>
 
