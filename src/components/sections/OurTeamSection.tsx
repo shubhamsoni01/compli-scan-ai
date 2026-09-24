@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Users, Crown, Mail, Phone, GraduationCap, Building2, 
-  Award, Sparkles, CheckCircle2, ShieldCheck, UserCheck, ExternalLink
+  Users, Mail, Phone, GraduationCap, Building2, 
+  Award, Sparkles, CheckCircle2, ShieldCheck, UserCheck
 } from 'lucide-react';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { Card } from '@/components/ui/Card';
 
 interface TeamMember {
   name: string;
-  role: 'Team Leader' | 'Team Member';
+  role: string;
   gender: 'F' | 'M';
   stream: string;
   year: string;
@@ -20,36 +20,6 @@ interface TeamMember {
 
 const TEAM_MEMBERS: TeamMember[] = [
   {
-    name: "Nahid Kausar",
-    role: "Team Leader",
-    gender: "F",
-    stream: "CSE",
-    year: "3rd Year",
-    email: "nahidkhushi560@gmail.com",
-    phone: "9263816880",
-    avatarColor: "from-amber-500 to-orange-600"
-  },
-  {
-    name: "Nafisa Khatoon",
-    role: "Team Member",
-    gender: "F",
-    stream: "CSE",
-    year: "3rd Year",
-    email: "nafisakhatoon282@gmail.com",
-    phone: "8092827705",
-    avatarColor: "from-emerald-500 to-teal-600"
-  },
-  {
-    name: "Ananaya",
-    role: "Team Member",
-    gender: "F",
-    stream: "CSE",
-    year: "3rd Year",
-    email: "ananaya20may@gmail.com",
-    phone: "6204336310",
-    avatarColor: "from-cyan-500 to-blue-600"
-  },
-  {
     name: "Subham Kumar",
     role: "Team Member",
     gender: "M",
@@ -57,7 +27,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     year: "3rd Year",
     email: "kumarshubham3187@gmail.com",
     phone: "8102592130",
-    avatarColor: "from-indigo-500 to-violet-600"
+    avatarColor: "from-emerald-500 to-teal-600"
   },
   {
     name: "Yashwant",
@@ -67,7 +37,37 @@ const TEAM_MEMBERS: TeamMember[] = [
     year: "3rd Year",
     email: "ryashwant5051@gmail.com",
     phone: "9693744607",
+    avatarColor: "from-indigo-500 to-violet-600"
+  },
+  {
+    name: "Nahid Kausar",
+    role: "Team Member",
+    gender: "F",
+    stream: "CSE",
+    year: "3rd Year",
+    email: "nahidkhushi560@gmail.com",
+    phone: "9263816880",
+    avatarColor: "from-cyan-500 to-blue-600"
+  },
+  {
+    name: "Nafisa Khatoon",
+    role: "Team Member",
+    gender: "F",
+    stream: "CSE",
+    year: "3rd Year",
+    email: "nafisakhatoon282@gmail.com",
+    phone: "8092827705",
     avatarColor: "from-purple-500 to-pink-600"
+  },
+  {
+    name: "Ananaya",
+    role: "Team Member",
+    gender: "F",
+    stream: "CSE",
+    year: "3rd Year",
+    email: "ananaya20may@gmail.com",
+    phone: "6204336310",
+    avatarColor: "from-amber-500 to-orange-600"
   },
   {
     name: "Manisha Kujur",
@@ -92,13 +92,13 @@ export const OurTeamSection: React.FC = () => {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-emerald-300 shadow-sm backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border border-emerald-500/30 text-emerald-300 shadow-sm backdrop-blur-md">
             <Users className="w-4 h-4 text-emerald-400" />
             <span>SMART INDIA HACKATHON 2026 • OFFICIAL NOMINATED TEAM</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-heading text-white tracking-tight leading-tight">
-            Meet Team <span className="text-transparent bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 bg-clip-text">INNOVISION</span>
+            Meet Team <span className="text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text">INNOVISION</span>
           </h2>
 
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
@@ -125,8 +125,6 @@ export const OurTeamSection: React.FC = () => {
         {/* 6 Team Members Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {TEAM_MEMBERS.map((member, idx) => {
-            const isLeader = member.role === 'Team Leader';
-
             return (
               <motion.div
                 key={member.name}
@@ -137,16 +135,10 @@ export const OurTeamSection: React.FC = () => {
                 className="h-full"
               >
                 <TiltCard tiltFactor={6} className="h-full">
-                  <Card className={`h-full p-6 bg-slate-900/80 rounded-3xl border ${
-                    isLeader 
-                      ? 'border-amber-500/50 shadow-2xl shadow-amber-500/10 ring-1 ring-amber-500/30' 
-                      : 'border-slate-800 hover:border-emerald-500/40'
-                  } transition-all duration-300 flex flex-col justify-between group relative overflow-hidden`}>
+                  <Card className="h-full p-6 bg-slate-900/80 rounded-3xl border border-slate-800 hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-950/30 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
                     
-                    {/* Top Accent Gradient Bar for Leader */}
-                    {isLeader && (
-                      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 animate-pulse" />
-                    )}
+                    {/* Top Accent Gradient Bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-cyan-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     <div className="space-y-4">
                       {/* Top Header: Avatar + Role Badge */}
@@ -167,19 +159,12 @@ export const OurTeamSection: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Role Pill */}
+                        {/* Uniform Team Member Pill */}
                         <div>
-                          {isLeader ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 shadow-sm">
-                              <Crown size={12} className="text-amber-400" />
-                              <span>Team Leader</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">
-                              <UserCheck size={12} className="text-emerald-400" />
-                              <span>Member</span>
-                            </span>
-                          )}
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold bg-slate-800/90 text-slate-300 px-3 py-1 rounded-full border border-slate-700/80 group-hover:border-emerald-500/40 group-hover:text-emerald-300 transition-colors">
+                            <UserCheck size={13} className="text-emerald-400" />
+                            <span>Team Member</span>
+                          </span>
                         </div>
                       </div>
 

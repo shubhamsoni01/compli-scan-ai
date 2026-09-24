@@ -19,6 +19,7 @@ import { NationalMetricsBar } from '@/components/sections/NationalMetricsBar';
 import { AppleBentoShowcase } from '@/components/sections/AppleBentoShowcase';
 import { ProblemStatementDetailedSection } from '@/components/sections/ProblemStatementDetailedSection';
 import { InteractiveFeaturesShowcase } from '@/components/sections/InteractiveFeaturesShowcase';
+import { CompliScanFuturisticVideoShowcase } from '@/components/sections/CompliScanFuturisticVideoShowcase';
 import { PitchDeckSlideViewer } from '@/components/sections/PitchDeckSlideViewer';
 import { FutureVisionAndChallengesSection } from '@/components/sections/FutureVisionAndChallengesSection';
 import { OurTeamSection } from '@/components/sections/OurTeamSection';
@@ -163,6 +164,9 @@ export default function LandingPage() {
 
       {/* Comprehensive Official Problem Statement Section (ID: SIH26034) */}
       <ProblemStatementDetailedSection />
+
+      {/* Dedicated High-Impact Futuristic Video & Live Detection Showcase */}
+      <CompliScanFuturisticVideoShowcase />
 
       {/* Interactive Feature Catalog (Click any card for live video/simulation demo) */}
       <div id="features">
