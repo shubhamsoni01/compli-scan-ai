@@ -38,8 +38,19 @@ export async function requireAuth(req, res, next) {
       });
     }
 
-    // Lookup user in MongoDB Atlas
-    const user = await User.findById(decoded.userId);
+    // Lookup user in MongoDB Atlas or in-memory registry
+    let user = null;
+    try {
+      user = await User.findById(decoded.userId);
+    } catch {
+      user = null;
+    }
+
+    if (!user) {
+      const { findInMemoryUser } = await import('../routes/auth.js');
+      user = findInMemoryUser(decoded.userId) || findInMemoryUser(decoded.email);
+    }
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -48,8 +59,9 @@ export async function requireAuth(req, res, next) {
     }
 
     // Attach authenticated user to request
+    const uid = user._id || user.id || decoded.userId;
     req.user = user;
-    req.userId = user._id.toString();
+    req.userId = String(uid);
 
     next();
   } catch (error) {
@@ -76,10 +88,20 @@ export async function optionalAuth(req, _res, next) {
 
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET);
-      const user = await User.findById(decoded.userId);
+      let user = null;
+      try {
+        user = await User.findById(decoded.userId);
+      } catch {
+        user = null;
+      }
+      if (!user) {
+        const { findInMemoryUser } = await import('../routes/auth.js');
+        user = findInMemoryUser(decoded.userId) || findInMemoryUser(decoded.email);
+      }
       if (user) {
+        const uid = user._id || user.id || decoded.userId;
         req.user = user;
-        req.userId = user._id.toString();
+        req.userId = String(uid);
       }
     }
   } catch {

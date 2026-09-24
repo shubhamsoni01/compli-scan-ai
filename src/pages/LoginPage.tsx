@@ -47,6 +47,23 @@ export default function LoginPage() {
     }
   };
 
+  const handleQuickLogin = (demoEmail: string, demoPass: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setIsLoading(true);
+    setError(null);
+    login(demoEmail, demoPass)
+      .then(() => {
+        navigate(redirectTarget);
+      })
+      .catch((err: any) => {
+        setError(err.message || 'Invalid email or password.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
   const handleGoogleAuth = () => {
     // Direct browser redirect to real Google OAuth endpoint
     window.location.href = '/api/auth/google';
@@ -250,8 +267,46 @@ export default function LoginPage() {
                   </Button>
                 </form>
 
+                {/* Quick Demo Login Credentials Panel */}
+                <div className="mt-5 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      ⚡ Quick 1-Click Demo Login:
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold px-1.5 py-0.5 rounded">
+                      Instant Access
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('sih@gmail.com', '822115')}
+                      className="px-2 py-1.5 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80 rounded-lg transition text-center cursor-pointer"
+                    >
+                      👑 Super Admin
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('inspector@compliscan.ai', 'inspector123')}
+                      className="px-2 py-1.5 text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 rounded-lg transition text-center cursor-pointer"
+                    >
+                      🛡️ Officer
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('demo@compliscan.ai', 'demo123')}
+                      className="px-2 py-1.5 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-lg transition text-center cursor-pointer"
+                    >
+                      👤 Citizen
+                    </button>
+                  </div>
+                </div>
+
                 {/* Create Account Link */}
-                <div className="mt-6 text-center text-xs text-slate-600 dark:text-slate-400">
+                <div className="mt-5 text-center text-xs text-slate-600 dark:text-slate-400">
                   <span>Don't have an account? </span>
                   <Link
                     to={location.search ? `/auth/register${location.search}` : '/auth/register'}
@@ -262,7 +317,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Privacy Subtext */}
-                <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center leading-relaxed">
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center leading-relaxed">
                   Your scan history stays securely connected to your account.
                 </div>
               </Card>
