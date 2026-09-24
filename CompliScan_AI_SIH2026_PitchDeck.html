@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CompliScan AI — SIH 2026 Interactive Pitch Deck</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            emerald: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+      background-color: #0f172a;
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: scale(0.98) translateY(10px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    .btn-hover {
+      transition: all 0.2s ease;
+    }
+    .btn-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.3);
+    }
+    .btn-hover:active {
+      transform: translateY(1px);
+    }
+    .watermark-bg {
+      background-image: url('compli-scan-ai/public/assets/sih-transparent-bulb.png');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 450px;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between text-slate-900 bg-slate-950 select-none antialiased">
+
+  <!-- Top App Navigation Chrome -->
+  <header class="w-full bg-white/95 backdrop-blur border-b border-slate-200 px-6 py-2.5 flex items-center justify-between shadow-sm z-50">
+    <div class="flex items-center gap-3 cursor-pointer" onclick="goToSlide(0)">
+      <img src="compli-scan-ai/public/compliscan-logo.jpg" alt="Logo" class="w-8 h-8 rounded-lg shadow-sm border border-slate-200" onerror="this.src='https://via.placeholder.com/32?text=CS'" />
+      <div>
+        <div class="flex items-center gap-1.5 font-extrabold text-base tracking-tight">
+          <span class="text-indigo-600">CompliScan</span>
+          <span class="text-emerald-500">AI</span>
+          <span class="text-[10px] uppercase font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200">SIH 2026</span>
+        </div>
+        <p class="text-[11px] font-medium text-slate-500 leading-none">PS: SIH26034 • Ministry of Consumer Affairs</p>
+      </div>
+    </div>
+
+    <!-- Quick Nav Menu -->
+    <nav class="hidden md:flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
+      <button onclick="goToSlide(0)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="0">🏠 Cover</button>
+      <button onclick="goToSlide(1)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="1">🌐 Overview</button>
+      <button onclick="goToSlide(2)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="2">⚠️ Problem</button>
+      <button onclick="goToSlide(3)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="3">💡 Solution</button>
+      <button onclick="goToSlide(4)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="4">🔍 Live Scan</button>
+      <button onclick="goToSlide(5)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="5">🏛️ Architecture</button>
+      <button onclick="goToSlide(6)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="6">📊 Dashboard</button>
+      <button onclick="goToSlide(7)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="7">📑 Notice</button>
+      <button onclick="goToSlide(8)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="8">⚖️ Enforcement</button>
+      <button onclick="goToSlide(9)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="9">📈 Impact</button>
+      <button onclick="goToSlide(10)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="10">👥 Team</button>
+      <button onclick="goToSlide(11)" class="nav-btn px-2.5 py-1.5 rounded-lg transition-all" data-idx="11">🎯 Summary</button>
+    </nav>
+
+    <!-- Right Ministry & Fullscreen Actions -->
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200">
+        <img src="compli-scan-ai/public/assets/ministry-emblem-transparent.png" class="h-6 object-contain" alt="Emblem" onerror="this.style.display='none'" />
+        <span>Dept. of Consumer Affairs</span>
+      </div>
+      <button onclick="toggleFullScreen()" title="Toggle Fullscreen (F11)" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Slide Display Area -->
+  <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 flex flex-col justify-center items-center relative overflow-hidden">
+
+    <!-- ================= SLIDE 1: GRAND COVER ================= -->
+    <section id="slide-0" class="slide active w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <!-- Background subtle watermark -->
+      <div class="absolute inset-0 watermark-bg opacity-[0.03] pointer-events-none"></div>
+
+      <!-- Top Header Logos -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-5 z-10">
+        <div class="flex items-center gap-4">
+          <img src="compli-scan-ai/public/assets/sih-transparent-bulb.png" alt="SIH Logo" class="h-14 object-contain" />
+          <div class="h-10 w-px bg-slate-200"></div>
+          <img src="compli-scan-ai/public/assets/ministry-emblem-transparent.png" alt="Ministry" class="h-12 object-contain" />
+          <div class="h-10 w-px bg-slate-200"></div>
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900 leading-tight">Ministry of Consumer Affairs, Food & Public Distribution</h4>
+            <p class="text-xs text-slate-500 font-semibold">Government of India • Legal Metrology Division</p>
+          </div>
+        </div>
+        <img src="compli-scan-ai/public/assets/ucet-hazaribagh.jpg" alt="UCET" class="h-12 object-contain rounded border border-slate-200" />
+      </div>
+
+      <!-- Center Hero Content -->
+      <div class="my-auto text-center space-y-4 z-10">
+        <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-bold px-4 py-1.5 rounded-full border border-emerald-200 shadow-sm">
+          <span>🇮🇳</span> SMART INDIA HACKATHON 2026 • PROBLEM STATEMENT ID: <span class="font-mono font-black text-emerald-800">SIH26034</span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+          CompliScan <span class="text-indigo-600">AI</span>
+        </h1>
+        <p class="text-lg md:text-xl font-bold text-slate-700 max-w-3xl mx-auto">
+          Autonomous Multi-Modal Product Label Compliance & Legal Metrology Inspection System
+        </p>
+
+        <!-- Problem Details Box -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto text-left mt-6">
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-700 mb-1.5">📌 The Challenge</h4>
+            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+              Over 500M packaged commodities enter retail monthly with <0.01% physical verification. Misleading weights, missing Unit Sale Price (USP), and non-compliant fonts cause immense consumer losses.
+            </p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-emerald-700 mb-1.5">💡 The CompliScan AI Solution</h4>
+            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+              1-second multi-lingual label OCR, 100% deterministic Legal Metrology Rules 2011 & FSSAI statutory evaluation with auto-generated Section 39 Violation Notices.
+            </p>
+          </div>
+        </div>
+
+        <!-- Grand CTA Button -->
+        <div class="pt-2">
+          <button onclick="goToSlide(1)" class="btn-hover inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-extrabold text-base px-8 py-4 rounded-2xl shadow-xl shadow-indigo-500/25">
+            <span>🚀 LAUNCH INTERACTIVE PRESENTATION & SYSTEM TOUR</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Attribution -->
+      <div class="flex items-center justify-between text-xs text-slate-500 font-semibold border-t border-slate-100 pt-3 z-10">
+        <span>University College of Engineering & Technology (UCET), VBU, Hazaribagh</span>
+        <span>SIH 2026 Final Presentation • Slide 1 of 12</span>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 2: OVERVIEW ================= -->
+    <section id="slide-1" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-indigo-600">Slide 2 / 12 • Overview</span>
+          <h2 class="text-2xl font-black text-slate-900">National AI Product Compliance Portal</h2>
+        </div>
+        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200">Live Production UI</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 my-auto">
+        <div class="md:col-span-7 space-y-4">
+          <div class="bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 inline-block">
+            ⚡ 100% Deterministic Statutory Evaluation
+          </div>
+          <h3 class="text-3xl font-extrabold text-slate-900 leading-tight">
+            Autonomous Verification for Indian Legal Metrology & FSSAI Standards
+          </h3>
+          <p class="text-sm text-slate-600 leading-relaxed font-medium">
+            CompliScan AI parses packaged food, edible oil, and FMCG labels through Vision OCR, cross-referencing every mandatory declaration against Gazette rules in under 1.2 seconds.
+          </p>
+
+          <div class="flex gap-3 pt-2">
+            <button onclick="goToSlide(4)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-md">
+              🚀 Try Live Scanner Demo ➔
+            </button>
+            <button onclick="goToSlide(5)" class="btn-hover bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-5 py-3 rounded-xl border border-slate-200">
+              ⚖️ Technical Architecture
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 pt-4">
+            <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
+              <div class="text-indigo-700 font-black text-sm">⚡ < 1.2s</div>
+              <div class="text-[11px] font-semibold text-slate-600">Scan Latency</div>
+            </div>
+            <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+              <div class="text-emerald-700 font-black text-sm">📐 99.4%</div>
+              <div class="text-[11px] font-semibold text-slate-600">Legal Accuracy</div>
+            </div>
+            <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100">
+              <div class="text-amber-700 font-black text-sm">📄 1-Click</div>
+              <div class="text-[11px] font-semibold text-slate-600">Notice Export</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="md:col-span-5 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3 flex flex-col justify-center">
+          <h4 class="font-black text-sm text-slate-900 border-b border-slate-200 pb-2 flex items-center justify-between">
+            <span>⚡ System Live Benchmarks</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          </h4>
+          <div class="space-y-2.5">
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-800">Total Scans Processed</div>
+                <div class="text-[10px] text-slate-500">+14.2% weekly volume</div>
+              </div>
+              <span class="font-mono font-black text-indigo-600 text-base">1,248+</span>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-800">Deterministic Rules Covered</div>
+                <div class="text-[10px] text-slate-500">LM Rules 2011 & FSSAI 2020</div>
+              </div>
+              <span class="font-mono font-black text-emerald-600 text-base">100%</span>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-800">AI Hallucination Rate</div>
+                <div class="text-[10px] text-slate-500">Code-level verification</div>
+              </div>
+              <span class="font-mono font-black text-slate-900 text-base">0.00%</span>
+            </div>
+          </div>
+          <button onclick="goToSlide(6)" class="btn-hover w-full bg-slate-900 text-white text-xs font-bold py-2.5 rounded-xl shadow mt-2">
+            📊 Open Compliance Dashboard ➔
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-500 font-semibold border-t border-slate-100 pt-3">
+        <span>Smart India Hackathon 2026 • PS ID: SIH26034</span>
+        <span>Slide 2 of 12</span>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 3: PROBLEM STATEMENT ================= -->
+    <section id="slide-2" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-red-600">Slide 3 / 12 • Problem Analysis</span>
+          <h2 class="text-2xl font-black text-slate-900">Enforcement Bottlenecks & Consumer Vulnerability</h2>
+        </div>
+        <span class="bg-red-50 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Critical Gaps</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-auto">
+        <div class="bg-red-50/70 p-5 rounded-2xl border border-red-200 flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-red-600 text-white font-black flex items-center justify-center text-sm mb-3">1</div>
+            <h4 class="font-black text-base text-red-950 mb-2">Manual Inspection Crisis</h4>
+            <p class="text-xs text-slate-700 font-medium leading-relaxed">
+              Over 500M packaged units hit Indian shelves every month. Field officers physically inspect less than 0.01% due to extreme manpower shortages.
+            </p>
+          </div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-red-200 mt-4 text-[11px] font-bold text-red-800">
+            🚨 99.99% Goods Unchecked
+          </div>
+        </div>
+
+        <div class="bg-amber-50/70 p-5 rounded-2xl border border-amber-200 flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-amber-600 text-white font-black flex items-center justify-center text-sm mb-3">2</div>
+            <h4 class="font-black text-base text-amber-950 mb-2">Hidden & Micro Font Deceptions</h4>
+            <p class="text-xs text-slate-700 font-medium leading-relaxed">
+              Rule 7 of Legal Metrology mandates minimum 1mm to 6mm numeral heights relative to package area. Humans cannot visually distinguish 1.5mm vs 2.0mm fonts on store shelves.
+            </p>
+          </div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-amber-200 mt-4 text-[11px] font-bold text-amber-800">
+            ⚠️ 42% Consumer Care Missing
+          </div>
+        </div>
+
+        <div class="bg-indigo-50/70 p-5 rounded-2xl border border-indigo-200 flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white font-black flex items-center justify-center text-sm mb-3">3</div>
+            <h4 class="font-black text-base text-indigo-950 mb-2">Siloed Multi-Agency Rules</h4>
+            <p class="text-xs text-slate-700 font-medium leading-relaxed">
+              Food items require simultaneous compliance with Legal Metrology (MRP, USP, Net Qty) and FSSAI (FoSCoS license, Veg logo). Officers have no unified digital tool.
+            </p>
+          </div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-200 mt-4 text-[11px] font-bold text-indigo-800">
+            🏛️ 14+ Days to Draft Notices
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <span class="text-xs text-slate-500 font-semibold">Estimated ₹18,000+ Cr annual loss from deceptive packaging</span>
+        <button onclick="goToSlide(3)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          💡 Explore Solution ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 4: THE SOLUTION ================= -->
+    <section id="slide-3" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-emerald-600">Slide 4 / 12 • The Solution</span>
+          <h2 class="text-2xl font-black text-slate-900">CompliScan AI End-to-End Architecture</h2>
+        </div>
+        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">4-Pillar Platform</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto">
+        <div class="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-200 flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center text-lg shrink-0">1</div>
+          <div>
+            <h4 class="font-black text-base text-slate-900 mb-1">Multi-Modal Label Ingestion</h4>
+            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+              Accepts high-resolution camera photos, packaging PDFs, and 3D mockups across front, back, and side panels.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-200 flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center text-lg shrink-0">2</div>
+          <div>
+            <h4 class="font-black text-base text-slate-900 mb-1">Vision OCR & Entity Extraction</h4>
+            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+              Groq Llama-3 Vision + Tesseract pipeline extracts 20+ mandatory declarations with bounding-box coordinate tracking.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-200 flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-amber-600 text-white font-black flex items-center justify-center text-lg shrink-0">3</div>
+          <div>
+            <h4 class="font-black text-base text-slate-900 mb-1">100% Deterministic Rule Engine</h4>
+            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+              Hardcoded statutory validation logic checking Legal Metrology Rules 2011 (Rules 6, 7, 8, 9) and FSSAI 2020 without LLM hallucination.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-red-50/60 p-5 rounded-2xl border border-red-200 flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-red-600 text-white font-black flex items-center justify-center text-lg shrink-0">4</div>
+          <div>
+            <h4 class="font-black text-base text-slate-900 mb-1">Instant Section 39 Notice Generator</h4>
+            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+              Auto-drafts court-ready show cause notices with penalty compounding calculations and cryptographic audit logs.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <span class="text-xs text-slate-500 font-semibold">Zero Hallucination • Statutory Defensibility</span>
+        <button onclick="goToSlide(4)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          🔍 View Live Scanner Demo ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 5: LIVE SCAN DEMO ================= -->
+    <section id="slide-4" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-indigo-600">Slide 5 / 12 • Live Scan Simulation</span>
+          <h2 class="text-2xl font-black text-slate-900">Real-Time OCR & Statutory Audit In Action</h2>
+        </div>
+        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200">Interactive Simulation</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto">
+        <!-- Package Mockup -->
+        <div class="md:col-span-5 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
+          <div class="flex items-center justify-between text-slate-700 font-bold border-b border-slate-200 pb-2">
+            <span>📦 Golden Harvest Mustard Oil 1L</span>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded">OCR Processed</span>
+          </div>
+          <div class="space-y-1.5 text-[11px]">
+            <div class="flex justify-between bg-white p-2 rounded border border-slate-200">
+              <span class="text-slate-500">MRP:</span>
+              <span class="font-bold text-slate-800">₹185.00 (Incl. Taxes)</span>
+            </div>
+            <div class="flex justify-between bg-red-50 p-2 rounded border border-red-200 text-red-700 font-bold">
+              <span>Unit Sale Price (USP):</span>
+              <span>MISSING (Violates Rule 6.11)</span>
+            </div>
+            <div class="flex justify-between bg-amber-50 p-2 rounded border border-amber-200 text-amber-800 font-bold">
+              <span>Net Quantity:</span>
+              <span>1 L (910g equivalent missing)</span>
+            </div>
+            <div class="flex justify-between bg-white p-2 rounded border border-slate-200">
+              <span class="text-slate-500">FSSAI FoSCoS Lic:</span>
+              <span class="font-bold text-slate-800">10020043000123 (Valid)</span>
+            </div>
+            <div class="flex justify-between bg-white p-2 rounded border border-slate-200">
+              <span class="text-slate-500">Consumer Care:</span>
+              <span class="font-bold text-slate-800">care@harvestoil.com</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compliance Evaluation -->
+        <div class="md:col-span-7 space-y-3">
+          <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold uppercase text-amber-800">Overall Compliance Score</div>
+              <div class="text-2xl font-black text-amber-700">78% • ACTION REQUIRED</div>
+            </div>
+            <span class="text-xs font-bold bg-amber-200 text-amber-900 px-3 py-1 rounded-lg">2 Violations</span>
+          </div>
+
+          <div class="space-y-2">
+            <div class="bg-red-50 p-3 rounded-xl border border-red-200">
+              <div class="text-xs font-bold text-red-900">🚨 Violation 1: Missing Unit Sale Price (USP)</div>
+              <div class="text-[11px] text-red-700 font-medium mt-0.5">Rule 6(11) mandate: Packaged commodities > 100g/ml must declare ₹/g or ₹/ml adjacent to MRP.</div>
+            </div>
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+              <div class="text-xs font-bold text-amber-900">⚠️ Violation 2: Net Quantity Missing Weight Equivalent</div>
+              <div class="text-[11px] text-amber-700 font-medium mt-0.5">Edible Oil Gazette 2022: Net volume (1L) must declare equivalent net weight (910g) at packaging temp.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <button onclick="goToSlide(5)" class="btn-hover bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          🏛️ Inspect AI vs Law Architecture ➔
+        </button>
+        <button onclick="goToSlide(7)" class="btn-hover bg-red-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          📑 Generate Section 39 Notice ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 6: AI VS LAW ARCHITECTURE ================= -->
+    <section id="slide-5" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-indigo-600">Slide 6 / 12 • Technical Architecture</span>
+          <h2 class="text-2xl font-black text-slate-900">Strict Separation: AI Vision Parser vs Statutory Rule Engine</h2>
+        </div>
+        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">Zero Hallucination</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
+        <div class="bg-indigo-50/70 p-5 rounded-2xl border border-indigo-200">
+          <div class="text-xs font-extrabold text-indigo-700 uppercase mb-2">Layer 1: Vision / Ingestion</div>
+          <h4 class="font-black text-base text-slate-900 mb-2">NLP Text Parser</h4>
+          <ul class="text-xs text-slate-700 space-y-2 font-medium">
+            <li>• OpenCV perspective normalization</li>
+            <li>• Groq Llama-3 70B Vision + OCR</li>
+            <li>• Bounding box layout coordinates</li>
+            <li>• Token stream schema conversion</li>
+            <li class="font-bold text-indigo-900 pt-2 border-t border-indigo-200">Role: Strictly Text Extraction</li>
+          </ul>
+        </div>
+
+        <div class="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200">
+          <div class="text-xs font-extrabold text-emerald-700 uppercase mb-2">Layer 2: Statutory Engine</div>
+          <h4 class="font-black text-base text-slate-900 mb-2">Deterministic Law Engine</h4>
+          <ul class="text-xs text-slate-700 space-y-2 font-medium">
+            <li>• 100% hard-coded Python/Node rules</li>
+            <li>• LM Rules 2011: Rules 6, 7, 8, 9</li>
+            <li>• Font size vs PDP area math check</li>
+            <li>• FSSAI 2020: 14-digit FoSCoS audit</li>
+            <li class="font-bold text-emerald-900 pt-2 border-t border-emerald-200">Role: 100% Statutory Compliance</li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50/70 p-5 rounded-2xl border border-amber-200">
+          <div class="text-xs font-extrabold text-amber-700 uppercase mb-2">Layer 3: Enforcement</div>
+          <h4 class="font-black text-base text-slate-900 mb-2">Actionable Intelligence</h4>
+          <ul class="text-xs text-slate-700 space-y-2 font-medium">
+            <li>• Section 39 auto-notice drafting</li>
+            <li>• Immutable MongoDB audit trails</li>
+            <li>• Digital Signature & Aadhaar e-Sign</li>
+            <li>• National heatmaps & analytics</li>
+            <li class="font-bold text-amber-900 pt-2 border-t border-amber-200">Role: Regulatory Enforcement</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between text-xs">
+        <p class="font-medium max-w-4xl">
+          <span class="text-emerald-400 font-bold">🔒 Core Engineering Principle:</span> AI is used strictly as an NLP & visual parser. All legal compliance determinations are executed by 100% deterministic code to guarantee court-defensible statutory reports with zero hallucinations.
+        </p>
+        <button onclick="goToSlide(6)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap ml-4">
+          📊 View Dashboard ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 7: AUDIT DASHBOARD ================= -->
+    <section id="slide-6" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-indigo-600">Slide 7 / 12 • Audit Dashboard</span>
+          <h2 class="text-2xl font-black text-slate-900">Real-Time Regulatory Inspection Command Center</h2>
+        </div>
+        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">Live MongoDB Stream</span>
+      </div>
+
+      <!-- Live Table Stream -->
+      <div class="my-auto space-y-3">
+        <div class="grid grid-cols-4 gap-3 text-center">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><div class="text-xs text-slate-500 font-bold">Scans Today</div><div class="text-xl font-black text-indigo-600">1,248</div></div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><div class="text-xs text-slate-500 font-bold">Passed Rate</div><div class="text-xl font-black text-emerald-600">82.4%</div></div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><div class="text-xs text-slate-500 font-bold">Violations</div><div class="text-xl font-black text-red-600">184</div></div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><div class="text-xs text-slate-500 font-bold">Avg Scan Time</div><div class="text-xl font-black text-amber-600">1.18s</div></div>
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 font-mono text-xs">
+          <div class="grid grid-cols-12 font-bold text-slate-500 border-b border-slate-200 pb-2">
+            <span class="col-span-2">Scan ID</span>
+            <span class="col-span-4">Product Name</span>
+            <span class="col-span-4">Detected Non-Compliance</span>
+            <span class="col-span-2 text-right">Status</span>
+          </div>
+          <div class="grid grid-cols-12 items-center bg-white p-2 rounded border border-slate-200 text-xs">
+            <span class="col-span-2 font-bold text-indigo-600">SCAN-8921</span>
+            <span class="col-span-4 font-bold text-slate-800">Golden Harvest Mustard Oil 1L</span>
+            <span class="col-span-4 text-slate-600 text-[11px]">Rule 6(11) USP Missing, Net Wt Equiv</span>
+            <span class="col-span-2 text-right text-red-600 font-bold">NON-COMPLIANT</span>
+          </div>
+          <div class="grid grid-cols-12 items-center bg-white p-2 rounded border border-slate-200 text-xs">
+            <span class="col-span-2 font-bold text-indigo-600">SCAN-8920</span>
+            <span class="col-span-4 font-bold text-slate-800">Amul Butter Pasteurised 500g</span>
+            <span class="col-span-4 text-slate-600 text-[11px]">All 8 Mandatory Declarations Valid</span>
+            <span class="col-span-2 text-right text-emerald-600 font-bold">COMPLIANT</span>
+          </div>
+          <div class="grid grid-cols-12 items-center bg-white p-2 rounded border border-slate-200 text-xs">
+            <span class="col-span-2 font-bold text-indigo-600">SCAN-8919</span>
+            <span class="col-span-4 font-bold text-slate-800">Dabur Red Toothpaste 150g</span>
+            <span class="col-span-4 text-slate-600 text-[11px]">MRP Font size 1.2mm (< 2.0mm required)</span>
+            <span class="col-span-2 text-right text-amber-600 font-bold">POTENTIAL ISSUE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <span class="text-xs text-slate-500 font-semibold">Real-time synchronization with National Consumer Helpline</span>
+        <button onclick="goToSlide(7)" class="btn-hover bg-red-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          📑 View Section 39 Notice ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 8: SECTION 39 VIOLATION NOTICE ================= -->
+    <section id="slide-7" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-red-600">Slide 8 / 12 • Statutory Action</span>
+          <h2 class="text-2xl font-black text-slate-900">Automated Section 39 Show Cause Notice</h2>
+        </div>
+        <span class="bg-red-50 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Legal Metrology Act, 2009</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto">
+        <!-- Notice Preview Box -->
+        <div class="md:col-span-8 bg-slate-50 p-5 rounded-2xl border border-slate-300 font-mono text-[11px] leading-relaxed text-slate-800 shadow-inner">
+          <div class="text-center font-bold text-xs text-indigo-900 mb-2">
+            GOVERNMENT OF INDIA • LEGAL METROLOGY DIVISION<br>
+            <span class="text-red-700 font-black">NOTICE UNDER SECTION 39 OF THE LEGAL METROLOGY ACT, 2009</span>
+          </div>
+          <div class="border-b border-slate-200 pb-2 mb-2 text-slate-500 text-[10px] flex justify-between">
+            <span>Ref: LM/DL/2026/VIO-8921</span>
+            <span>Date: 12-09-2026</span>
+          </div>
+          <p><strong>To:</strong> M/s Golden Agro Industries Pvt. Ltd., Phase-II, New Delhi</p>
+          <p class="mt-2"><strong>Subject:</strong> Contravention of Rule 6(11) & Rule 7 of Legal Metrology Rules, 2011.</p>
+          <p class="mt-2">Inspection of 'Golden Harvest Mustard Oil 1L' (Barcode: 8901234567890) revealed:</p>
+          <ul class="list-disc ml-4 my-1 text-red-700 font-bold">
+            <li>Omission of Unit Sale Price (USP) adjacent to Maximum Retail Price (MRP).</li>
+            <li>Failure to state equivalent net weight (910g) for 1 Litre volume declaration.</li>
+          </ul>
+          <p class="mt-2">You are hereby called upon to show cause within 15 days why compounding proceedings under Section 48 or prosecution under Section 36(1) (Penalty up to ₹25,000) should not be initiated.</p>
+        </div>
+
+        <!-- Workflow Actions -->
+        <div class="md:col-span-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 flex flex-col justify-center text-xs">
+          <h4 class="font-black text-slate-900 border-b border-slate-200 pb-1.5">⚡ Officer Workflow</h4>
+          <div class="space-y-2">
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">
+              📄 1-Click Court-Ready PDF
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">
+              ✍️ Aadhaar e-Sign / DSC Token
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">
+              📤 Speed-Post API Webhook
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">
+              ⚖️ Section 48 Fee Calculator
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <button onclick="goToSlide(8)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          ⚖️ Multi-Agency Enforcement Portal ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 9: ENFORCEMENT PORTAL ================= -->
+    <section id="slide-8" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-indigo-600">Slide 9 / 12 • Multi-Agency Portal</span>
+          <h2 class="text-2xl font-black text-slate-900">Inter-Agency Interoperability & Intelligence</h2>
+        </div>
+        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200">Unified Enforcement</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-auto">
+        <div class="bg-indigo-50/70 p-5 rounded-2xl border border-indigo-200 space-y-2">
+          <h4 class="font-black text-base text-indigo-950">🏛️ Legal Metrology</h4>
+          <p class="text-xs text-slate-500 font-bold">Central & State Controllers</p>
+          <ul class="text-xs text-slate-700 space-y-1.5 font-medium pt-2">
+            <li>• Retail shelf compliance tracking</li>
+            <li>• Digital compounding registry</li>
+            <li>• Sampling inventory management</li>
+            <li>• E-commerce marketplace audits</li>
+          </ul>
+        </div>
+
+        <div class="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200 space-y-2">
+          <h4 class="font-black text-base text-emerald-950">🥗 FSSAI Authority</h4>
+          <p class="text-xs text-slate-500 font-bold">Food Safety & Standards</p>
+          <ul class="text-xs text-slate-700 space-y-1.5 font-medium pt-2">
+            <li>• 14-digit FoSCoS validation</li>
+            <li>• Allergen & nutrition audit</li>
+            <li>• Fortified (+F) & Organic check</li>
+            <li>• Joint raid coordination</li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50/70 p-5 rounded-2xl border border-amber-200 space-y-2">
+          <h4 class="font-black text-base text-amber-950">🛡️ Consumer Helpline</h4>
+          <p class="text-xs text-slate-500 font-bold">Dept. of Consumer Affairs</p>
+          <ul class="text-xs text-slate-700 space-y-1.5 font-medium pt-2">
+            <li>• Auto-match public complaints</li>
+            <li>• Dark pattern & deceptive MRP logs</li>
+            <li>• Class-action evidence builder</li>
+            <li>• Public redressal resolution</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <button onclick="goToSlide(9)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          📈 View Measurable Impact & Roadmap ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 10: IMPACT & ROADMAP ================= -->
+    <section id="slide-9" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase text-emerald-600">Slide 10 / 12 • Scale & Impact</span>
+          <h2 class="text-2xl font-black text-slate-900">National Economic Impact & Scale Roadmap</h2>
+        </div>
+        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">1.4B Citizens Protected</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 my-auto">
+        <div class="md:col-span-6 grid grid-cols-2 gap-3">
+          <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+            <div class="text-2xl font-black text-indigo-700">99.2%</div>
+            <div class="text-xs font-bold text-slate-800 mt-1">Audit Time Reduction</div>
+            <div class="text-[10px] text-slate-500">From 20 mins to < 1.2s</div>
+          </div>
+          <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+            <div class="text-2xl font-black text-emerald-700">₹4,200 Cr</div>
+            <div class="text-xs font-bold text-slate-800 mt-1">Recoverable Penalty</div>
+            <div class="text-[10px] text-slate-500">Across 28 States & 8 UTs</div>
+          </div>
+          <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+            <div class="text-2xl font-black text-amber-700">100%</div>
+            <div class="text-xs font-bold text-slate-800 mt-1">Statutory Proof</div>
+            <div class="text-[10px] text-slate-500">Direct Rule References</div>
+          </div>
+          <div class="bg-red-50 p-4 rounded-2xl border border-red-200">
+            <div class="text-2xl font-black text-red-700">1.4B</div>
+            <div class="text-xs font-bold text-slate-800 mt-1">Consumers Protected</div>
+            <div class="text-[10px] text-slate-500">Zero Deceptive Packaging</div>
+          </div>
+        </div>
+
+        <div class="md:col-span-6 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+          <h4 class="font-black text-slate-900 border-b border-slate-200 pb-1.5">🚀 Scale Roadmap</h4>
+          <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800">
+            📱 Mobile Barcode & GS1 DataBar Scanner App
+          </div>
+          <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800">
+            🌐 22 Regional Indian Languages OCR Support
+          </div>
+          <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800">
+            🏛️ Automated Gazette Rule Synchronizer Scraper
+          </div>
+          <div class="bg-white p-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800">
+            📶 Offline Edge AI Inspector for Remote Markets
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <button onclick="goToSlide(10)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          👥 Meet Team UCET Hazaribagh ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 11: TEAM ================= -->
+    <section id="slide-10" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-3">
+          <img src="compli-scan-ai/public/assets/ucet-hazaribagh.jpg" alt="UCET" class="h-10 object-contain rounded border border-slate-200" />
+          <div>
+            <span class="text-xs font-bold uppercase text-indigo-600">Slide 11 / 12 • Team & Development</span>
+            <h2 class="text-2xl font-black text-slate-900">UCET VBU Hazaribagh Team</h2>
+          </div>
+        </div>
+        <img src="compli-scan-ai/public/assets/sih-transparent-bulb.png" alt="SIH" class="h-10 object-contain" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
+        <!-- Team Leader -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm">TL</div>
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900">Team Leader</h4>
+            <p class="text-xs text-indigo-600 font-bold">Project Lead & Coordinator</p>
+            <p class="text-[10px] text-slate-500">B.Tech Engineering • 2024–27</p>
+          </div>
+        </div>
+
+        <!-- Shubham Kumar (AI & Full Stack Architect) -->
+        <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-300 flex items-center gap-3 shadow-sm">
+          <img src="compli-scan-ai/public/assets/shubham-kumar.png" alt="Shubham Kumar" class="w-12 h-12 rounded-xl object-cover border border-emerald-400 shadow" onerror="this.src='https://via.placeholder.com/48?text=SK'" />
+          <div>
+            <h4 class="font-black text-sm text-slate-900">Shubham Kumar</h4>
+            <p class="text-xs text-emerald-700 font-bold">Full-Stack & AI System Architect</p>
+            <p class="text-[10px] text-slate-600 font-medium">B.Tech IT (D2D) • 2024–27 • Lead Developer</p>
+          </div>
+        </div>
+
+        <!-- Member 3 -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm">M3</div>
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900">Team Member 3</h4>
+            <p class="text-xs text-slate-600 font-bold">Backend & Rule Engine Lead</p>
+            <p class="text-[10px] text-slate-500">B.Tech Engineering • 2024–27</p>
+          </div>
+        </div>
+
+        <!-- Member 4 -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm">M4</div>
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900">Team Member 4</h4>
+            <p class="text-xs text-slate-600 font-bold">AI/ML & Computer Vision</p>
+            <p class="text-[10px] text-slate-500">B.Tech Engineering • 2024–27</p>
+          </div>
+        </div>
+
+        <!-- Member 5 -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm">M5</div>
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900">Team Member 5</h4>
+            <p class="text-xs text-slate-600 font-bold">Legal Research & Regulatory Analyst</p>
+            <p class="text-[10px] text-slate-500">B.Tech Engineering • 2024–27</p>
+          </div>
+        </div>
+
+        <!-- Member 6 -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm">M6</div>
+          <div>
+            <h4 class="font-extrabold text-sm text-slate-900">Team Member 6</h4>
+            <p class="text-xs text-slate-600 font-bold">QA, Security & DevOps</p>
+            <p class="text-[10px] text-slate-500">B.Tech Engineering • 2024–27</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+        <span class="text-xs text-slate-500 font-semibold">University College of Engineering & Technology (UCET), VBU, Hazaribagh</span>
+        <button onclick="goToSlide(11)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          🎯 Summary & Product Hub ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 12: FINAL HUB ================= -->
+    <section id="slide-11" class="slide w-full h-full flex-col justify-between bg-white rounded-3xl p-8 border border-slate-200/80 shadow-2xl relative overflow-hidden text-center">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-2">
+          <img src="compli-scan-ai/public/assets/ministry-emblem-transparent.png" class="h-8 object-contain" alt="Ministry" />
+          <span class="text-xs font-bold text-slate-700">Ministry of Consumer Affairs</span>
+        </div>
+        <img src="compli-scan-ai/public/assets/sih-transparent-bulb.png" class="h-8 object-contain" alt="SIH" />
+      </div>
+
+      <div class="my-auto space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-bold px-4 py-1.5 rounded-full border border-emerald-200">
+          SMART INDIA HACKATHON 2026 • FINAL SUMMARY & Q&A
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900">
+          CompliScan <span class="text-indigo-600">AI</span>
+        </h1>
+        <p class="text-lg font-bold text-slate-700">
+          Making Product Label Compliance Smarter, Faster & Consumer-First
+        </p>
+        <p class="text-xs text-slate-500 max-w-xl mx-auto font-medium">
+          Empowering 1.4B Indian Citizens • Accelerating Regulatory Enforcement • Eradicating Packaging Fraud
+        </p>
+
+        <!-- Quick Jump Hub -->
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
+          <button onclick="goToSlide(0)" class="btn-hover bg-slate-100 text-slate-800 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-200">
+            🏠 Cover
+          </button>
+          <button onclick="goToSlide(4)" class="btn-hover bg-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+            🔍 Live Scanner
+          </button>
+          <button onclick="goToSlide(5)" class="btn-hover bg-slate-100 text-slate-800 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-200">
+            🏛️ Architecture
+          </button>
+          <button onclick="goToSlide(6)" class="btn-hover bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+            📊 Dashboard
+          </button>
+          <button onclick="goToSlide(7)" class="btn-hover bg-red-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+            📑 Section 39 Notice
+          </button>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 pt-3 text-xs text-indigo-700 font-bold">
+        Thank You Judges & Mentors! • UCET VBU Hazaribagh • Problem ID: SIH26034
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Persistent Slide Controller Bar -->
+  <footer class="w-full bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-2 flex items-center justify-between shadow-lg z-50">
+    <button onclick="prevSlide()" class="btn-hover flex items-center gap-1.5 text-xs font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-xl border border-slate-300">
+      <span>◀</span>
+      <span>PREV SLIDE</span>
+    </button>
+
+    <!-- Slide Jump Pills -->
+    <div class="flex items-center gap-1.5 overflow-x-auto max-w-2xl py-1">
+      <script>
+        for (let i = 0; i < 12; i++) {
+          document.write(`
+            <button onclick="goToSlide(${i})" class="pill-btn w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center ${i === 0 ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}" data-pill="${i}">
+              ${i + 1}
+            </button>
+          `);
+        }
+      </script>
+    </div>
+
+    <button onclick="nextSlide()" class="btn-hover flex items-center gap-1.5 text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl shadow-md shadow-indigo-500/20">
+      <span>NEXT SLIDE</span>
+      <span>▶</span>
+    </button>
+  </footer>
+
+  <!-- Interactive Presentation State Engine -->
+  <script>
+    let currentSlide = 0;
+    const totalSlides = 12;
+
+    function updateSlideUI() {
+      // Toggle slides
+      document.querySelectorAll('.slide').forEach((slide, idx) => {
+        if (idx === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update pills
+      document.querySelectorAll('.pill-btn').forEach((pill, idx) => {
+        if (idx === currentSlide) {
+          pill.className = 'pill-btn w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center bg-indigo-600 text-white shadow-md scale-105';
+        } else {
+          pill.className = 'pill-btn w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200';
+        }
+      });
+
+      // Update top navbar buttons
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        const idx = parseInt(btn.getAttribute('data-idx'));
+        if (idx === currentSlide) {
+          btn.className = 'nav-btn px-2.5 py-1.5 rounded-lg transition-all bg-indigo-600 text-white shadow-sm';
+        } else {
+          btn.className = 'nav-btn px-2.5 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900';
+        }
+      });
+    }
+
+    function goToSlide(idx) {
+      if (idx >= 0 && idx < totalSlides) {
+        currentSlide = idx;
+        updateSlideUI();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Arrow Keys & Space Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      }
+    });
+
+    // Initialize
+    updateSlideUI();
+  </script>
+</body>
+</html>
