@@ -124,7 +124,7 @@ export const PitchDeckSlideViewer: React.FC = () => {
                     Team Name :
                   </span>
                   <p className="text-slate-900 dark:text-white text-[11px] sm:text-xs ml-3 font-black text-indigo-600 dark:text-indigo-400">
-                    CompliScan AI
+                    INNOVISION (CompliScan AI)
                   </p>
                 </div>
               </div>

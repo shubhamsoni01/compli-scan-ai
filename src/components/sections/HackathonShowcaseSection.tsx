@@ -23,8 +23,8 @@ export const HACKATHON_PROJECT_CONFIG = {
   problemTitle: 'AI-Powered Packaged Product Labelling & Compliance Screening',
   problemDescription:
     'Automating the verification of packaged commodity labelling against mandatory Indian regulatory standards (Legal Metrology, FSSAI, CDSCO). Leverages Computer Vision, OCR extraction, and deterministic legal rule verification to screen for regulatory non-compliance in real-time.',
-  teamName: 'To be updated',
-  teamMembers: [] as string[],
+  teamName: 'INNOVISION (UCET Hazaribagh)',
+  teamMembers: ['Nahid Kausar (Leader)', 'Nafisa Khatoon', 'Ananaya', 'Subham Kumar', 'Yashwant', 'Manisha Kujur'] as string[],
 };
 
 export const HackathonShowcaseSection: React.FC = () => {

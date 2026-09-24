@@ -21,6 +21,7 @@ import { ProblemStatementDetailedSection } from '@/components/sections/ProblemSt
 import { InteractiveFeaturesShowcase } from '@/components/sections/InteractiveFeaturesShowcase';
 import { PitchDeckSlideViewer } from '@/components/sections/PitchDeckSlideViewer';
 import { FutureVisionAndChallengesSection } from '@/components/sections/FutureVisionAndChallengesSection';
+import { OurTeamSection } from '@/components/sections/OurTeamSection';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { SIHVectorAura } from '@/components/3d/SIHVectorAura';
 import { KidScanningStoryAnimation } from '@/components/hero/KidScanningStoryAnimation';
@@ -312,6 +313,9 @@ export default function LandingPage() {
 
       {/* Smart India Hackathon & UCET Hazaribagh Showcase Section */}
       <HackathonShowcaseSection />
+
+      {/* Official Nominated Team Section (Team INNOVISION) */}
+      <OurTeamSection />
 
       {/* Footer */}
       <footer className="bg-slate-950 text-slate-300 py-14 border-t border-slate-800">
